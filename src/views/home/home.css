@@ -2,10 +2,11 @@
     font-weight: 700;
 }
 .home-navigate {
-    border: 1px solid red;
+    height: 700px;
+    border: 1px solid #E6E6E6;
 }
 .header {
-    border: 1xp solid blue;
+    text-align: center;
 }
 .header-image {
     margin: 10px;
@@ -16,10 +17,11 @@
     height: 60px;
     text-align: center;
     line-height: 60px;
+    color: #5A5A5A;
 }
 .active{
     background-color: #1089EB;
+    color: white;
 }
-.home-content{
-    border: 1px solid pink;
-}
+/* .home-content{
+} */

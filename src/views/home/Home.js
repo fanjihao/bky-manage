@@ -1,9 +1,9 @@
 import React, { Component } from "react"
-import '../home/home.css'
+import './home.css'
 import { Row, Col } from 'antd'
 import { HomeOutlined, SettingFilled, MenuFoldOutlined } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'
-import HomeIndex from '../../component/HomeIndex'
+import HomeIndex from '../homeIndex/HomeIndex'
 import Goods from '../goods/Goods'
 import Order from '../order/Order'
 import Employee from '../employee/Employee'
@@ -42,7 +42,13 @@ class Home extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            height:'', // 浏览器可视高度
         }
+    }
+    componentDidMount() {
+        this.setState({
+            height: window.innerHeight + 'px'
+        })
     }
 
     // 切换选项卡
@@ -53,12 +59,13 @@ class Home extends Component {
     }
 
     render() {
+        const { height } = this.state
         return (
             <div className="home">
                 <Row>
-                    <Col span={3} className="home-navigate">
+                    <Col span={4} className="home-navigate">
                         <div className="header">
-                            <img src={require('../../assets/img/logo.png')} className="header-image" alt="图标"></img>
+                            <img src={require('../../assets/imgs/logo.png')} className="header-image" alt="图标"></img>
                             <h2>博客云商家版</h2>
                         </div>
 

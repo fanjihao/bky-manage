@@ -1,0 +1,144 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.homeIndex-header {
+    height: 50px;
+    background-color: #e6e6e6;
+    line-height: 50px;
+}
+.homeIndex-header>span{
+    padding-left: 20px;
+}
+.homeIndex-date {
+    margin: 10px;
+}
+.homeIndex-statistics {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+}
+/* .homeIndex-statistics>div{
+    display: inline-block;
+} */
+.homeIndex-stage {
+    width: 60%;
+}
+.homeIndex-online {
+    width: 30%;
+    margin-left: 50px;
+}
+.homeIndex-stageTitle .homeIndex-onlineTitle {
+    display: flex;
+    margin-left: 20px;
+    justify-content: space-between;
+}
+.homeIndex-renderDate {
+    color: #B5B5B5;
+}
+.homeIndex-stageStatistics {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+.homeIndex-stageItems{
+    width: 30%;
+    height: 110px;
+    background-color: #E7F3FD;
+    border-radius: 5px;
+    padding: 20px;
+    color: #1089EB;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.stageItems-top{
+    display: flex;
+    justify-content: space-between;
+}
+.online-top{
+    display: flex;
+    justify-content: space-between;
+}
+.stageItems-bottom {
+    display: flex;
+}
+.stagePrice {
+    font-size: 24px;
+    letter-spacing: 1px;
+}
+.stageUnit {
+    margin-left: 10px;
+}
+.homeIndex-stageCharts {
+    width: 100%;
+    display: flex;
+    margin-top: 20px;
+    justify-content: space-between;
+}
+.charts {
+    width:65% ;
+    height: 300px;
+    border: 1px solid #E6E6E6;
+}
+.stageManage-list {
+    width: 30%;
+    height: 300px;
+    border: 1px solid #E6E6E6;
+}
+.onlineGoodsStatistics {
+    width: 60%;
+    height: 110px;
+    background-color: #E7F3FD;
+    border-radius: 5px;
+    padding: 20px;
+    color: #1089EB;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.storeInfo {
+    width: 80%;
+    border: 1px solid #E6E6E6;
+    margin-top: 20px;
+}
+.storeInfo-header{
+    padding: 10px;
+}
+.storeInfo-section{
+    width: 100%;
+    border: 1px solid #E6E6E6;
+    padding: 10px;
+    border-left: 0;
+    border-right: 0;
+}
+.storeInfo-section-Items{
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 10px;
+}
+.storeInfo-section-span1 {
+    color: #666666;
+}
+.QRcode{
+    width: 200px;
+    margin: 20px;
+}
+.download {
+    text-align: center;
+    border-bottom: 1px solid #E6E6E6;
+}
+.download-text {
+    font-size: 18px;
+    letter-spacing: 10px;
+    color: #1089EB;
+    margin-bottom: 20px;
+}
+.handle{
+    color: #666666;
+    padding: 10px;
+}
