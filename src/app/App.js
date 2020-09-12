@@ -7,11 +7,10 @@ import Home from '../views/home/Home'
 import Login from '../views/login/Login'
 
 function App(props) {
-	// const token=localStorage.getItem('token')
-	const token = 'dasdasda'
+	const token = localStorage.getItem('token')
 	return (
 		<div className="App">
-			<Redirect from="/" exact to="/login" />
+			<Redirect exact to="/home" />
 			<PrivateRoute path="/home" Component={Home} auth={token} />
 			<Route path="/login" component={Login} />
 		</div>
