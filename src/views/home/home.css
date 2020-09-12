@@ -1,0 +1,24 @@
+.home {
+    font-weight: 700;
+}
+.home-navigate {
+    border: 1px solid red;
+}
+.header {
+    border: 1xp solid blue;
+}
+.header-image {
+    margin: 10px;
+}
+.tab-items {
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    line-height: 60px;
+}
+.check-tab-items {
+    background-color: #1089EB;
+}
+.home-content{
+    border: 1px solid pink;
+}

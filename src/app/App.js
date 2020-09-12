@@ -11,7 +11,7 @@ function App(props) {
 	const token = 'dasdasda'
 	return (
 		<div className="App">
-			<Redirect from="/" exact to="/login" />
+			<Redirect from="/" exact to="/home" />
 			<PrivateRoute path="/home" Component={Home} auth={token} />
 			<Route path="/login" component={Login} />
 		</div>
