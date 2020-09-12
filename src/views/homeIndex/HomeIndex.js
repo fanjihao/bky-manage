@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './homeIndex.css'
-import { DatePicker, Row, Col } from 'antd'
+import { DatePicker } from 'antd'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
 
 const { RangePicker } = DatePicker;

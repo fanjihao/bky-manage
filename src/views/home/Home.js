@@ -42,13 +42,11 @@ class Home extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            height:'', // 浏览器可视高度
+
         }
     }
     componentDidMount() {
-        this.setState({
-            height: window.innerHeight + 'px'
-        })
+        
     }
 
     // 切换选项卡
@@ -59,7 +57,6 @@ class Home extends Component {
     }
 
     render() {
-        const { height } = this.state
         return (
             <div className="home">
                 <Row>
