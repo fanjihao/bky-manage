@@ -10,7 +10,7 @@ function App(props) {
 	const token = localStorage.getItem('token')
 	return (
 		<div className="App">
-			<Redirect exact to="/home" />
+			<Redirect from="/" exact to="/home" />
 			<PrivateRoute path="/home" Component={Home} auth={token} />
 			<Route path="/login" component={Login} />
 		</div>
