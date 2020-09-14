@@ -1,0 +1,29 @@
+.modalItem{
+    width: 90%;
+    margin: 0 auto;
+    height: 50px;
+    margin-bottom: 10px;
+    line-height: 50px;
+}
+.modalBody{
+    width: 90%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+.modalBody>div{
+    width: 50%;
+    float: left;
+}
+.mbLabel{
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+}
+.mbLabel span{
+    margin-right: 10px;
+}
+.modalNote{
+    width: 90%;
+    margin: 30px auto;
+}
