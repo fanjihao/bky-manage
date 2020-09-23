@@ -1,22 +1,19 @@
 import { loginType, logoutType } from './userActionsType'
 
 const initState = {
-	username: '',
+	user: '',
 	token: '',
-	checkedList: JSON.parse(sessionStorage.getItem('checkedList')) || [],
 }
 function userReducer(state = initState, action) {
 	switch (action.type) {
 		case loginType:
-			console.log(action.checkedList, 'checkedList')
 			return {
-				username: action.username,
+				user: action.user,
 				token: action.token,
-				checkedList: action.checkedList
 			}
 		case logoutType:
 			return {
-				username: '',
+				user: '',
 				token: ''
 			}
 		default:

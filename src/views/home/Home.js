@@ -39,14 +39,11 @@ const tab = [
 ]
 
 class Home extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
+    state = {
 
-        }
     }
     componentDidMount() {
-        
+
     }
 
     // 切换选项卡

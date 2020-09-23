@@ -1,20 +1,89 @@
 import React, { Component } from 'react'
 import '../goods/Goods.css'
 import './Order.css'
-import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal } from 'antd'
+import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal, message } from 'antd'
+import axios from '../../http/index'
 
 const { Option } = Select
 const { TextArea } = Input
 
 class Order extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            goodsIndex: 1,
-            orderVisible:false
-        }
+    state = {
+        goodsIndex: 1,
+        orderVisible: false,
+        listPhased:[],
+        listOnline:[]
     }
 
+    getStoreStage() {
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url:'/merchantOrder/listPhasedProject',
+            method:'GET',
+            params:{
+                cateName:'',
+                enterId:user.id,
+                limit:10,
+                name:'',
+                offset:1,
+                type:''
+            }
+        })
+        .then(res => {
+            console.log(res)
+            if(res.data.status === 200) {
+                this.setState({
+                    listPhased:res.data.data.list
+                })
+                message.success('查询门店分期订单成功')
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            message.error('查询失败')
+        })
+    }
+    getStoreOnline = () => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url:'/merchantOrder/listOnLineProducts',
+            method:'GET',
+            params:{
+                enterId:user.id,
+                limit:10,
+                offset:1,
+                type:'',
+                userPhone:''
+            }
+        })
+        .then(res => {
+            console.log(res)
+            if(res.data.status === 200) {
+                this.setState({
+                    listOnline:res.data.data.list
+                })
+                message.success('查询线上商品订单成功')
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            message.error('查询失败')
+        })
+    }
+    componentDidMount() {
+        this.getStoreStage()
+    }
+    checkList = (i) => {
+        this.setState({
+            goodsIndex:i
+        }, () => {
+            if(i === 1) {
+                this.getStoreStage()
+            } else {
+                this.getStoreOnline()
+            }
+        })
+    }
     // 气泡删除
     confirm = (re) => {
         console.log('确认删除', re)
@@ -31,7 +100,7 @@ class Order extends Component {
     }
     lookOrder = () => {
         this.setState({
-            orderVisible:true
+            orderVisible: true
         })
     }
     render() {
@@ -130,45 +199,115 @@ class Order extends Component {
 
             },
         ]
-        const data = [
+        const colOnline = [
             {
-                no: '1',
-                name: 'John Brown',
-                kindname: '美容类',
-                price: 998,
-                numOfStage: '18期',
-                sales: 9228,
-                state: '未完成分期',
+                title: '订单编号',
+                dataIndex: 'no',
+                key: 'no',
+                render: text => <a>{text}</a>,
             },
             {
-                no: '2',
-                name: 'Jim Green',
-                kindname: '美容类',
-                price: 998,
-                numOfStage: '12期',
-                sales: 9228,
-                state: '已完成分期',
+                title: '用户姓名',
+                dataIndex: 'name',
+                key: 'name',
+                render: text => <span>{text}</span>
             },
             {
-                no: '3',
-                name: 'Joe Black',
-                kindname: '美容类',
-                price: 998,
-                numOfStage: '12期',
-                sales: 9228,
-                state: '分期中',
+                title: '用户手机号',
+                dataIndex: 'phone',
+                key: 'phone',
             },
             {
-                no: '4',
-                name: 'Jim Green',
-                kindname: '美容类',
-                price: 998,
-                numOfStage: '12期',
-                sales: 9228,
-                state: '异常分期',
-            }
+                title: '商品信息',
+                dataIndex: 'goodsinfo',
+                key: 'goodsinfo',
+            },
+            {
+                title: '实际支付',
+                dataIndex: 'truePay',
+                key: 'truePay',
+            },
+            {
+                title: '支付状态',
+                key: 'numOfStage',
+                dataIndex: 'numOfStage',
+                render: state => {
+                    if(state === '未支付') {
+                        return <Tag>未支付</Tag>
+                    } else if(state === '已支付') {
+                        return <Tag>已支付</Tag>
+                    } else if(state === '未发货') {
+                        return <Tag>未发货</Tag>
+                    } else if(state === '待收货') {
+                        return <Tag>待收货</Tag>
+                    } else if(state === '交易完成') {
+                        return <Tag>交易完成</Tag>
+                    } else if(state === '退款中') {
+                        return <Tag>退款中</Tag>
+                    } else if(state === '已退款') {
+                        return <Tag>已退款</Tag>
+                    } else {
+                        return <Tag>已删除</Tag>
+                    }
+                },
+            },
+            {
+                title: '创建时间',
+                key: 'buildTime',
+                dataIndex: 'buildTime',
+                render: tags => (
+                    <span>{tags}</span>
+                ),
+            },
+            {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => {
+                    if (record.state === '交易完成') {
+                        return (<Space size="middle">
+                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
+                            <Popconfirm
+                                title="请您确认是否删除?"
+                                onConfirm={() => this.confirm(record)}
+                                onCancel={this.cancel}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <a style={{ color: '#FF5A5A' }}>删除</a>
+                            </Popconfirm>
+                        </Space>)
+                    } else if (record.state === '已删除') {
+                        return (<Space size="middle">
+                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder()}>查看订单</a>
+                            <Popconfirm
+                                title="请您确认是否恢复?"
+                                onConfirm={() => this.confirm(record)}
+                                onCancel={this.cancel}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <a style={{ color: '#FF5A5A' }}>恢复</a>
+                            </Popconfirm>
+                            <Popconfirm
+                                title="请您确认是否彻底删除?"
+                                onConfirm={() => this.confirm(record)}
+                                onCancel={this.cancel}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <a style={{ color: '#FF5A5A' }}>彻底删除</a>
+                            </Popconfirm>
+                        </Space>)
+                    } else {
+                        return (<Space size="middle">
+                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
+                        </Space>)
+                    }
+                }
+
+            },
         ]
-        const { goodsIndex, orderVisible } = this.state
+        const { goodsIndex, orderVisible, listOnline, listPhased } = this.state
         return (
             <div className='goods'>
                 <div className='goodsHeaderTop'>
@@ -176,26 +315,52 @@ class Order extends Component {
                 </div>
                 <div className='goodsHeaderBody'>
                     <div className={goodsIndex === 1 ? 'goodsActive' : 'ghBodyBtn'}
-                        onClick={() => this.setState({ goodsIndex: 1 })}>门店分期项目</div>
+                        onClick={() => this.checkList(1)}>门店分期项目</div>
                     <div className={goodsIndex === 2 ? 'goodsActive' : 'ghBodyBtn'}
-                        onClick={() => this.setState({ goodsIndex: 2 })}>线上商品</div>
+                        onClick={() => this.checkList(2)}>线上商品</div>
                 </div>
                 <div className='goodsBody'>
-                    <div className='gbTableTop'>
-                        <Input style={{ width: 150, margin: '0 20px' }}
-                            placeholder='请输入搜索条件'></Input>
-                        <Select style={{ width: 150, margin: '0 20px 0 0' }}
-                            placeholder='分类'>
-                            <Option value="jack">Jack</Option>
-                            <Option value="lucy">Lucy</Option>
-                        </Select>
-                        <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
-                    </div>
+                    {goodsIndex === 1
+                        ? <div className='gbTableTop'>
+                            <Input style={{ width: 150, margin: '0 20px' }}
+                                placeholder='请输入搜索条件'></Input>
+                            <Select style={{ width: 150, margin: '0 20px 0 0' }}
+                                placeholder='项目状态'>
+                                <Option value="未支付">未支付</Option>
+                                <Option value="已支付">已支付</Option>
+                                <Option value="未发货">未发货</Option>
+                                <Option value="待收货">待收货</Option>
+                                <Option value="交易完成">交易完成</Option>
+                                <Option value="退款中">退款中</Option>
+                                <Option value="已退款">已退款</Option>
+                                <Option value="已删除">已删除</Option>
+                            </Select>
+                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
+                        </div>
+                        : <div className='gbTableTop'>
+                            <Input style={{ width: 150, margin: '0 20px' }}
+                                placeholder='搜索商品名'></Input>
+                            <Input style={{ width: 150, margin: '0 20px' }}
+                                placeholder='搜索用户名'></Input>
+                            <Input style={{ width: 150, margin: '0 20px' }}
+                                placeholder='搜索用户手机号'></Input>
+                            <Select style={{ width: 150, margin: '0 20px 0 0' }}
+                                placeholder='订单状态'>
+                                <Option value="jack">未支付</Option>
+                                <Option value="lucy">Lucy</Option>
+                            </Select>
+                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
+                        </div>}
                     <div style={{ width: '100%' }}>
-                        <Table columns={columns}
-                            dataSource={data}
+                        {goodsIndex === 1
+                            ? <Table columns={columns}
+                            dataSource={listPhased}
                             style={{ textAlign: 'center' }}
                             pagination={{ pageSize: 2 }} />
+                            : <Table columns={colOnline}
+                            dataSource={listOnline}
+                            style={{ textAlign: 'center' }}
+                            pagination={{ pageSize: 2 }} />}
                     </div>
                 </div>
 
@@ -203,19 +368,19 @@ class Order extends Component {
                     visible={orderVisible}
                     title="查看订单"
                     onOk={this.handleOk}
-                    onCancel={() => this.setState({ orderVisible: false})}
+                    onCancel={() => this.setState({ orderVisible: false })}
                     footer={[
                         <Button key="submit" type="primary" onClick={() => console.log('确认修改')}>
                             确认修改
                         </Button>
                     ]}
                     destroyOnClose={true}
-                    bodyStyle={{fontSize:'12px',fontWeight:'bold',padding:'10px',color:'#666666'}}
+                    bodyStyle={{ fontSize: '12px', fontWeight: 'bold', padding: '10px', color: '#666666' }}
                     width={800}
                 >
                     <div className='modalItem'>
-                        <span style={{marginRight:10}}>美疗师</span>
-                        <Select style={{ width: 150}}
+                        <span style={{ marginRight: 10 }}>美疗师</span>
+                        <Select style={{ width: 150 }}
                             placeholder='关联'>
                             <Option value="jack">9527号</Option>
                             <Option value="lucy">3321号</Option>
@@ -226,51 +391,51 @@ class Order extends Component {
                             <div className='mbLabel'>
                                 <span>订单编号</span>
                                 <span>134654984</span>
-                                <span style={{color:'#1089EB'}}>复制</span>
+                                <span style={{ color: '#1089EB' }}>复制</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>项目名称</span>
+                                <span style={{ marginRight: 10 }}>项目名称</span>
                                 <span>养生美容服务年卡</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>项目总数</span>
+                                <span style={{ marginRight: 10 }}>项目总数</span>
                                 <span>1</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>项目分期</span>
+                                <span style={{ marginRight: 10 }}>项目分期</span>
                                 <span>￥100/12期</span>
-                                <span style={{color:'#1089EB'}}>剩余￥120/2期</span>
+                                <span style={{ color: '#1089EB' }}>剩余￥120/2期</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>支付方式</span>
-                                <span style={{color:'#13CE66'}}>微信</span>
+                                <span style={{ marginRight: 10 }}>支付方式</span>
+                                <span style={{ color: '#13CE66' }}>微信</span>
                             </div>
                         </div>
                         <div className='modalBodyChild'>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>订单状态</span>
+                                <span style={{ marginRight: 10 }}>订单状态</span>
                                 <span>已支付/未支付</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>项目分期总额</span>
+                                <span style={{ marginRight: 10 }}>项目分期总额</span>
                                 <span>1200</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>分期状态</span>
-                                <span style={{color:'#1089EB'}}>正常分期中</span>
+                                <span style={{ marginRight: 10 }}>分期状态</span>
+                                <span style={{ color: '#1089EB' }}>正常分期中</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>实际支付</span>
+                                <span style={{ marginRight: 10 }}>实际支付</span>
                                 <span>￥300</span>
                             </div>
                             <div className='mbLabel'>
-                                <span style={{marginRight:10}}>创建时间</span>
+                                <span style={{ marginRight: 10 }}>创建时间</span>
                                 <span>2020-05-20-13：14：00</span>
                             </div>
                         </div>
                     </div>
                     <div className='modalNote'>
-                        <div style={{width:'100%'}}><span>备注</span></div>
+                        <div style={{ width: '100%' }}><span>备注</span></div>
                         <div>
                             <TextArea rows={4} />
                         </div>
