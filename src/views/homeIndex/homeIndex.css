@@ -64,10 +64,12 @@
 }
 .stageItems-bottom {
     display: flex;
+    align-items: flex-end;
 }
 .stagePrice {
     font-size: 24px;
     letter-spacing: 1px;
+    line-height: 30px;
 }
 .stageUnit {
     margin-left: 10px;
@@ -87,6 +89,7 @@
     width: 30%;
     height: 300px;
     border: 1px solid #E6E6E6;
+    padding: 10px;
 }
 .onlineGoodsStatistics {
     width: 60%;
@@ -106,7 +109,7 @@
     margin-top: 20px;
 }
 .storeInfo-header{
-    padding: 10px;
+    padding: 20px;
 }
 .storeInfo-section{
     width: 100%;
@@ -141,4 +144,52 @@
 .handle{
     color: #666666;
     padding: 10px;
+}
+.stageManage-list-title{
+    font-size: 14;
+    font-weight: bold;
+    margin: 0;
+}
+.stagemanage-list-img{
+    width: 20px;
+    height: 20px;
+    margin: 8px;
+}
+.stagemanage-list-item{
+    height: 40px;
+    display: flex;
+    align-items: center;
+    background-color: #FFECEC;
+    margin-top: 10px;
+}
+.stagemanage-list-ranking{
+    width: 20px;
+    text-align: center;
+    font-size: 10px;
+    color: #F56C6C;
+    font-style: italic;
+}
+.stagemenage-list-data{
+    width: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    font-size: 10px;
+}
+.stagemenage-list-data span{
+    width: 50px;
+    font-size: 10px;
+}
+.stagemanage-list-name{
+    font-size: 10px;
+    margin: 0;
+}
+.noData{
+    width: 100%;
+    height: 200px;
+    text-align: center;
+    line-height: 200px;
+    font-weight: normal;
+    color: #C2C7CE;
 }

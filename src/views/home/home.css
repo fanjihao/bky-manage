@@ -1,5 +1,5 @@
 .home {
-    /* font-weight: 700; */
+    font-weight: 700;
 }
 .home-navigate {
     height: 700px;
@@ -25,3 +25,21 @@
 }
 /* .home-content{
 } */
+.headImage{
+    width: 60px;
+    height: 60px;
+    /* background-color: #1089EB; */
+    border-radius: 30px;
+}
+.loginOut{
+    text-align: center;
+    margin-top: 70px;
+}
+.welcome{
+    line-height: 40px;
+    margin: 0;
+}
+.out{
+    color: #1089EB;
+    cursor: pointer;
+}

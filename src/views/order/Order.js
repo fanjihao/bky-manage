@@ -117,7 +117,7 @@ class Order extends Component {
                 key: 'img',
                 render: src => {
                     return (
-                        <img className='tableGoodsImg'></img>
+                        <img className='tableGoodsImg' alt="*"></img>
                     )
                 }
             },

@@ -1,4 +1,4 @@
-import { loginType, logoutType } from './userActionsType'
+import { loginType } from './userActionsType'
 
 export const loginAction = (user) => {
 	return (
@@ -10,11 +10,3 @@ export const loginAction = (user) => {
 	)
 
 }
-export const logoutAction = () => (
-	function () {
-		localStorage.removeItem("token")
-		this.props.history.push({
-			pathname: "/login",
-		})
-	}
-)

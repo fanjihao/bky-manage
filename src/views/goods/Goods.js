@@ -20,7 +20,7 @@ class Goods extends Component {
         stageImg: '',
         stagePrice: '',
         stageSales: '',
-        stageNumVal:'',
+        stageNumVal: '',
         stageAmount: '',
         stageRemarks: '',
         fenleiList: [],
@@ -385,7 +385,7 @@ class Goods extends Component {
                     stageRemarks: '',
                     stageNo: '',
                     cateId: '',
-                    fileList:[]
+                    fileList: []
                 })
             }
         })
@@ -452,10 +452,13 @@ class Goods extends Component {
         const { goodsIndex, goodsTable, name, stageVisible, stageName, stageKeyWord,
             stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks, fenleiList, stageData, promptModal,
             promptInfo, stageVisiInfo, stageFenlei, goodsFenleiList,
-            goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsPhoto,
+            goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3,
+            // goodsPhoto,
             goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
             previewVisible, previewImage, fileList, previewTitle,
-            goodsimgVisible, goodsImage, goodsFileList } = this.state
+            goodsimgVisible, goodsImage,
+            // goodsFileList 
+        } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -731,49 +734,49 @@ class Goods extends Component {
                 })
             }
         }
-        const goodsProps = {
-            name: 'file',
-            action: 'http://47.108.174.202:9010/upload/files-upload',
-            listType: 'picture-card',
-            headers: {
-                authorization: 'authorization-text',
-                Content_Type: 'multipart/form-data'
-            },
-            fileList: goodsFileList,
-            onChange(info) {
-                if (info.file.status !== 'uploading') {
-                    console.log('上传的文件', info.fileList)
-                }
-                if (info.file.status === 'done') {
-                    message.success(`${info.file.name} 上传成功`)
-                    _that.setState({
-                        goodsFileList: info.fileList,
-                    })
-                } else if (info.file.status === 'error') {
-                    message.error(`${info.file.name} 上传失败.`)
-                }
-            },
-            onPreview(file) {
-                console.log('预览', file)
-                let url
-                if (file.response) {
-                    url = 'https://www.bkysc.cn/api/files-upload/' + file.response.data
-                } else {
-                    url = file.url
-                }
-                _that.setState({
-                    goodsImage: url,
-                    goodsimgVisible: true,
-                    previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
-                })
-            },
-            onRemove(file) {
-                let newList = fileList.filter(item => item.uid !== file.uid)
-                _that.setState({
-                    goodsFileList: newList
-                })
-            }
-        }
+        // const goodsProps = {
+        //     name: 'file',
+        //     action: 'http://47.108.174.202:9010/upload/files-upload',
+        //     listType: 'picture-card',
+        //     headers: {
+        //         authorization: 'authorization-text',
+        //         Content_Type: 'multipart/form-data'
+        //     },
+        //     fileList: goodsFileList,
+        //     onChange(info) {
+        //         if (info.file.status !== 'uploading') {
+        //             console.log('上传的文件', info.fileList)
+        //         }
+        //         if (info.file.status === 'done') {
+        //             message.success(`${info.file.name} 上传成功`)
+        //             _that.setState({
+        //                 goodsFileList: info.fileList,
+        //             })
+        //         } else if (info.file.status === 'error') {
+        //             message.error(`${info.file.name} 上传失败.`)
+        //         }
+        //     },
+        //     onPreview(file) {
+        //         console.log('预览', file)
+        //         let url
+        //         if (file.response) {
+        //             url = 'https://www.bkysc.cn/api/files-upload/' + file.response.data
+        //         } else {
+        //             url = file.url
+        //         }
+        //         _that.setState({
+        //             goodsImage: url,
+        //             goodsimgVisible: true,
+        //             previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
+        //         })
+        //     },
+        //     onRemove(file) {
+        //         let newList = fileList.filter(item => item.uid !== file.uid)
+        //         _that.setState({
+        //             goodsFileList: newList
+        //         })
+        //     }
+        // }
         return (
             <div className='goods'>
                 <div className='goodsHeaderTop'>
@@ -1019,7 +1022,7 @@ class Goods extends Component {
                                 <span className='littleLabel'>分期数上限</span>
                                 <Input placeholder='请输入分期数上限'
                                     value={stageNumVal}
-                                    onChange={e => this.setState({ stageNumVal: e.target.value})}></Input>
+                                    onChange={e => this.setState({ stageNumVal: e.target.value })}></Input>
                             </div>
                             <div className='littleitem'>
                                 <span className='littleLabel'>预付金额</span>

@@ -8,6 +8,7 @@ import Goods from '../goods/Goods'
 import Order from '../order/Order'
 import Employee from '../employee/Employee'
 import Setting from '../setting/Setting'
+import { connect } from 'react-redux'
 
 const tab = [
     {
@@ -53,7 +54,15 @@ class Home extends Component {
         })
     }
 
+    // 退出登录
+    loginOut = () => {
+        this.props.history.push({
+            pathname: '/login'
+        })
+    }
+
     render() {
+        const { userInfo } = this.props
         return (
             <div className="home">
                 <Row>
@@ -73,6 +82,16 @@ class Home extends Component {
                             })
                         }
 
+                        <div className="loginOut">
+                            
+                            {
+                                userInfo.avatar 
+                                ? <img  className="headImage" alt="loginLogo" src={userInfo.avatar}/>
+                                : <img  className="headImage" alt="loginLogo" src={require('../../assets/imgs/logo.png')}/>
+                            }
+                            <p className="welcome">欢迎{userInfo.merchantName}</p>
+                            <p className="out" onClick={this.loginOut}>退出登录</p>
+                        </div>
                     </Col>
                     <Col span={20} className="home-content">
                         <Redirect from="/home" to="/home/homeindex" />
@@ -88,4 +107,10 @@ class Home extends Component {
     }
 }
 
-export default Home
+function mapStateToProps(state) {
+    return {
+        userInfo: state.userReducer.user
+    }
+}
+
+export default connect(mapStateToProps)(Home)

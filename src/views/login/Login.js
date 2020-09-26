@@ -64,7 +64,7 @@ class Login extends React.Component {
         }
     }
     toLogin = () => {
-        console.log(this.props)
+        // console.log(this.props)
         const { userphone, userpass, phonecode } = this.state
         if (this.state.codeLogin || this.state.pwdLogin) {
             axios({
@@ -77,7 +77,7 @@ class Login extends React.Component {
                 }
             })
                 .then(res => {
-                    console.log(res)
+                    // console.log(res)
                     if (res.data.status === 200) {
                         localStorage.setItem('token', res.data.token)
                         localStorage.setItem('user', JSON.stringify(res.data.data))
@@ -212,9 +212,7 @@ class Login extends React.Component {
                         </div>
                     </div>
                     <div className='loginContent'>
-                        <div className='loginImg'>
-
-                        </div>
+                        <img src={require('../../assets/imgs/bkyManagementLogo.png')} className='loginImg' alt="logo"></img>
                         <div className='loginForm'>
                             <div className='loginFormItem loginLogo'>
                                 <img alt='logo' src={require('../../assets/imgs/ic_launcher.png')}
@@ -242,9 +240,7 @@ class Login extends React.Component {
                                 : null}
                             {dom}
                             <div className='loginBtnBox'>
-                                <Button type="primary" size='large'
-                                    className='loginBtn'
-                                    onClick={this.toLogin}>登录</Button>
+                                <Button type="primary" size='large'className='loginBtn'onClick={this.toLogin}>登录</Button>
                             </div>
                         </div>
                     </div>

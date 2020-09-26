@@ -1,4 +1,4 @@
-import { loginType, logoutType } from './userActionsType'
+import { loginType } from './userActionsType'
 
 const initState = {
 	user: '',
@@ -10,11 +10,6 @@ function userReducer(state = initState, action) {
 			return {
 				user: action.user,
 				token: action.token,
-			}
-		case logoutType:
-			return {
-				user: '',
-				token: ''
 			}
 		default:
 			return state

@@ -426,10 +426,13 @@ export default class Employee extends Component {
 
             },
         ]
-        const { detailVisible, whatDo, isLook, employNo,
+        const { detailVisible, whatDo, isLook, 
+            // employNo,
             employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor,
-            employGraduate, name, phone, data, idWrong, telWrong, avatar } = this.state
+            employGraduate, name, 
+            // phone, 
+            data, idWrong, telWrong, avatar } = this.state
         let modalFootDom
         if (whatDo === '修改') {
             modalFootDom = <Button key="submit" type="primary" onClick={() => this.changeStaff()}>

@@ -1,4 +1,3 @@
-"use strict";
 import axios from "axios";
 import { Modal } from 'antd'
 
@@ -43,11 +42,13 @@ _axios.interceptors.response.use(
         if (response.data.token) { // 将返回的最新的 token 保存
             window.localStorage.setItem('token', response.data.token);
         }
+        // console.log('response',response)
 
         // window.history.go('http://localhost:3000/login')
         return response;
     },
     function (error) {
+        // console.log('error',error)
         if (error.response.status === 401) {
             // 401 说明 token 验证失败
             // 可以直接跳转到登录页面，重新登录获取 token
