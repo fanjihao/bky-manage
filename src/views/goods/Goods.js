@@ -50,7 +50,6 @@ class Goods extends Component {
         goodsKey1: '',
         goodsKey2: '',
         goodsKey3: '',
-        goodsPhoto: '',
         goodsRemarks: '',
         goodsPrice: '',
         goodsVip: '',
@@ -89,7 +88,7 @@ class Goods extends Component {
         const { name, goodsTable, cateName } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
-            url: '/merchantOrder/listOnLineProducts',
+            url: '/statistics/onlineProducts',
             method: 'GET',
             params: {
                 cateName: cateName, // 分类名称
@@ -102,7 +101,7 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                console.log(res.data.data)
+                console.log('查询商品成功',res.data.data)
                 message.success('查询商品成功')
                 this.setState({
                     onlineGoods: res.data.data.list
@@ -127,7 +126,6 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                console.log(res)
                 this.setState({
                     goodsFenleiList: res.data.content
                 })
@@ -415,8 +413,17 @@ class Goods extends Component {
     // 添加商品-新增并上架
     goodsOkShelves = (which) => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { goodsClass, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsPhoto,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, } = this.state
+        const { goodsClass, goodsName, goodsKey1, goodsKey2, goodsKey3,
+            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsFileList } = this.state
+        let photoStr = ''
+        let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
+        for (let i = 0; i < goodsFileList.length; i++) {
+            if (photoStr === '') {
+                photoStr = baseUrl + goodsFileList[i].response.data
+            } else {
+                photoStr = baseUrl + goodsFileList[i].response.data + ',' + photoStr
+            }
+        }
         let formData = new FormData()
         formData.append('merId', user.id)
         formData.append('keyword', goodsKey1 + ',' + goodsKey2 + ',' + goodsKey3)
@@ -424,7 +431,7 @@ class Goods extends Component {
         formData.append('name', goodsName)
         formData.append('price', Number(goodsPrice))
         formData.append('vipPrice', Number(goodsVip))
-        formData.append('image', goodsPhoto)
+        formData.append('image', photoStr)
         formData.append('ficti', Number(goodsSales))
         formData.append('stock', Number(goodsSku))
         formData.append('storeInfo', goodsRemarks)
@@ -440,6 +447,10 @@ class Goods extends Component {
         })
             .then(res => {
                 console.log('添加成功', res)
+                this.getOnlineItem()
+                this.setState({
+                    goodsModal:false
+                })
             })
             .catch(err => {
                 console.log('添加失败', err)
@@ -452,10 +463,10 @@ class Goods extends Component {
         const { goodsIndex, goodsTable, name, stageVisible, stageName, stageKeyWord,
             stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks, fenleiList, stageData, promptModal,
             promptInfo, stageVisiInfo, stageFenlei, goodsFenleiList,
-            goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsPhoto,
+            goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3,
             goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
             previewVisible, previewImage, fileList, previewTitle,
-            goodsimgVisible, goodsImage, goodsFileList } = this.state
+            goodsimgVisible, goodsImage, goodsFileList, onlineGoods } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -582,40 +593,45 @@ class Goods extends Component {
         const colOnline = [
             {
                 title: '商品编号',
-                dataIndex: 'no',
-                key: 'no',
+                dataIndex: 'id',
+                key: 'id',
                 render: text => <a>{text}</a>,
             },
             {
                 title: '商品图片',
-                dataIndex: 'name',
-                key: 'name',
-                render: text => <span>{text}</span>
+                dataIndex: 'image',
+                key: 'image',
+                render: src => {
+                    let arr = src.split(',')
+                    return (
+                        <Image className='tableGoodsImg' src={arr[0]}></Image>
+                    )
+                }
             },
             {
                 title: '商品名称',
-                dataIndex: 'phone',
-                key: 'phone',
+                dataIndex: 'name',
+                key: 'name',
             },
             {
                 title: '分类名称',
-                dataIndex: 'goodsinfo',
-                key: 'goodsinfo',
+                dataIndex: 'cateName',
+                key: 'cateName',
             },
             {
                 title: '商品价格',
-                dataIndex: 'truePay',
-                key: 'truePay',
+                dataIndex: 'price',
+                key: 'price',
             },
             {
                 title: '销量',
-                key: 'numOfStage',
-                dataIndex: 'numOfStage',
+                key: 'ficti',
+                dataIndex: 'ficti',
             },
             {
                 title: '库存',
-                key: 'buildTime',
-                dataIndex: 'buildTime',
+                key: 'stock',
+                dataIndex: 'stock',
                 render: tags => (
                     <span>{tags}</span>
                 ),
@@ -819,7 +835,7 @@ class Goods extends Component {
                                 style={{ textAlign: 'center', paddingBottom: '10px' }}
                                 pagination={{ pageSize: 10 }} /> :
                             <Table columns={colOnline}
-                                dataSource={stageData}
+                                dataSource={onlineGoods}
                                 style={{ textAlign: 'center' }}
                                 pagination={{ pageSize: 10 }} />}
                     </div>
@@ -873,7 +889,7 @@ class Goods extends Component {
                         </div>
                         <div className='goodsModalImg'>
                             <span className='gmiLabel'>商品图片</span>
-                            <Upload {...props} className='avatar-uploader'>
+                            <Upload {...goodsProps} className='avatar-uploader'>
                                 {fileList.length >= 3 ? null : uploadButton}
                             </Upload>
                             <Modal
