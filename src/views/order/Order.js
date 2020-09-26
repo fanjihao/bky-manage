@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import '../goods/Goods.css'
 import './Order.css'
-import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal, message } from 'antd'
+import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal, message, Image } from 'antd'
 import axios from '../../http/index'
 
 const { Option } = Select
@@ -30,7 +30,7 @@ class Order extends Component {
             }
         })
         .then(res => {
-            console.log(res)
+            console.log('==============', res.data.data.list)
             if(res.data.status === 200) {
                 this.setState({
                     listPhased:res.data.data.list
@@ -107,19 +107,18 @@ class Order extends Component {
         const columns = [
             {
                 title: '项目编号',
-                dataIndex: 'no',
-                key: 'no',
+                dataIndex: 'id',
+                key: 'id',
                 render: text => <a>{text}</a>,
             },
             {
                 title: '项目图片',
-                dataIndex: 'img',
-                key: 'img',
-                render: src => {
-                    return (
-                        <img className='tableGoodsImg' alt="*"></img>
-                    )
-                }
+                dataIndex: 'photo',
+                key: 'photo',
+                render: text => {
+                    let src = text.split(',')[0]
+                    return <Image className='tableGoodsImg' alt={src} src={src}></Image>
+                },
             },
             {
                 title: '项目名称',
@@ -128,8 +127,8 @@ class Order extends Component {
             },
             {
                 title: '分类名称',
-                dataIndex: 'kindname',
-                key: 'kindname',
+                dataIndex: 'cateName',
+                key: 'cateName',
             },
             {
                 title: '项目价格',
@@ -138,31 +137,35 @@ class Order extends Component {
             },
             {
                 title: '分期数',
-                key: 'numOfStage',
-                dataIndex: 'numOfStage',
+                key: 'stagesNumber',
+                dataIndex: 'stagesNumber',
                 render: tags => (
                     <>{tags}</>
                 ),
             },
             {
                 title: '关联员工',
-                key: 'sales',
-                dataIndex: 'sales',
-                render: tags => (
-                    <>{tags}</>
-                ),
+                key: 'staffName',
+                dataIndex: 'staffName',
+                render: tags => {
+                    if(tags) {
+                        return <span>{tags}</span>
+                    } else {
+                        return <span>未关联</span>
+                    }
+                },
             },
             {
                 title: '项目状态',
-                key: 'state',
-                dataIndex: 'state',
+                key: 'type',
+                dataIndex: 'type',
                 render: state => {
-                    if (state === '未完成分期') {
-                        return <Tag color='blue'>未完成分期</Tag>
-                    } else if (state === '分期中') {
+                    if (state === 4) {
+                        return <Tag color='blue'>未处理分期</Tag>
+                    } else if (state === 1) {
                         return <Tag color='blue'>分期中</Tag>
-                    } else if (state === '已完成分期') {
-                        return <Tag color="blue">已完成分期</Tag>
+                    } else if (state === 2) {
+                        return <Tag color="#87d068">已完成分期</Tag>
                     } else {
                         return <Tag color="gold">异常分期</Tag>
                     }
@@ -172,7 +175,7 @@ class Order extends Component {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => {
-                    if (record.state === '已完成分期') {
+                    if (record.type === 2) {
                         return (<Space size="middle">
                             <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
                             <Popconfirm
@@ -185,7 +188,7 @@ class Order extends Component {
                                 <a style={{ color: '#FF5A5A' }}>删除</a>
                             </Popconfirm>
                         </Space>)
-                    } else if (record.state === '未完成分期') {
+                    } else if (record.type === 4) {
                         return (<Space size="middle">
                             <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder()}>查看订单</a>
                             <a style={{ color: '#13CE66' }} onClick={() => console.log('我点了', record)}>修改</a>
@@ -325,15 +328,11 @@ class Order extends Component {
                             <Input style={{ width: 150, margin: '0 20px' }}
                                 placeholder='请输入搜索条件'></Input>
                             <Select style={{ width: 150, margin: '0 20px 0 0' }}
-                                placeholder='项目状态'>
-                                <Option value="未支付">未支付</Option>
-                                <Option value="已支付">已支付</Option>
-                                <Option value="未发货">未发货</Option>
-                                <Option value="待收货">待收货</Option>
-                                <Option value="交易完成">交易完成</Option>
-                                <Option value="退款中">退款中</Option>
-                                <Option value="已退款">已退款</Option>
-                                <Option value="已删除">已删除</Option>
+                                placeholder='分期状态'>
+                                <Option value="未处理分期">未处理分期</Option>
+                                <Option value="分期中">分期中</Option>
+                                <Option value="已完成分期">已完成分期</Option>
+                                <Option value="异常分期">异常分期</Option>
                             </Select>
                             <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
                         </div>
@@ -346,8 +345,14 @@ class Order extends Component {
                                 placeholder='搜索用户手机号'></Input>
                             <Select style={{ width: 150, margin: '0 20px 0 0' }}
                                 placeholder='订单状态'>
-                                <Option value="jack">未支付</Option>
-                                <Option value="lucy">Lucy</Option>
+                                <Option value="未支付">未支付</Option>
+                                <Option value="已支付">已支付</Option>
+                                <Option value="未发货">未发货</Option>
+                                <Option value="待收货">待收货</Option>
+                                <Option value="交易完成">交易完成</Option>
+                                <Option value="退款中">退款中</Option>
+                                <Option value="已退款">已退款</Option>
+                                <Option value="已删除">已删除</Option>
                             </Select>
                             <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
                         </div>}
