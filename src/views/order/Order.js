@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import '../goods/Goods.css'
 import './Order.css'
-import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal, message, Image } from 'antd'
+import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal, message, Image, Popover } from 'antd'
 import axios from '../../http/index'
 
 const { Option } = Select
@@ -11,73 +11,109 @@ class Order extends Component {
     state = {
         goodsIndex: 1,
         orderVisible: false,
-        listPhased:[],
-        listOnline:[]
+        listPhased: [],
+        listOnline: [],
+        visible: false,
+        modalType: '',
+        islook: false,
+        orderId: '', // 编号
+        orderName: '', // 名字
+        orderNum: '', // 分期数
+        orderStagePrice: '', // 每期支付
+        orderPayType: '', // 支付方式
+        orderPrice: '', // 总价
+        orderState: '', // 状态
+        orderPay: '', // 已支付
+        orderCreate: '', // 创建时间
+        orderRemarks: '', // 备注
+        orderOtherNum: '',
+        orderOtherPrice: '',
+        data: [],
+        linkEmploy: '',
+        linkId: '',
+        username: '',
+
+        // 
+        stageName: '',
+
+        //
+        goodsVisible: false,
+        goodsOrderid:'', 
+        goodsOrdertime:'', 
+        goodsPerson:'', 
+        goodsPhone:'', 
+        goodsAddress:'', 
+        goodsTotalNum:'', 
+        goodsTotalPrice:'', 
+        goodsPostage:'', 
+        goodsState:'', 
+
     }
 
     getStoreStage() {
+        const { stageName, type } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
-            url:'/merchantOrder/listPhasedProject',
-            method:'GET',
-            params:{
-                cateName:'',
-                enterId:user.id,
-                limit:10,
-                name:'',
-                offset:1,
-                type:''
+            url: '/merchantOrder/listPhasedProject',
+            method: 'GET',
+            params: {
+                cateName: '',
+                enterId: user.id,
+                limit: 10,
+                name: stageName,
+                offset: 1,
+                type: type
             }
         })
-        .then(res => {
-            console.log('==============', res.data.data.list)
-            if(res.data.status === 200) {
-                this.setState({
-                    listPhased:res.data.data.list
-                })
-                message.success('查询门店分期订单成功')
-            }
-        })
-        .catch(err => {
-            console.log(err)
-            message.error('查询失败')
-        })
+            .then(res => {
+                if (res.data.status === 200) {
+                    this.setState({
+                        listPhased: res.data.data.list
+                    })
+                    message.success('查询门店分期订单成功')
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                message.error('查询失败')
+            })
     }
     getStoreOnline = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
-            url:'/merchantOrder/listOnLineProducts',
-            method:'GET',
-            params:{
-                enterId:user.id,
-                limit:10,
-                offset:1,
-                type:'',
-                userPhone:''
+            url: '/merchantOrder/listOnLineProduct',
+            method: 'GET',
+            params: {
+                enterId: user.id,
+                limit: 10,
+                offset: 1,
+                type: '',
+                userPhone: ''
             }
         })
-        .then(res => {
-            console.log(res)
-            if(res.data.status === 200) {
-                this.setState({
-                    listOnline:res.data.data.list
-                })
-                message.success('查询线上商品订单成功')
-            }
-        })
-        .catch(err => {
-            console.log(err)
-            message.error('查询失败')
-        })
+            .then(res => {
+                console.log(res)
+                if (res.data.status === 200) {
+                    this.setState({
+                        listOnline: res.data.data.list
+                    })
+                    message.success('查询线上商品订单成功')
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                message.error('查询失败')
+            })
     }
     componentDidMount() {
         this.getStoreStage()
+        this.getEmploy()
     }
     checkList = (i) => {
         this.setState({
-            goodsIndex:i
+            goodsIndex: i
         }, () => {
-            if(i === 1) {
+            if (i === 1) {
                 this.getStoreStage()
             } else {
                 this.getStoreOnline()
@@ -98,9 +134,125 @@ class Order extends Component {
     cancel = () => {
         console.log('取消删除')
     }
-    lookOrder = () => {
-        this.setState({
-            orderVisible: true
+    getEmploy = () => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url: '/merchantOrder/listStoreStaff',
+            method: 'GET',
+            params: {
+                enterId: user.id,
+                limit: 10,
+                name: '',
+                offset: 1,
+                order: '',
+                phone: '',
+            }
+        })
+            .then(res => {
+                this.setState({
+                    data: res.data.data.list
+                })
+            })
+            .catch(err => {
+            })
+    }
+    lookOrder = (i, type) => {
+        console.log('===============', i)
+        if (type === 'look') {
+            this.setState({
+                islook: true,
+                modalType: type,
+                orderVisible: true,
+                orderId: i.orderId,
+                orderName: i.name,
+                orderNum: i.stagesNumber,
+                orderStagePrice: i.stagesPrice,
+                orderPayType: i.payType,
+                orderPrice: i.price,
+                orderState: i.type,
+                orderPay: i.amount,
+                orderCreate: i.createTime,
+                orderRemarks: i.remarks,
+                orderOtherNum: i.surplusNum,
+                orderOtherPrice: '',
+                username: i.userName,
+                linkEmploy: i.staffName,
+            })
+        } else {
+            this.setState({
+                modalType: type,
+                islook: false,
+                orderVisible: true,
+                orderId: i.orderId,
+                orderName: i.name,
+                orderNum: i.stagesNumber,
+                orderStagePrice: i.stagesPrice,
+                orderPayType: i.payType,
+                orderPrice: i.price,
+                orderState: i.type,
+                orderPay: i.amount,
+                orderCreate: i.createTime,
+                orderRemarks: i.remarks,
+                orderOtherNum: i.surplusNum,
+                orderOtherPrice: '',
+                linkEmploy: i.staffName,
+                linkId: i.staffId,
+                username: i.userName
+            })
+        }
+    }
+    handleVisibleChange = visible => {
+        this.setState({ visible })
+    }
+    stageChange = () => {
+        const { orderId, orderRemarks, linkId, username } = this.state
+        axios({
+            url: '/merchantOrder/updatePhasedProject',
+            method: 'GET',
+            params: {
+                orderId,
+                remarks: orderRemarks,
+                staffId: linkId,
+                userName: username
+            }
+        })
+            .then(res => {
+                message.success('修改成功')
+                this.getStoreStage()
+                this.setState({
+                    orderVisible: false,
+                })
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+    //
+    editGoods = (i, type) => {
+        axios({
+            url:'/merchantOrder/storeOrderDetails',
+            method:'GET',
+            params:{
+                orderId:i.orderId
+            }
+        })
+        .then(res => {
+            console.log(res)
+            this.setState({
+                goodsVisible: true,
+                goodsOrderid:res.data.orderId,
+                goodsOrdertime:i.creatTime,
+                goodsPerson:res.data.realName, 
+                goodsPhone:res.data.userPhone, 
+                goodsAddress:res.data.userAddress, 
+                goodsTotalNum:res.data.totalNum, 
+                goodsTotalPrice:res.data.totalPrice, 
+                goodsPostage:res.data.totalPostage, 
+                goodsState:res.data.status
+            })
+        })
+        .catch(err => {
+            console.log(err)
         })
     }
     render() {
@@ -144,26 +296,17 @@ class Order extends Component {
                 ),
             },
             {
-                title: '关联员工',
-                key: 'staffName',
-                dataIndex: 'staffName',
-                render: tags => {
-                    if(tags) {
-                        return <span>{tags}</span>
-                    } else {
-                        return <span>未关联</span>
-                    }
-                },
-            },
-            {
                 title: '项目状态',
                 key: 'type',
                 dataIndex: 'type',
-                render: state => {
+                render: (state, record) => {
                     if (state === 4) {
                         return <Tag color='blue'>未处理分期</Tag>
                     } else if (state === 1) {
-                        return <Tag color='blue'>分期中</Tag>
+                        return <div>
+                            <Tag color='blue'>分期中</Tag>
+                            <p style={{ color: '#1089EB' }}>剩余￥{record.stagesPrice.toFixed(2)}/{record.surplusNum}期</p>
+                        </div>
                     } else if (state === 2) {
                         return <Tag color="#87d068">已完成分期</Tag>
                     } else {
@@ -172,82 +315,116 @@ class Order extends Component {
                 },
             },
             {
+                title: '客户姓名',
+                key: 'userName',
+                dataIndex: 'userName',
+                render: tags => (
+                    <>{tags}</>
+                ),
+            },
+            {
+                title: '关联员工',
+                key: 'staffName',
+                dataIndex: 'staffName',
+                render: tags => {
+                    if (tags) {
+                        return <span>{tags}</span>
+                    } else {
+                        return <span>未关联</span>
+                    }
+                },
+            },
+            {
+                title: '创建日期',
+                key: 'createTime',
+                dataIndex: 'createTime',
+                render: state => <>{state}</>,
+            },
+            {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => {
                     if (record.type === 2) {
                         return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
-                            <Popconfirm
-                                title="请您确认是否删除?"
-                                onConfirm={() => this.confirm(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#FF5A5A' }}>删除</a>
-                            </Popconfirm>
-                        </Space>)
-                    } else if (record.type === 4) {
-                        return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder()}>查看订单</a>
-                            <a style={{ color: '#13CE66' }} onClick={() => console.log('我点了', record)}>修改</a>
+                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder(record, 'look')}>查看订单</a>
                         </Space>)
                     } else {
                         return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
+                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder(record, 'look')}>查看订单</a>
+                            <a style={{ color: '#13CE66' }} onClick={() => this.lookOrder(record, 'edit')}>修改</a>
                         </Space>)
                     }
                 }
 
             },
         ]
+        const employColumns = [
+            {
+                title: '编号',
+                dataIndex: 'id',
+                key: 'id'
+            },
+            {
+                title: '姓名',
+                dataIndex: 'staffName',
+                key: 'staffName',
+            },
+            {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => <a onClick={() => this.setState({ linkEmploy: record.staffName, linkId: record.id })}>选择</a>
+
+            },
+        ]
         const colOnline = [
             {
                 title: '订单编号',
-                dataIndex: 'no',
-                key: 'no',
-                render: text => <a>{text}</a>,
+                dataIndex: 'id',
+                key: 'id'
             },
             {
                 title: '用户姓名',
-                dataIndex: 'name',
-                key: 'name',
+                dataIndex: 'realName',
+                key: 'realName',
                 render: text => <span>{text}</span>
             },
             {
-                title: '用户手机号',
-                dataIndex: 'phone',
-                key: 'phone',
+                title: '商品图片',
+                dataIndex: 'image',
+                key: 'image',
+                render: src => {
+                    let arr = src.split(',')
+                    return (
+                        <Image className='tableGoodsImg' src={arr[0]}></Image>
+                    )
+                }
             },
             {
-                title: '商品信息',
-                dataIndex: 'goodsinfo',
-                key: 'goodsinfo',
+                title: '商品名称',
+                dataIndex: 'storeName',
+                key: 'storeName',
             },
             {
                 title: '实际支付',
-                dataIndex: 'truePay',
-                key: 'truePay',
+                dataIndex: 'payPrice',
+                key: 'payPrice',
             },
             {
                 title: '支付状态',
-                key: 'numOfStage',
-                dataIndex: 'numOfStage',
+                key: 'status',
+                dataIndex: 'status',
                 render: state => {
-                    if(state === '未支付') {
-                        return <Tag>未支付</Tag>
-                    } else if(state === '已支付') {
-                        return <Tag>已支付</Tag>
-                    } else if(state === '未发货') {
-                        return <Tag>未发货</Tag>
-                    } else if(state === '待收货') {
+                    if (state === 5) {
+                        return <Tag>待付款</Tag>
+                    } else if (state === 0) {
+                        return <Tag>待发货</Tag>
+                    } else if (state === 1) {
                         return <Tag>待收货</Tag>
-                    } else if(state === '交易完成') {
-                        return <Tag>交易完成</Tag>
-                    } else if(state === '退款中') {
+                    } else if (state === 2) {
+                        return <Tag>已收货</Tag>
+                    } else if (state === '退款中') {
                         return <Tag>退款中</Tag>
-                    } else if(state === '已退款') {
+                    } else if (state === '已退款') {
                         return <Tag>已退款</Tag>
                     } else {
                         return <Tag>已删除</Tag>
@@ -256,8 +433,8 @@ class Order extends Component {
             },
             {
                 title: '创建时间',
-                key: 'buildTime',
-                dataIndex: 'buildTime',
+                key: 'creatTime',
+                dataIndex: 'creatTime',
                 render: tags => (
                     <span>{tags}</span>
                 ),
@@ -265,52 +442,29 @@ class Order extends Component {
             {
                 title: '操作',
                 key: 'action',
-                render: (text, record) => {
-                    if (record.state === '交易完成') {
-                        return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
-                            <Popconfirm
-                                title="请您确认是否删除?"
-                                onConfirm={() => this.confirm(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#FF5A5A' }}>删除</a>
-                            </Popconfirm>
-                        </Space>)
-                    } else if (record.state === '已删除') {
-                        return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder()}>查看订单</a>
-                            <Popconfirm
-                                title="请您确认是否恢复?"
-                                onConfirm={() => this.confirm(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#FF5A5A' }}>恢复</a>
-                            </Popconfirm>
-                            <Popconfirm
-                                title="请您确认是否彻底删除?"
-                                onConfirm={() => this.confirm(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#FF5A5A' }}>彻底删除</a>
-                            </Popconfirm>
-                        </Space>)
-                    } else {
-                        return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
-                        </Space>)
-                    }
-                }
-
+                render: (text, record) =>
+                    <Space size="middle">
+                        <a style={{ color: '#1089EB' }} onClick={() => this.editGoods(record)}>查看详情</a>
+                    </Space>
             },
         ]
-        const { goodsIndex, orderVisible, listOnline, listPhased } = this.state
+        const { goodsIndex, orderVisible, listOnline, listPhased,
+            orderId, orderName, orderNum, orderStagePrice, orderPayType,
+            orderPrice, orderState, orderPay, orderCreate, orderRemarks,
+            orderOtherNum, username, modalType, visible, data, linkEmploy,
+            stageName,
+            goodsVisible, goodsOrderid, goodsOrdertime, goodsPerson, goodsPhone, goodsAddress,
+            goodsTotalNum, goodsTotalPrice, goodsPostage, goodsState } = this.state
+        let stateDom
+        if (orderState === 1) {
+            stateDom = <span>正常分期中</span>
+        } else if (orderState === 2) {
+            stateDom = <span>分期已完成</span>
+        } else if (orderState === 3) {
+            stateDom = <span>分期已逾期</span>
+        } else {
+            stateDom = <span>未处理分期</span>
+        }
         return (
             <div className='goods'>
                 <div className='goodsHeaderTop'>
@@ -326,13 +480,15 @@ class Order extends Component {
                     {goodsIndex === 1
                         ? <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='请输入搜索条件'></Input>
+                                placeholder='请输入搜索条件'
+                                value={stageName}
+                                onChange={e => this.setState({ stageName: e.target.value })}></Input>
                             <Select style={{ width: 150, margin: '0 20px 0 0' }}
                                 placeholder='分期状态'>
-                                <Option value="未处理分期">未处理分期</Option>
-                                <Option value="分期中">分期中</Option>
-                                <Option value="已完成分期">已完成分期</Option>
-                                <Option value="异常分期">异常分期</Option>
+                                <Option value="4">未处理分期</Option>
+                                <Option value="1">分期中</Option>
+                                <Option value="2">已完成分期</Option>
+                                <Option value="3">异常分期</Option>
                             </Select>
                             <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
                         </div>
@@ -359,48 +515,69 @@ class Order extends Component {
                     <div style={{ width: '100%' }}>
                         {goodsIndex === 1
                             ? <Table columns={columns}
-                            dataSource={listPhased}
-                            style={{ textAlign: 'center' }}
-                            pagination={{ pageSize: 2 }} />
+                                dataSource={listPhased}
+                                style={{ textAlign: 'center' }}
+                                pagination={{ pageSize: 10 }} />
                             : <Table columns={colOnline}
-                            dataSource={listOnline}
-                            style={{ textAlign: 'center' }}
-                            pagination={{ pageSize: 2 }} />}
+                                dataSource={listOnline}
+                                style={{ textAlign: 'center' }}
+                                pagination={{ pageSize: 10 }} />}
                     </div>
                 </div>
 
                 <Modal
                     visible={orderVisible}
-                    title="查看订单"
+                    title="订单详情"
                     onOk={this.handleOk}
                     onCancel={() => this.setState({ orderVisible: false })}
                     footer={[
-                        <Button key="submit" type="primary" onClick={() => console.log('确认修改')}>
-                            确认修改
-                        </Button>
+                        modalType === 'edit' ?
+                            <Button key="submit" type="primary" onClick={() => this.stageChange()}>
+                                确认修改
+                        </Button> : null
                     ]}
                     destroyOnClose={true}
-                    bodyStyle={{ fontSize: '12px', fontWeight: 'bold', padding: '10px', color: '#666666' }}
+                    bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
                 >
-                    <div className='modalItem'>
-                        <span style={{ marginRight: 10 }}>美疗师</span>
-                        <Select style={{ width: 150 }}
-                            placeholder='关联'>
-                            <Option value="jack">9527号</Option>
-                            <Option value="lucy">3321号</Option>
-                        </Select>
+                    <div className='modalheader'>
+                        <div className='modalItem'>
+                            <span style={{ marginRight: 10 }}>美疗师</span>
+                            <Popover
+                                content={<Table columns={employColumns}
+                                    dataSource={data}
+                                    style={{ textAlign: 'center' }}
+                                    pagination={{ pageSize: 2 }} />}
+                                trigger="hover"
+                                visible={visible}
+                                onVisibleChange={this.handleVisibleChange}
+                            >
+                                <Input style={{ width: 150, margin: '0 20px' }}
+                                    placeholder='关联员工'
+                                    disabled={this.state.islook}
+                                    value={linkEmploy}
+                                    onFocus={() => this.setState({ visible: true })}></Input>
+                            </Popover>
+                        </div>
+                        <div className='modalItem'>
+                            <span style={{ marginRight: 10 }}>客户</span>
+                            <Input style={{ width: 150, margin: '0 20px' }}
+                                placeholder='客户姓名/昵称'
+                                disabled={this.state.islook}
+                                value={username}
+                                onChange={e => this.setState({ username: e.target.value })}></Input>
+                        </div>
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
                             <div className='mbLabel'>
                                 <span>订单编号</span>
-                                <span>134654984</span>
+                                <span>{orderId}</span>
                                 <span style={{ color: '#1089EB' }}>复制</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目名称</span>
-                                <span>养生美容服务年卡</span>
+                                <span>{orderName}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目总数</span>
@@ -408,41 +585,101 @@ class Order extends Component {
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期</span>
-                                <span>￥100/12期</span>
-                                <span style={{ color: '#1089EB' }}>剩余￥120/2期</span>
+                                <span>￥{orderStagePrice}/{orderNum}期</span>
+                                <span style={{ color: '#1089EB' }}>剩余￥{orderStagePrice}/{orderOtherNum}期</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>支付方式</span>
-                                <span style={{ color: '#13CE66' }}>微信</span>
+                                <span style={{ color: '#13CE66' }}>{orderPayType}</span>
                             </div>
                         </div>
                         <div className='modalBodyChild'>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>订单状态</span>
-                                <span>已支付/未支付</span>
+                                <span>
+                                    {orderOtherNum < orderNum ? '已支付' : '未支付'}
+                                </span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期总额</span>
-                                <span>1200</span>
+                                <span>{orderPrice}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分期状态</span>
-                                <span style={{ color: '#1089EB' }}>正常分期中</span>
+                                <span style={{ color: '#1089EB' }}>{stateDom}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>实际支付</span>
-                                <span>￥300</span>
+                                <span>￥{orderPay}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>创建时间</span>
-                                <span>2020-05-20-13：14：00</span>
+                                <span>{orderCreate}</span>
                             </div>
                         </div>
                     </div>
                     <div className='modalNote'>
                         <div style={{ width: '100%' }}><span>备注</span></div>
                         <div>
-                            <TextArea rows={4} />
+                            <TextArea rows={4} value={orderRemarks} disabled={this.state.islook}
+                                onChange={e => this.setState({ orderRemarks: e.target.value })} />
+                        </div>
+                    </div>
+                </Modal>
+                <Modal
+                    visible={goodsVisible}
+                    title="订单详情"
+                    onOk={this.handleOk}
+                    onCancel={() => this.setState({ goodsVisible: false })}
+                    footer={[
+                        modalType === 'edit' ?
+                            <Button key="submit" type="primary" onClick={() => this.stageChange()}>
+                                确认修改
+                        </Button> : null
+                    ]}
+                    destroyOnClose={true}
+                    bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
+                    width={800}
+                >
+                    <div style={{ width: '90%', margin: '0 auto' }}>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>订单编号：</span>
+                            <span>{goodsOrderid}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>创建时间：</span>
+                            <span>{goodsOrdertime}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>收货人：</span>
+                            <span>{goodsPerson}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>联系电话：</span>
+                            <span>{goodsPhone}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>收货地址：</span>
+                            <span>{goodsAddress}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>货物数量：</span>
+                            <span>{goodsTotalNum}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>订单总金额：</span>
+                            <span>{goodsTotalPrice}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>运费：</span>
+                            <span>{goodsPostage}</span>
+                        </div>
+                        <div className='mbLabel'>
+                            <span style={{ marginRight: 10 }}>订单状态：</span>
+                            <span>{goodsState === 0 ? '待发货' : null}</span>
+                            <span>{goodsState === 1 ? '待收货' : null}</span>
+                            <span>{goodsState === 2 ? '已收货' : null}</span>
+                            <span>{goodsState === 5 ? '待付款' : null}</span>
                         </div>
                     </div>
                 </Modal>

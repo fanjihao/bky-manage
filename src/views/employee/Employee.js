@@ -509,7 +509,7 @@ export default class Employee extends Component {
                     width={800}
                 >
                     <div className='modalItem'>
-                        <span style={{ color: '#1089EB' }}>基本信息</span>
+                        <span style={{ color: '#1089EB', marginLeft:30 }}>基本信息</span>
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
@@ -592,7 +592,7 @@ export default class Employee extends Component {
                         </div>
                     </div>
                     <div className='modalItem'>
-                        <span style={{ color: '#1089EB' }}>学历信息</span>
+                        <span style={{ color: '#1089EB', marginLeft:30 }}>学历信息</span>
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>

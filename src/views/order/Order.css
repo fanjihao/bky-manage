@@ -1,9 +1,14 @@
 .modalItem{
-    width: 90%;
-    margin: 0 auto;
+    width: 50%;
     height: 50px;
     margin-bottom: 10px;
     line-height: 50px;
+    float: left;
+}
+.modalheader{
+    overflow: hidden;
+    width: 90%;
+    margin: 0 auto;
 }
 .modalBody{
     width: 90%;
@@ -19,6 +24,7 @@
     width: 100%;
     height: 30px;
     line-height: 30px;
+    margin-bottom: 10px;
 }
 .mbLabel span{
     margin-right: 10px;
