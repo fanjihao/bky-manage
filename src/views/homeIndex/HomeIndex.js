@@ -5,7 +5,8 @@ import locale from 'antd/lib/date-picker/locale/zh_CN'
 import { connect } from "react-redux"
 import axios from '../../http/index'
 import ReactEcharts from 'echarts-for-react'
-import moment from 'moment';
+import moment from 'moment'
+import QRCode from 'qrcode.react'
 
 const { RangePicker } = DatePicker;
 
@@ -320,6 +321,8 @@ class HomeIndex extends Component {
             stageoThree, stageOneMoney, stageTwoMoney, stageThreeMoney,
             stageRankList, onlineData, onlineNumList, onlineTimeList,
             onlineTotalList, onlineRankList } = this.state
+        let personInfo = JSON.parse(localStorage.getItem('user'))
+        console.log('===========>', personInfo)
         return (
             <div className="homeIndex">
                 <div className="homeIndex-header">
@@ -570,7 +573,11 @@ class HomeIndex extends Component {
                             </section>
 
                             <div className="download">
-                                <img src={require('../../assets/imgs/QRcode.png')} alt="扫码下载博客云App" className="QRcode" />
+                                <QRCode
+                                    value={"https://www.bkysc.cn/storeDetail?id=" + personInfo.systemStoreId + "&enterId=" + personInfo.id}
+                                    className='qrcode'
+                                    size={200}
+                                    />
                                 <div className="download-text">博客云扫码下载</div>
                             </div>
 

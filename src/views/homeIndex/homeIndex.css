@@ -131,6 +131,9 @@
     width: 200px;
     margin: 20px;
 }
+.qrcode{
+    margin: 10px auto;
+}
 .download {
     text-align: center;
     border-bottom: 1px solid #E6E6E6;
