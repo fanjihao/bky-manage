@@ -495,7 +495,8 @@ export default class Employee extends Component {
                         <Table columns={columns}
                             dataSource={data}
                             style={{ textAlign: 'center' }}
-                            pagination={{ pageSize: 10 }} />
+                            pagination={{ pageSize: 10 }}
+                            locale={{emptyText:'暂无数据'}} />
                     </div>
                 </div>
                 <Modal

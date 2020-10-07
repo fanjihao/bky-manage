@@ -9,11 +9,13 @@ const { TextArea } = Input
 
 class Goods extends Component {
     state = {
+        // 表格无数据时显示
+        emptyText: '暂无数据',
         goodsIndex: 1,
         goodsTable: 1,
         name: '',
-        visible:false,
-        cateName:'',
+        visible: false,
+        cateName: '',
         // 分期项目
         stageVisible: false,
         stageFenlei: '',
@@ -696,7 +698,8 @@ class Goods extends Component {
             goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
             previewVisible, previewImage, fileList, previewTitle,
             goodsimgVisible, goodsImage, goodsFileList, onlineGoods,
-            goodsProModal, goodsProInfo, goodsProId, visible, cateName } = this.state
+            goodsProModal, goodsProInfo, goodsProId, visible, cateName,
+            emptyText } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -946,7 +949,7 @@ class Goods extends Component {
         ]
         const fenleiDom = fenleiList.map(item => {
             return <div key={item.id} className='goodsCate' onClick={() => this.setState({
-                visible:false, cateName:item.cateName
+                visible: false, cateName: item.cateName
             })}>
                 {item.cateName}
             </div>
@@ -1081,7 +1084,7 @@ class Goods extends Component {
                                 placeholder='分类'
                                 value={cateName}
                                 onFocus={() => this.setState({ visible: true })}
-                                onChange={e => this.setState({ cateName:e.target.value })}></Input>
+                                onChange={e => this.setState({ cateName: e.target.value })}></Input>
                         </Popover>
                         {goodsIndex === 1
                             ? <Button
@@ -1101,11 +1104,13 @@ class Goods extends Component {
                             <Table columns={columns}
                                 dataSource={stageData}
                                 style={{ textAlign: 'center', paddingBottom: '10px' }}
-                                pagination={{ pageSize: 10 }} /> :
+                                pagination={{ pageSize: 10 }}
+                                locale={{emptyText:emptyText}} /> :
                             <Table columns={colOnline}
                                 dataSource={onlineGoods}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} />}
+                                pagination={{ pageSize: 10 }} 
+                                locale={{emptyText:emptyText}} />}
                     </div>
                     <Modal
                         visible={goodsModal}

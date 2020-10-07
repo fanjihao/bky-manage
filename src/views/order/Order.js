@@ -38,31 +38,29 @@ class Order extends Component {
 
         //
         goodsVisible: false,
-        goodsOrderid:'', 
-        goodsOrdertime:'', 
-        goodsPerson:'', 
-        goodsPhone:'', 
-        goodsAddress:'', 
-        goodsTotalNum:'', 
-        goodsTotalPrice:'', 
-        goodsPostage:'', 
-        goodsState:'', 
+        goodsOrderid: '',
+        goodsOrdertime: '',
+        goodsPerson: '',
+        goodsPhone: '',
+        goodsAddress: '',
+        goodsTotalNum: '',
+        goodsTotalPrice: '',
+        goodsPostage: '',
+        goodsState: '',
 
+        stateVisible:'',
+        stateVal:''
     }
 
     getStoreStage() {
-        const { stageName, type } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
             url: '/merchantOrder/listPhasedProject',
             method: 'GET',
             params: {
-                cateName: '',
                 enterId: user.id,
                 limit: 10,
-                name: stageName,
                 offset: 1,
-                type: type
             }
         })
             .then(res => {
@@ -71,6 +69,30 @@ class Order extends Component {
                         listPhased: res.data.data.list
                     })
                     message.success('查询门店分期订单成功')
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                message.error('查询失败')
+            })
+    }
+    getStageState(type) {
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url: '/merchantOrder/listPhasedProject',
+            method: 'GET',
+            params: {
+                enterId: user.id,
+                limit: 10,
+                offset: 1,
+                type
+            }
+        })
+            .then(res => {
+                if (res.data.status === 200) {
+                    this.setState({
+                        listPhased: res.data.data.list
+                    })
                 }
             })
             .catch(err => {
@@ -177,6 +199,7 @@ class Order extends Component {
                 orderOtherPrice: '',
                 username: i.userName,
                 linkEmploy: i.staffName,
+                type: i.type
             })
         } else {
             this.setState({
@@ -197,12 +220,18 @@ class Order extends Component {
                 orderOtherPrice: '',
                 linkEmploy: i.staffName,
                 linkId: i.staffId,
-                username: i.userName
+                username: i.userName,
+                type: i.type
             })
         }
     }
     handleVisibleChange = visible => {
         this.setState({ visible })
+    }
+    VisibleChange = stateVisible => {
+        this.setState({ 
+            stateVisible 
+        })
     }
     stageChange = () => {
         const { orderId, orderRemarks, linkId, username } = this.state
@@ -230,30 +259,30 @@ class Order extends Component {
     //
     editGoods = (i, type) => {
         axios({
-            url:'/merchantOrder/storeOrderDetails',
-            method:'GET',
-            params:{
-                orderId:i.orderId
+            url: '/merchantOrder/storeOrderDetails',
+            method: 'GET',
+            params: {
+                orderId: i.orderId
             }
         })
-        .then(res => {
-            console.log(res)
-            this.setState({
-                goodsVisible: true,
-                goodsOrderid:res.data.orderId,
-                goodsOrdertime:i.creatTime,
-                goodsPerson:res.data.realName, 
-                goodsPhone:res.data.userPhone, 
-                goodsAddress:res.data.userAddress, 
-                goodsTotalNum:res.data.totalNum, 
-                goodsTotalPrice:res.data.totalPrice, 
-                goodsPostage:res.data.totalPostage, 
-                goodsState:res.data.status
+            .then(res => {
+                console.log(res)
+                this.setState({
+                    goodsVisible: true,
+                    goodsOrderid: res.data.orderId,
+                    goodsOrdertime: i.creatTime,
+                    goodsPerson: res.data.realName,
+                    goodsPhone: res.data.userPhone,
+                    goodsAddress: res.data.userAddress,
+                    goodsTotalNum: res.data.totalNum,
+                    goodsTotalPrice: res.data.totalPrice,
+                    goodsPostage: res.data.totalPostage,
+                    goodsState: res.data.status
+                })
             })
-        })
-        .catch(err => {
-            console.log(err)
-        })
+            .catch(err => {
+                console.log(err)
+            })
     }
     render() {
         const columns = [
@@ -451,8 +480,8 @@ class Order extends Component {
         const { goodsIndex, orderVisible, listOnline, listPhased,
             orderId, orderName, orderNum, orderStagePrice, orderPayType,
             orderPrice, orderState, orderPay, orderCreate, orderRemarks,
-            orderOtherNum, username, modalType, visible, data, linkEmploy,
-            stageName,
+            orderOtherNum, username, modalType, visible, stateVisible, data, linkEmploy,
+            stageName, type, stateVal, 
             goodsVisible, goodsOrderid, goodsOrdertime, goodsPerson, goodsPhone, goodsAddress,
             goodsTotalNum, goodsTotalPrice, goodsPostage, goodsState } = this.state
         let stateDom
@@ -480,17 +509,46 @@ class Order extends Component {
                     {goodsIndex === 1
                         ? <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='请输入搜索条件'
+                                placeholder='请输入项目名称'
                                 value={stageName}
                                 onChange={e => this.setState({ stageName: e.target.value })}></Input>
-                            <Select style={{ width: 150, margin: '0 20px 0 0' }}
-                                placeholder='分期状态'>
-                                <Option value="4">未处理分期</Option>
-                                <Option value="1">分期中</Option>
-                                <Option value="2">已完成分期</Option>
-                                <Option value="3">异常分期</Option>
-                            </Select>
-                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
+                            <Popover
+                                content={
+                                <div style={{display:"flex", flexDirection:'column',justifyContent:'center', alignItems:'center'}}>
+                                    <span className='flexitem' onClick={() => {
+                                        this.setState({ stateVal:'未处理分期' }, () => {
+                                            this.getStageState(4)
+                                        })
+                                    }}>未处理分期</span>
+                                    <span className='flexitem' onClick={() => {
+                                        this.setState({ stateVal:'分期中' }, () => {
+                                            this.getStageState(1)
+                                        })
+                                    }}>分期中</span>
+                                    <span className='flexitem' onClick={() => {
+                                        this.setState({ stateVal:'已完成分期' }, () => {
+                                            this.getStageState(2)
+                                        })
+                                    }}>已完成分期</span>
+                                    <span className='flexitem' onClick={() => {
+                                        this.setState({ stateVal:'异常分期' }, () => {
+                                            this.getStageState(3)
+                                        })
+                                    }}>异常分期</span>
+                                </div>
+                                }
+                                trigger="hover"
+                                visible={stateVisible}
+                                onVisibleChange={this.VisibleChange}
+                            >
+                                <Input style={{ width: 150, margin: '0 20px' }}
+                                    placeholder='分期状态'
+                                    value={stateVal}
+                                    onFocus={() => this.setState({ stateVisible: true })}
+                                    onChange={e => this.setState({ stateVal: e.target.value })}></Input>
+                            </Popover>
+                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
+                                onClick={() => this.getStageState()}>搜索</Button>
                         </div>
                         : <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
@@ -517,11 +575,13 @@ class Order extends Component {
                             ? <Table columns={columns}
                                 dataSource={listPhased}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} />
+                                pagination={{ pageSize: 10 }} 
+                                locale={{emptyText:'暂无数据'}} />
                             : <Table columns={colOnline}
                                 dataSource={listOnline}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} />}
+                                pagination={{ pageSize: 10 }} 
+                                locale={{emptyText:'暂无数据'}} />}
                     </div>
                 </div>
 
@@ -547,7 +607,8 @@ class Order extends Component {
                                 content={<Table columns={employColumns}
                                     dataSource={data}
                                     style={{ textAlign: 'center' }}
-                                    pagination={{ pageSize: 2 }} />}
+                                    pagination={{ pageSize: 2 }} 
+                                    locale={{emptyText:'暂无数据'}} />}
                                 trigger="hover"
                                 visible={visible}
                                 onVisibleChange={this.handleVisibleChange}
@@ -597,7 +658,7 @@ class Order extends Component {
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>订单状态</span>
                                 <span>
-                                    {orderOtherNum < orderNum ? '已支付' : '未支付'}
+                                    {type === 4 ? '未支付' : '已支付'}
                                 </span>
                             </div>
                             <div className='mbLabel'>
