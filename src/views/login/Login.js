@@ -201,10 +201,10 @@ class Login extends React.Component {
         return (
             <div className="login" style={{ height }}>
                 <div className='loginPart'>
-                    <div className='loginTitle'>
+                    <div className='loginTitle' style={{marginTop:0.2*height}}>
                         <div className='loginTitleTop'>
                             <div className='loginTopLogo' >
-                                <img alt='logo' src={require('../../assets/imgs/ic_launcher.png')} style={{ width: '50%', height: '50%' }}></img>
+                                <img alt='logo' src={require('../../assets/imgs/ic_launcher.png')} style={{ width: '100%', height: '100%' }}></img>
                             </div>
                             <div className='systemName'>
                                 博客云商家版后台管理系统
@@ -212,7 +212,7 @@ class Login extends React.Component {
                         </div>
                     </div>
                     <div className='loginContent'>
-                        <img src={require('../../assets/imgs/bkyManagementLogo.png')} className='loginImg' alt="logo"></img>
+                        <img src={require('../../assets/imgs/bkyManagementLogo.png')} className='loginImg' alt="logo" />
                         <div className='loginForm'>
                             <div className='loginFormItem loginLogo'>
                                 <img alt='logo' src={require('../../assets/imgs/ic_launcher.png')}
