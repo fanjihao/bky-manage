@@ -160,3 +160,15 @@
     cursor: pointer;
     font-style:normal;
 }
+.goodsCate{
+    width:100px;
+    height:30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border-bottom: 1px solid #ccc; */
+    margin-bottom: 3px;
+}
+.goodsCate:hover{
+    cursor: pointer;
+}

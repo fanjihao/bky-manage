@@ -9,9 +9,13 @@ const { TextArea } = Input
 
 class Goods extends Component {
     state = {
+        // 表格无数据时显示
+        emptyText: '暂无数据',
         goodsIndex: 1,
         goodsTable: 1,
         name: '',
+        visible: false,
+        cateName: '',
         // 分期项目
         stageVisible: false,
         stageFenlei: '',
@@ -44,19 +48,22 @@ class Goods extends Component {
         goodsFenleiList: [],
         goodsModal: false,
         goodsMoInfo: '',
+        goodsNo: '',
         goodsClass: '',
         goodsClassVal: '',
         goodsName: '',
         goodsKey1: '',
         goodsKey2: '',
         goodsKey3: '',
-        goodsPhoto: '',
         goodsRemarks: '',
         goodsPrice: '',
         goodsVip: '',
         goodsPostage: '',
         goodsSales: '',
-        goodsSku: ''
+        goodsSku: '',
+        goodsProModal: false,
+        goodsProInfo: '',
+        goodsProId: '',
     }
     getStageItem = () => {
         const { name, goodsTable, cateName } = this.state
@@ -75,7 +82,6 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                console.log(res.data.data)
                 message.success('查询商品成功')
                 this.setState({
                     stageData: res.data.data.list
@@ -88,8 +94,14 @@ class Goods extends Component {
     getOnlineItem = () => {
         const { name, goodsTable, cateName } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
+        let type
+        if (goodsTable === 2) {
+            type = 0
+        } else {
+            type = 1
+        }
         axios({
-            url: '/merchantOrder/listOnLineProducts',
+            url: '/statistics/onlineProducts',
             method: 'GET',
             params: {
                 cateName: cateName, // 分类名称
@@ -98,11 +110,11 @@ class Goods extends Component {
                 name: name, // 项目名称
                 offset: 1, // 页码
                 order: '', // 排序方式
-                type: goodsTable,
+                type,
             }
         })
             .then(res => {
-                console.log(res.data.data)
+                console.log('============', res.data.data)
                 message.success('查询商品成功')
                 this.setState({
                     onlineGoods: res.data.data.list
@@ -111,12 +123,6 @@ class Goods extends Component {
             .catch(err => {
                 message.error('查询商品失败')
             })
-    }
-    addGoods = () => {
-        this.setState({
-            goodsModal: true,
-            goodsMoInfo: 'add'
-        })
     }
     goodsFenleiList = () => {
         axios({
@@ -127,7 +133,6 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                console.log(res)
                 this.setState({
                     goodsFenleiList: res.data.content
                 })
@@ -166,7 +171,13 @@ class Goods extends Component {
         this.setState({
             goodsTable: i
         }, () => {
-            this.getStageItem()
+            if (this.state.goodsIndex === 1) {
+                this.getStageItem()
+            } else if (i === 3 && this.state.goodsIndex === 2) {
+                this.getRecycle()
+            } else {
+                this.getOnlineItem()
+            }
         })
     }
     // 气泡删除
@@ -304,12 +315,11 @@ class Goods extends Component {
         })
     }
     changefl = val => {
-        let checkedFl = this.state.fenleiList.map(item => {
-            if (val === item.id) return item
-        })
+        let checkedFl = this.state.fenleiList.filter(item => val === item.id)
         this.setState({
-            cateName: checkedFl.cateName,
-            cateId: val
+            cateName: checkedFl[0].cateName,
+            cateId: val,
+
         })
     }
     dismount = (i, type) => {
@@ -328,11 +338,34 @@ class Goods extends Component {
                 console.log(err)
             })
     }
+    goodsUpDown = (i, type) => {
+        axios({
+            url: '/statistics/dismountOnlineProducts',
+            method: 'GET',
+            params: {
+                id: i
+            }
+        })
+            .then(res => {
+                type === '下架' ? message.success('下架成功') : message.success('上架成功')
+                this.getOnlineItem()
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
     handleOk = () => {
-        this.dismount(this.state.sureChange)
+        this.dismount(this.state.sureChange, this.state.promptInfo)
         this.setState({
             promptModal: false,
             sureChange: ''
+        })
+    }
+    handleGoodsOk = () => {
+        this.goodsUpDown(this.state.goodsProId, this.state.goodsProInfo)
+        this.setState({
+            goodsProModal: false,
+            goodsProId: ''
         })
     }
     handleCancel = () => {
@@ -347,11 +380,12 @@ class Goods extends Component {
             stageVisiInfo: type
         }, () => {
             if (type === 'edit') {
-                console.log(i)
                 let fenlei
-                fenlei = this.state.fenleiList.filter(item => {
-                    if (i.cateId === item.id) return item
-                })[0].cateName
+                if (this.state.fenleiList.filter(item => i.cateId === item.id) === true) {
+                    fenlei = this.state.fenleiList.filter(item => i.cateId === item.id)[0].cateName
+                } else {
+                    fenlei = ''
+                }
                 let imgArr = []
                 let urlArr = i.photo.split(',')
                 for (let i = 0; i < urlArr.length; i++) {
@@ -393,7 +427,8 @@ class Goods extends Component {
     }
     checkIndex = (i) => {
         this.setState({
-            goodsIndex: i
+            goodsIndex: i,
+            goodsTable: 1
         }, () => {
             if (i === 1) {
                 this.getStageItem()
@@ -415,8 +450,17 @@ class Goods extends Component {
     // 添加商品-新增并上架
     goodsOkShelves = (which) => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { goodsClass, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsPhoto,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, } = this.state
+        const { goodsClass, goodsName, goodsKey1, goodsKey2, goodsKey3,
+            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsFileList } = this.state
+        let photoStr = ''
+        let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
+        for (let i = 0; i < goodsFileList.length; i++) {
+            if (photoStr === '') {
+                photoStr = baseUrl + goodsFileList[i].response.data
+            } else {
+                photoStr = baseUrl + goodsFileList[i].response.data + ',' + photoStr
+            }
+        }
         let formData = new FormData()
         formData.append('merId', user.id)
         formData.append('keyword', goodsKey1 + ',' + goodsKey2 + ',' + goodsKey3)
@@ -424,7 +468,7 @@ class Goods extends Component {
         formData.append('name', goodsName)
         formData.append('price', Number(goodsPrice))
         formData.append('vipPrice', Number(goodsVip))
-        formData.append('image', goodsPhoto)
+        formData.append('image', photoStr)
         formData.append('ficti', Number(goodsSales))
         formData.append('stock', Number(goodsSku))
         formData.append('storeInfo', goodsRemarks)
@@ -439,11 +483,209 @@ class Goods extends Component {
             data: formData
         })
             .then(res => {
-                console.log('添加成功', res)
+                message.success('添加成功')
+                this.getOnlineItem()
+                this.setState({
+                    goodsModal: false
+                })
             })
             .catch(err => {
                 console.log('添加失败', err)
             })
+    }
+    // 修改商品
+    editOnline = (type, i) => {
+        this.setState({
+            goodsModal: true,
+            goodsMoInfo: type
+        }, () => {
+            if (type === 'edit') {
+                let keyArr = i.keyword.split(',')
+                let imgArr = []
+                let urlArr = i.image.split(',')
+                for (let i = 0; i < urlArr.length; i++) {
+                    let obj = {
+                        uid: i,
+                        url: urlArr[i]
+                    }
+                    imgArr.push(obj)
+                }
+                this.setState({
+                    goodsNo: i.id,
+                    goodsClass: i.cateId,
+                    goodsClassVal: i.cateName,
+                    goodsName: i.name,
+                    goodsKey1: keyArr[0],
+                    goodsKey2: keyArr[1],
+                    goodsKey3: keyArr[2],
+                    goodsRemarks: i.storeInfo,
+                    goodsPrice: i.price,
+                    goodsVip: i.vipPrice,
+                    goodsPostage: i.postage,
+                    goodsSales: i.ficti,
+                    goodsSku: i.stock,
+                    goodsFileList: imgArr
+                })
+            } else {
+                this.setState({
+                    goodsNo: '',
+                    goodsClass: '',
+                    goodsClassVal: '',
+                    goodsName: '',
+                    goodsKey1: '',
+                    goodsKey2: '',
+                    goodsKey3: '',
+                    goodsRemarks: '',
+                    goodsPrice: '',
+                    goodsVip: '',
+                    goodsPostage: '',
+                    goodsSales: '',
+                    goodsSku: '',
+                    goodsFileList: []
+                })
+            }
+        })
+    }
+    onlineSure = (i) => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        const { goodsNo, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsClass,
+            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
+            goodsFileList } = this.state
+        let photoStr = ''
+        let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
+        for (let i = 0; i < goodsFileList.length; i++) {
+            if (goodsFileList[i].response) {
+                if (photoStr === '') {
+                    photoStr = baseUrl + goodsFileList[i].response.data
+                } else {
+                    photoStr = baseUrl + goodsFileList[i].response.data + ',' + photoStr
+                }
+            } else {
+                if (photoStr === '') {
+                    photoStr = goodsFileList[i].url
+                } else {
+                    photoStr = goodsFileList[i].url + ',' + photoStr
+                }
+            }
+        }
+        let isshow
+        if (i === 1) {
+            isshow = 1
+        } else {
+            isshow = 0
+        }
+        let formData = new FormData()
+        formData.append('cateId', goodsClass)
+        formData.append('cateName', goodsClassVal)
+        formData.append('ficti', goodsSales)
+        formData.append('id', goodsNo)
+        formData.append('image', photoStr)
+        formData.append('isShow', isshow)
+        formData.append('keyword', goodsKey1 + ',' + goodsKey2 + ',' + goodsKey3)
+        formData.append('merId', user.id)
+        formData.append('name', goodsName)
+        formData.append('postage', goodsPostage)
+        formData.append('price', Number(goodsPrice))
+        formData.append('stock', goodsSku)
+        formData.append('storeInfo', goodsRemarks)
+        formData.append('vipPrice', Number(goodsVip))
+        axios({
+            url: '/statistics/updateOnlineProducts',
+            method: 'POST',
+            data: formData
+        })
+            .then(res => {
+                message.success('修改成功')
+                this.getOnlineItem()
+                this.setState({
+                    goodsModal: false
+                })
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+    // 回收站商品
+    getRecycle = () => {
+        const { name, cateName } = this.state
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url: '/statistics/recycleBinProducts',
+            method: 'GET',
+            params: {
+                cateName: cateName, // 分类名称
+                enterId: user.id, // 商户id
+                limit: 10, // 每页数量
+                name: name, // 项目名称
+                offset: 1, // 页码
+                order: '', // 排序方式
+                type: 3,
+            }
+        })
+            .then(res => {
+                message.success('查询商品成功')
+                this.setState({
+                    onlineGoods: res.data
+                })
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+    // 商品放入回收站
+    goodsfirm = (re) => {
+        axios({
+            url: '/statistics/delOnlineProducts',
+            method: 'GET',
+            params: {
+                id: re.id
+            }
+        })
+            .then(res => {
+                message.success('删除成功，已放入回收站！')
+                this.getOnlineItem()
+            })
+            .catch(err => {
+                message.error('删除失败')
+            })
+    }
+    // 商品从回收站 ===> 未上架
+    delToNoShow = (re) => {
+        axios({
+            url: '/statistics/recoveryOnlineProducts',
+            method: 'GET',
+            params: {
+                id: re.id
+            }
+        })
+            .then(res => {
+                console.log('===========', res)
+                message.success('恢复成功')
+                this.getRecycle()
+            })
+            .catch(err => {
+                message.error('恢复失败')
+            })
+    }
+    // 回收站彻底删除
+    realDelOnline = (re) => {
+        axios({
+            url: '/statistics/removeOnlineProducts',
+            method: 'GET',
+            params: {
+                id: re.id
+            }
+        })
+            .then(res => {
+                console.log('=============', res)
+                this.getRecycle()
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+    handleVisibleChange = visible => {
+        this.setState({ visible })
     }
     stageImgCancel = () => this.setState({ previewVisible: false })
     goodsImgCancel = () => this.setState({ goodsimgVisible: false })
@@ -453,12 +695,11 @@ class Goods extends Component {
             stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks, fenleiList, stageData, promptModal,
             promptInfo, stageVisiInfo, stageFenlei, goodsFenleiList,
             goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3,
-            // goodsPhoto,
             goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
             previewVisible, previewImage, fileList, previewTitle,
-            goodsimgVisible, goodsImage,
-            // goodsFileList 
-        } = this.state
+            goodsimgVisible, goodsImage, goodsFileList, onlineGoods,
+            goodsProModal, goodsProInfo, goodsProId, visible, cateName,
+            emptyText } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -585,62 +826,94 @@ class Goods extends Component {
         const colOnline = [
             {
                 title: '商品编号',
-                dataIndex: 'no',
-                key: 'no',
+                dataIndex: 'id',
+                key: 'id',
                 render: text => <a>{text}</a>,
             },
             {
                 title: '商品图片',
-                dataIndex: 'name',
-                key: 'name',
-                render: text => <span>{text}</span>
+                dataIndex: 'image',
+                key: 'image',
+                render: src => {
+                    let arr = src.split(',')
+                    return (
+                        <Image className='tableGoodsImg' src={arr[0]}></Image>
+                    )
+                }
             },
             {
                 title: '商品名称',
-                dataIndex: 'phone',
-                key: 'phone',
+                dataIndex: 'name',
+                key: 'name',
             },
             {
                 title: '分类名称',
-                dataIndex: 'goodsinfo',
-                key: 'goodsinfo',
+                dataIndex: 'cateName',
+                key: 'cateName',
             },
             {
                 title: '商品价格',
-                dataIndex: 'truePay',
-                key: 'truePay',
+                dataIndex: 'price',
+                key: 'price',
+                render: text => (
+                    <span>￥{text.toFixed(2)}</span>
+                ),
             },
             {
                 title: '销量',
-                key: 'numOfStage',
-                dataIndex: 'numOfStage',
+                key: 'ficti',
+                dataIndex: 'ficti',
             },
             {
                 title: '库存',
-                key: 'buildTime',
-                dataIndex: 'buildTime',
+                key: 'stock',
+                dataIndex: 'stock',
                 render: tags => (
                     <span>{tags}</span>
                 ),
             },
             {
                 title: '系统状态',
-                key: 'buildTime',
-                dataIndex: 'buildTime',
-                render: tags => (
-                    <span>{tags}</span>
-                ),
+                key: 'isShow',
+                dataIndex: 'isShow',
+                render: (text, record) => {
+                    if (goodsTable === 1) {
+                        return <Popover content={
+                            <Tag color='red'
+                                onClick={() => this.setState({
+                                    goodsProModal: true,
+                                    goodsProId: record.id,
+                                    goodsProInfo: '下架'
+                                })} >下架</Tag>
+                        }>
+                            <Tag color='#2596FF'>已上架</Tag>
+                        </Popover>
+                    } else if (goodsTable === 2) {
+                        return <Popover content={
+                            <Tag color='red'
+                                onClick={() => this.setState({
+                                    goodsProModal: true,
+                                    goodsProId: record.id,
+                                    goodsProInfo: '上架'
+                                })} >上架</Tag>
+                        }>
+                            <Tag color='#2596FF'>待上架</Tag>
+                        </Popover>
+                    } else {
+                        return <Tag color='#1890FF'>已删除</Tag>
+                    }
+                }
             },
             {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => {
-                    if (record.state === '交易完成') {
+                    if (goodsTable !== 3) {
                         return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
+                            <a style={{ color: '#13CE66' }} onClick={() => this.editOnline('edit', record)} >修改</a>
                             <Popconfirm
                                 title="请您确认是否删除?"
-                                onConfirm={() => this.confirm(record)}
+                                onConfirm={() => this.goodsfirm(record)}
                                 onCancel={this.cancel}
                                 okText="是"
                                 cancelText="否"
@@ -648,21 +921,20 @@ class Goods extends Component {
                                 <a style={{ color: '#FF5A5A' }}>删除</a>
                             </Popconfirm>
                         </Space>)
-                    } else if (record.state === '已删除') {
+                    } else {
                         return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder()}>查看订单</a>
                             <Popconfirm
                                 title="请您确认是否恢复?"
-                                onConfirm={() => this.confirm(record)}
+                                onConfirm={() => this.delToNoShow(record)}
                                 onCancel={this.cancel}
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF5A5A' }}>恢复</a>
+                                <a style={{ color: '#13CE66' }}>恢复</a>
                             </Popconfirm>
                             <Popconfirm
                                 title="请您确认是否彻底删除?"
-                                onConfirm={() => this.confirm(record)}
+                                onConfirm={() => this.realDelOnline(record)}
                                 onCancel={this.cancel}
                                 okText="是"
                                 cancelText="否"
@@ -670,17 +942,17 @@ class Goods extends Component {
                                 <a style={{ color: '#FF5A5A' }}>彻底删除</a>
                             </Popconfirm>
                         </Space>)
-                    } else {
-                        return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => console.log('我点了', record)}>查看订单</a>
-                        </Space>)
                     }
                 }
 
             },
         ]
         const fenleiDom = fenleiList.map(item => {
-            return <Option value={item.id} key={item.id}>{item.cateName}</Option>
+            return <div key={item.id} className='goodsCate' onClick={() => this.setState({
+                visible: false, cateName: item.cateName
+            })}>
+                {item.cateName}
+            </div>
         })
         const goodsClassDom = goodsFenleiList.map(item => {
             return <Option value={item.id} key={item.id}>{item.cateName}</Option>
@@ -734,49 +1006,49 @@ class Goods extends Component {
                 })
             }
         }
-        // const goodsProps = {
-        //     name: 'file',
-        //     action: 'http://47.108.174.202:9010/upload/files-upload',
-        //     listType: 'picture-card',
-        //     headers: {
-        //         authorization: 'authorization-text',
-        //         Content_Type: 'multipart/form-data'
-        //     },
-        //     fileList: goodsFileList,
-        //     onChange(info) {
-        //         if (info.file.status !== 'uploading') {
-        //             console.log('上传的文件', info.fileList)
-        //         }
-        //         if (info.file.status === 'done') {
-        //             message.success(`${info.file.name} 上传成功`)
-        //             _that.setState({
-        //                 goodsFileList: info.fileList,
-        //             })
-        //         } else if (info.file.status === 'error') {
-        //             message.error(`${info.file.name} 上传失败.`)
-        //         }
-        //     },
-        //     onPreview(file) {
-        //         console.log('预览', file)
-        //         let url
-        //         if (file.response) {
-        //             url = 'https://www.bkysc.cn/api/files-upload/' + file.response.data
-        //         } else {
-        //             url = file.url
-        //         }
-        //         _that.setState({
-        //             goodsImage: url,
-        //             goodsimgVisible: true,
-        //             previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
-        //         })
-        //     },
-        //     onRemove(file) {
-        //         let newList = fileList.filter(item => item.uid !== file.uid)
-        //         _that.setState({
-        //             goodsFileList: newList
-        //         })
-        //     }
-        // }
+        const goodsProps = {
+            name: 'file',
+            action: 'http://47.108.174.202:9010/upload/files-upload',
+            listType: 'picture-card',
+            headers: {
+                authorization: 'authorization-text',
+                Content_Type: 'multipart/form-data'
+            },
+            fileList: goodsFileList,
+            onChange(info) {
+                if (info.file.status !== 'uploading') {
+                    console.log('上传的文件', info.fileList)
+                }
+                if (info.file.status === 'done') {
+                    message.success(`${info.file.name} 上传成功`)
+                    _that.setState({
+                        goodsFileList: info.fileList,
+                    })
+                } else if (info.file.status === 'error') {
+                    message.error(`${info.file.name} 上传失败.`)
+                }
+            },
+            onPreview(file) {
+                console.log('预览', file)
+                let url
+                if (file.response) {
+                    url = 'https://www.bkysc.cn/api/files-upload/' + file.response.data
+                } else {
+                    url = file.url
+                }
+                _that.setState({
+                    goodsImage: url,
+                    goodsimgVisible: true,
+                    previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
+                })
+            },
+            onRemove(file) {
+                let newList = goodsFileList.filter(item => item.uid !== file.uid)
+                _that.setState({
+                    goodsFileList: newList
+                })
+            }
+        }
         return (
             <div className='goods'>
                 <div className='goodsHeaderTop'>
@@ -802,29 +1074,43 @@ class Goods extends Component {
                             placeholder='请输入搜索条件'
                             value={name}
                             onChange={e => this.setName(e)}></Input>
-                        <Select style={{ width: 150, margin: '0 20px 0 0' }}
-                            placeholder='分类'
-                            onChange={this.changefl}>
-                            {fenleiDom}
-                        </Select>
-                        <Button
-                            style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
-                            type='primary'
-                            onClick={() => this.getStageItem()}>搜索</Button>
+                        <Popover
+                            content={fenleiDom}
+                            trigger="hover"
+                            visible={visible}
+                            onVisibleChange={this.handleVisibleChange}
+                        >
+                            <Input style={{ width: 150, margin: '0 20px' }}
+                                placeholder='分类'
+                                value={cateName}
+                                onFocus={() => this.setState({ visible: true })}
+                                onChange={e => this.setState({ cateName: e.target.value })}></Input>
+                        </Popover>
+                        {goodsIndex === 1
+                            ? <Button
+                                style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
+                                type='primary'
+                                onClick={() => this.getStageItem()}>搜索</Button>
+                            : <Button
+                                style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
+                                type='primary'
+                                onClick={() => this.getOnlineItem()}>搜索</Button>}
                         {goodsIndex === 1
                             ? <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.editStage('add', 0)}>+新增分期项目</Button>
-                            : <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.addGoods()}>+新增商品</Button>}
+                            : <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.editOnline('add', 0)}>+新增商品</Button>}
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         {goodsIndex === 1 ?
                             <Table columns={columns}
                                 dataSource={stageData}
                                 style={{ textAlign: 'center', paddingBottom: '10px' }}
-                                pagination={{ pageSize: 10 }} /> :
+                                pagination={{ pageSize: 10 }}
+                                locale={{emptyText:emptyText}} /> :
                             <Table columns={colOnline}
-                                dataSource={stageData}
+                                dataSource={onlineGoods}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} />}
+                                pagination={{ pageSize: 10 }} 
+                                locale={{emptyText:emptyText}} />}
                     </div>
                     <Modal
                         visible={goodsModal}
@@ -838,7 +1124,7 @@ class Goods extends Component {
                             <Button onClick={() => this.goodsOkShelves(0)}>
                                 保存至待上架
                         </Button>] :
-                            [<Button key="submit" type="primary" onClick={() => this.sureChange()}>
+                            [<Button key="submit" type="primary" onClick={() => this.onlineSure(goodsTable)}>
                                 确定修改
                         </Button>,
                             <Button key="back" type="primary" onClick={() => this.sureChange()}>
@@ -876,7 +1162,7 @@ class Goods extends Component {
                         </div>
                         <div className='goodsModalImg'>
                             <span className='gmiLabel'>商品图片</span>
-                            <Upload {...props} className='avatar-uploader'>
+                            <Upload {...goodsProps} className='avatar-uploader'>
                                 {fileList.length >= 3 ? null : uploadButton}
                             </Upload>
                             <Modal
@@ -945,6 +1231,24 @@ class Goods extends Component {
                             {promptInfo === '下架'
                                 ? <span style={{ fontSize: 16 }}>您确定要将该分期项目放入待上架？</span>
                                 : <span style={{ fontSize: 16 }}>您确定要将该分期项目开始出售？</span>
+                            }
+                        </div>
+                    </Modal>
+                    <Modal
+                        visible={goodsProModal}
+                        title="上架 / 下架"
+                        onOk={this.handleGoodsOk}
+                        onCancel={this.handleCancel}
+                        okText='确定'
+                        cancelText='取消'
+                        destroyOnClose={true}
+                        bodyStyle={{ padding: '10px', color: '#666666' }}
+                        afterClose={() => this.setState({ goodsProId: '' })}
+                    >
+                        <div style={{ width: '90%', margin: '0 auto', height: 50, textAlign: 'center', lineHeight: '50px' }}>
+                            {goodsProInfo === '下架'
+                                ? <span style={{ fontSize: 16 }}>您确定要将该商品下架？</span>
+                                : <span style={{ fontSize: 16 }}>您确定要将该商品上架？</span>
                             }
                         </div>
                     </Modal>

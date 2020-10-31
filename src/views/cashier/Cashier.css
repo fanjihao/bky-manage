@@ -1,0 +1,139 @@
+.cashier{
+    font-weight: normal;
+}
+.cashierTop{
+    width: 100%;
+    height: 50px;
+    background-color: #e6e6e6;
+    line-height: 50px;
+    padding: 0 0 0 20px;
+    text-align: left;
+}
+.cashierHeader{
+    overflow: hidden;
+    width: 100%;
+    padding: 25px;
+}
+.headerTips{
+    float: left;
+    width: 300px;
+    height: 139px;
+    background: rgba(16,137,235, 0.1);
+    border-radius: 12px;
+    margin-right: 40px;
+    padding: 30px;
+}
+.month-num{
+    font-size: 28px;
+    float:left;
+    color:#1089EB
+}
+.sumTotal{
+    overflow: hidden;
+    width: 100%;
+}
+.sumTotal>span{
+    font-size: 16px;
+    font-family: FZHei-B01S;
+    font-weight: 400;
+    color: #1089EB;
+}
+.eyeIcon{
+    color: #1089eb;
+}
+.goodsBody{
+    width: 96%;
+    border: 1px solid #ccc;
+    margin: 0 auto;
+    border-radius: 5px;
+}
+.goodsBodyTab{
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+.gbTabBtn{
+    height: 45px;
+    display: inline-block;
+    line-height: 45px;
+    border-right: 1px #ccc solid;
+    padding: 0 20px;
+}
+.gtActive:hover,.gbTabBtn:hover{
+    cursor: pointer;
+}
+.gtActive{
+    height: 45px;
+    display: inline-block;
+    line-height: 45px;
+    border-right: 1px #ccc solid;
+    padding: 0 20px;
+    border-bottom: 2px solid #1089EB;
+    color: #1089EB;
+    box-sizing: content-box;
+}
+.tableTips{
+    display: inline-block;
+    padding-left: 25px;
+    color: red;
+    font-size: 12px;
+}
+.footer-statistical{
+    width: 100%;
+    padding: 25px 0 25px 50px;
+}
+.footer-statistical>span{
+    margin-right: 20px;
+    color: #222222;
+    font-size: 16px;
+    font-weight: 500;
+}
+.datePicker{
+    width: 230px;
+    margin-right: 20px;
+}
+.nameInput{
+    width: 200px;
+    margin-right: 20px;
+}
+.classSelect{
+    width: 150px;
+    margin-right: 20px;
+}
+.search-btn{
+    width: 70px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #13CE66;
+    color:white;
+    margin-right: 10px;
+}
+.daochu-btn{
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    background-color: orange;
+    color:white;
+    margin-right: 10px;
+}
+.search-btn:hover, .daochu-btn:hover{
+    cursor: pointer;
+    opacity: 0.7;
+}
+.look-action{
+    color: #1089EB;
+}
+.edit-action{
+    color: #FF4949;
+}
+.actions{
+    cursor: pointer;
+}
+.goods-item-img{
+    width: 50px;
+    height: 50px;
+    border: 1px solid #eee;
+}
