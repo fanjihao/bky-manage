@@ -8,6 +8,7 @@ import Goods from '../goods/Goods'
 import Order from '../order/Order'
 import Employee from '../employee/Employee'
 import Setting from '../setting/Setting'
+import Cashier from '../cashier/Cashier'
 import { connect } from 'react-redux'
 
 const tab = [
@@ -16,23 +17,28 @@ const tab = [
         name: '首页',
         icon: <HomeOutlined />,
         path: '/home/homeindex'
-    }, {
+    }, , {
         id: 2,
+        name: '收银管理',
+        icon: <SettingFilled />,
+        path: '/home/cashier'
+    },{
+        id: 3,
         name: '商品管理',
         icon: <MenuFoldOutlined />,
         path: '/home/goods'
     }, {
-        id: 3,
+        id: 4,
         name: '订单管理',
         icon: 'home',
         path: '/home/order'
     }, {
-        id: 4,
-        name: '员工列表',
+        id: 5,
+        name: '员工管理',
         icon: 'home',
         path: '/home/employee'
     }, {
-        id: 5,
+        id: 6,
         name: '设置',
         icon: <SettingFilled />,
         path: '/home/setting'
@@ -96,6 +102,7 @@ class Home extends Component {
                     <Col span={20} className="home-content">
                         <Redirect from="/home" to="/home/homeindex" />
                         <Route path="/home/homeindex" component={HomeIndex} />
+                        <Route path="/home/cashier" component={Cashier} />
                         <Route path="/home/goods" component={Goods} />
                         <Route path="/home/order" component={Order} />
                         <Route path="/home/employee" component={Employee} />

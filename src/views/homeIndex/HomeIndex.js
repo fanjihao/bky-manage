@@ -322,7 +322,6 @@ class HomeIndex extends Component {
             stageRankList, onlineData, onlineNumList, onlineTimeList,
             onlineTotalList, onlineRankList } = this.state
         let personInfo = JSON.parse(localStorage.getItem('user'))
-        console.log('===========>', personInfo)
         return (
             <div className="homeIndex">
                 <div className="homeIndex-header">
