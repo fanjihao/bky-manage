@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import './homeIndex.css'
 import { DatePicker } from 'antd'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
-import { connect } from "react-redux"
 import axios from '../../http/index'
 import ReactEcharts from 'echarts-for-react'
 import moment from 'moment'
@@ -43,7 +42,6 @@ class HomeIndex extends Component {
     }
     // 查询商户信息
     getUserInfo = id => {
-
         axios({
             method: 'GET',
             url: `/statistics/userEnter?id=${id}`,
@@ -55,26 +53,6 @@ class HomeIndex extends Component {
             .catch(err => {
                 console.log('失败', err)
             })
-    }
-    // 计算时间
-    getTime = () => {
-        const date = new Date()
-        let Y = date.getFullYear()
-        let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
-        let D = date.getDate();
-        const nowDate = Y + '-' + M + '-' + D
-        // console.log(nowDate)
-
-        date.setMonth(date.getMonth() - 1)
-        let y = date.getFullYear()
-        let m = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
-        let d = date.getDate()
-        const preDate = y + '-' + m + '-' + d
-        // console.log(preDate)
-        this.setState({
-            startTime: preDate,
-            endTime: nowDate
-        })
     }
     // 分期项目统计图表数据
     getStageChartData = id => {
@@ -264,34 +242,51 @@ class HomeIndex extends Component {
             })
     }
     componentDidMount() {
-        // console.log('商户信息',this.props.userInfo)
-        const id = this.props.userInfo.id
-        // 查询商户信息
-        this.getUserInfo(id)
-        // 计算时间
-        this.getTime()
+        const date = new Date()
+        let Y = date.getFullYear()
+        let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
+        let D = date.getDate();
+        const nowDate = Y + '-' + M + '-' + D
+        // console.log(nowDate)
 
-        // 分期项目统计图表数据
-        this.getStageChartData(id)
-        // 分期中
-        this.getStageOrderList(1, id)
-        // 已完成
-        this.getStageOrderList(2, id)
-        // 异常
-        this.getStageOrderList(3, id)
-        // 查询分期项目排行榜
-        this.getStageRankList(id)
+        date.setMonth(date.getMonth() - 1)
+        let y = date.getFullYear()
+        let m = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
+        let d = date.getDate()
+        const preDate = y + '-' + m + '-' + d
+        // console.log(preDate)
+        
+        const id = JSON.parse(localStorage.getItem('user')).id
 
-        // 线上商品统计
-        this.getOnlineGoods(id)
-        // 线上商品统计图表数据
-        this.getOnlinechartList(id)
-        // 线上商品排行榜
-        this.getOnlineRankList(id)
+        this.setState({
+            startTime: preDate,
+            endTime: nowDate
+        }, () => {
+
+            this.getUserInfo(id)
+
+            // 分期项目统计图表数据
+            this.getStageChartData(id)
+            // 分期中
+            this.getStageOrderList(1, id)
+            // 已完成
+            this.getStageOrderList(2, id)
+            // 异常
+            this.getStageOrderList(3, id)
+            // 查询分期项目排行榜
+            this.getStageRankList(id)
+
+            // 线上商品统计
+            this.getOnlineGoods(id)
+            // 线上商品统计图表数据
+            this.getOnlinechartList(id)
+            // 线上商品排行榜
+            this.getOnlineRankList(id)
+        })
     }
     // 改变日期
     setTime = e => {
-        const id = this.props.userInfo.id
+        const id = JSON.parse(localStorage.getItem('user')).id
         // console.log(e)
         const startTime = e[0]._d.getFullYear() + '-' + (e[0]._d.getMonth() + 1) + '-' + e[0]._d.getDate()
         const endTime = e[1]._d.getFullYear() + '-' + (e[1]._d.getMonth() + 1) + '-' + e[1]._d.getDate()
@@ -576,7 +571,7 @@ class HomeIndex extends Component {
                                     value={"https://www.bkysc.cn/storeDetail?id=" + personInfo.systemStoreId + "&enterId=" + personInfo.id}
                                     className='qrcode'
                                     size={200}
-                                    />
+                                />
                                 <div className="download-text">博客云扫码下载</div>
                             </div>
 
@@ -594,10 +589,5 @@ class HomeIndex extends Component {
     }
 }
 
-function mapStateToProps(state) {
-    return {
-        userInfo: state.userReducer.user
-    }
-}
 
-export default connect(mapStateToProps)(HomeIndex)
+export default HomeIndex

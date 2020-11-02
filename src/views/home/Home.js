@@ -17,12 +17,12 @@ const tab = [
         name: '首页',
         icon: <HomeOutlined />,
         path: '/home/homeindex'
-    }, , {
+    }, {
         id: 2,
         name: '收银管理',
         icon: <SettingFilled />,
         path: '/home/cashier'
-    },{
+    }, {
         id: 3,
         name: '商品管理',
         icon: <MenuFoldOutlined />,
@@ -46,13 +46,7 @@ const tab = [
 ]
 
 class Home extends Component {
-    state = {
-
-    }
-    componentDidMount() {
-
-    }
-
+    
     // 切换选项卡
     checkTab = (i) => {
         this.setState({
@@ -89,11 +83,11 @@ class Home extends Component {
                         }
 
                         <div className="loginOut">
-                            
+
                             {
-                                userInfo.avatar 
-                                ? <img  className="headImage" alt="loginLogo" src={userInfo.avatar}/>
-                                : <img  className="headImage" alt="loginLogo" src={require('../../assets/imgs/logo.png')}/>
+                                userInfo.avatar
+                                    ? <img className="headImage" alt="loginLogo" src={userInfo.avatar} />
+                                    : <img className="headImage" alt="loginLogo" src={require('../../assets/imgs/logo.png')} />
                             }
                             <p className="welcome">欢迎{userInfo.merchantName}</p>
                             <p className="out" onClick={this.loginOut}>退出登录</p>

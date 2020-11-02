@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import axios from '../../http'
 import './Cashier.css'
-import { Input, Select, Button, Space, Table, Modal, Popconfirm, message, Popover, Image, DatePicker } from 'antd'
+import { Input, Select, Space, Table, Modal, message, Image, DatePicker } from 'antd'
 import moment from 'moment'
-// import locale from 'antd/lib/date-picker/locale/zh_CN'
+import locale from 'antd/lib/date-picker/locale/zh_CN'
 import { CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
 import XLSX from 'xlsx'
 
@@ -14,31 +14,76 @@ const dateFormat = 'YYYY/MM/DD'
 
 class Cashier extends Component {
     state = {
+        // tab切换
         tabCheck: 1,
-        eyeTrue: false,
-        allEyeTrue: false,
+        // 价格隐藏
+        eyeTrue: true,
+        allEyeTrue: true,
+        // 是否显示模态框
         orderVisible: false,
-        modalType: '',
-        startTime: '2020-07-25',
-        endTime: '2020-09-25',
+        // 时间
+        startTime: null,
+        endTime: null,
+        // 订单表数据
+        data: [],
+        // 本月实收总额
+        monthTrueNum: null,
+        // 本月实际订单数
+        monthTrueCount: null,
+        // 本月订单总额
+        monthNum: null,
+        // 本月订单数
+        monthConut: null,
+        // 总销售额
+        allNum: null,
+        // 线上总销售额
+        onlineNum: null,
+        // 线下总销售额
+        offlineNum: null,
+        // 用户id
+        id: null,
+        // 订单类型
+        orderType: 1,
+        // 商品名
+        goodsName: '',
 
-        islook: false,
-        linkEmploy: '',
-        visible: false,
-        username: '',
-        orderId: '',
-        orderName: '',
-        orderNum: '',
-        orderStagePrice: '',
-        orderPayType: '',
-        orderPrice: '',
-        orderPay: '',
-        orderCreate: '',
-        orderRemarks: '',
-        orderOtherNum: '',
-        type: '',
+        // 订单号
+        orderId: null,
+        // 订单状态
+        paid: null,
+        // 项目名称
+        name: null,
+        // 项目分期总额
+        amount: 0,
+        // 项目分期总数
+        stagesNum: 0,
+        // 分期状态
+        type: null,
+        // 分类
+        classify: 1,
+        // 销量
+        sales: 0,
+        // 库存
+        stock: 0,
+        // 每期金额
+        stagesPrice: 0,
+        // 已支付分期数
+        stagesNumber: 0,
+        // 剩余分期数
+        surplus: 0,
+        // 支付方式
+        payType: null,
+        // 实际支付金额
+        payPrice: 0,
+        // 订单创建时间
+        addTime: null,
+        // 备注
+        mark: null,
+        // 美疗师
+        staffName: null,
+
     }
-
+    // 隐藏信息
     changeEyeTrue = () => {
         this.setState({
             eyeTrue: !this.state.eyeTrue
@@ -49,174 +94,347 @@ class Cashier extends Component {
             allEyeTrue: !this.state.allEyeTrue
         })
     }
-    detail = (type, i) => {
-        this.setState({
-            orderVisible: true,
-            modalType: type
+    // 订单详情
+    detail = (type, record) => {
+        axios({
+            method: 'GET',
+            url: `/cash/detail/{orderId}`,
+            params: {
+                orderId: record.orderId
+            }
         })
+            .then(res => {
+                console.log('获取订单详细信息成功', res.data.data)
+                this.setState({
+                    orderId: res.data.data.orderId,
+                    paid: res.data.data.paid,
+                    name: res.data.data.name,
+                    amount: res.data.data.amount,
+                    stagesNum: res.data.data.stagesNum,
+                    type: res.data.data.type,
+                    classify: res.data.data.classify,
+                    sales: res.data.data.sales,
+                    stock: res.data.data.stock,
+                    stagesPrice: res.data.data.stagesPrice,
+                    stagesNumber: res.data.data.stagesNumber,
+                    surplus: res.data.data.surplus,
+                    payType: res.data.data.payType,
+                    payPrice: res.data.data.payPrice,
+                    addTime: res.data.data.addTime,
+                    mark: res.data.data.mark,
+                    staffName: res.data.data.staffName
+                }, () => {
+                    this.setState({
+                        orderVisible: true
+                    })
+                })
+            })
+            .catch(err => {
+                console.log('获取订单详细信息失败', err)
+            })
+
+
     }
-    exportExcel = (headers, data, fileName = '请假记录表.xlsx') => {
-        const _headers = headers
-            .map((item, i) => Object.assign({}, { key: item.key, title: item.title, position: String.fromCharCode(65 + i) + 1 }))
-            .reduce((prev, next) => Object.assign({}, prev, { [next.position]: { key: next.key, v: next.title } }), {});
-    
-        const _data = data
-            .map((item, i) => headers.map((key, j) => Object.assign({}, { content: item[key.key], position: String.fromCharCode(65 + j) + (i + 2) })))
-            // 对刚才的结果进行降维处理（二维数组变成一维数组）
-            .reduce((prev, next) => prev.concat(next))
-            // 转换成 worksheet 需要的结构
-            .reduce((prev, next) => Object.assign({}, prev, { [next.position]: { v: next.content } }), {});
-    
-        // 合并 headers 和 data
-        const output = Object.assign({}, _headers, _data);
-        // 获取所有单元格的位置
-        const outputPos = Object.keys(output);
-        // 计算出范围 ,["A1",..., "H2"]
-        const ref = `${outputPos[0]}:${outputPos[outputPos.length - 1]}`;
-    
-        // 构建 workbook 对象
-        const wb = {
-            SheetNames: ['mySheet'],
-            Sheets: {
-                mySheet: Object.assign(
-                    {},
-                    output,
-                    {
-                        '!ref': ref,
-                        '!cols': [{ wpx: 45 }, { wpx: 100 }, { wpx: 200 }, { wpx: 80 }, { wpx: 150 }, { wpx: 100 }, { wpx: 300 }, { wpx: 300 }],
-                    },
-                ),
-            },
-        };
-    
-        // 导出 Excel
-        XLSX.writeFile(wb, fileName);
+    exportExcel = (headers, data, fileName) => {
+        if (data.length === 0) {
+            message.warning('没有数据，不能导出')
+        } else {
+            const _headers = headers
+                .map((item, i) => Object.assign({}, { key: item.key, title: item.title, position: String.fromCharCode(65 + i) + 1 }))
+                .reduce((prev, next) => Object.assign({}, prev, { [next.position]: { key: next.key, v: next.title } }), {});
+
+            const _data = data
+                .map((item, i) => headers.map((key, j) => Object.assign({}, { content: item[key.key], position: String.fromCharCode(65 + j) + (i + 2) })))
+                // 对刚才的结果进行降维处理（二维数组变成一维数组）
+                .reduce((prev, next) => prev.concat(next))
+                // 转换成 worksheet 需要的结构
+                .reduce((prev, next) => Object.assign({}, prev, { [next.position]: { v: next.content } }), {});
+
+            // 合并 headers 和 data
+            const output = Object.assign({}, _headers, _data);
+            // 获取所有单元格的位置
+            const outputPos = Object.keys(output);
+            // 计算出范围 ,["A1",..., "H2"]
+            const ref = `${outputPos[0]}:${outputPos[outputPos.length - 1]}`;
+
+            // 构建 workbook 对象
+            const wb = {
+                SheetNames: ['mySheet'],
+                Sheets: {
+                    mySheet: Object.assign(
+                        {},
+                        output,
+                        {
+                            '!ref': ref,
+                            '!cols': [{ wpx: 45 }, { wpx: 100 }, { wpx: 200 }, { wpx: 80 }, { wpx: 150 }, { wpx: 100 }, { wpx: 300 }, { wpx: 300 }],
+                        },
+                    ),
+                },
+            };
+
+            // 导出 Excel
+            XLSX.writeFile(wb, fileName);
+        }
     }
     // 改变日期
     setTime = e => {
         console.log(e, 'ddddddddddd')
-        // const id = this.props.userInfo.id
-        // const startTime = e[0]._d.getFullYear() + '-' + (e[0]._d.getMonth() + 1) + '-' + e[0]._d.getDate()
-        // const endTime = e[1]._d.getFullYear() + '-' + (e[1]._d.getMonth() + 1) + '-' + e[1]._d.getDate()
-        // console.log(startTime, '---', endTime)
-        // this.setState({
-        //     startTime: startTime,
-        //     endTime: endTime
-        // })
+        const id = JSON.parse(localStorage.getItem('user')).id
+        const startTime = e[0]._d.getFullYear() + '-' + (e[0]._d.getMonth() + 1) + '-' + e[0]._d.getDate()
+        const endTime = e[1]._d.getFullYear() + '-' + (e[1]._d.getMonth() + 1) + '-' + e[1]._d.getDate()
+        console.log(startTime, '---', endTime)
+        this.setState({
+            startTime: startTime,
+            endTime: endTime
+        }, () => {
+            // 订单数据
+            this.getOrderData(id, 1)
+        })
     }
+    // 月营收数据
+    getMonthData = id => {
+        const { endTime } = this.state
+        axios({
+            method: 'GET',
+            url: '/cash/money',
+            params: {
+                date: endTime,
+                enterId: id
+            }
+        })
+            .then(res => {
+                // console.log('查询成功', res)
+                this.setState({
+                    monthTrueNum: res.data.data.orderMoneyMonth,
+                    monthNum: res.data.data.actOrderMoneyMonth,
+                    monthTrueCount: res.data.data.actCount,
+                    monthConut: res.data.data.sumCount
+                })
+            })
+            .catch(err => {
+                console.log('查询月营收数据失败', err)
+            })
+    }
+    // 总营收数据
+    getAllData = id => {
+        axios({
+            method: 'GET',
+            url: '/cash/sum',
+            params: {
+                enterId: id
+            }
+        })
+            .then(res => {
+                console.log('查询总营收数据成功', res)
+                this.setState({
+                    allNum: res.data.data.onMoney + res.data.data.offMoney,
+                    onlineNum: res.data.data.onMoney,
+                    offMoney: res.data.data.offMoney
+                })
+            })
+            .catch(err => {
+                console.log('查询总营收数据失败', err)
+            })
+    }
+    // 订单数据
+    getOrderData = (id, type) => {
+        const { startTime, endTime, goodsName } = this.state
+        axios({
+            method: 'GET',
+            url: '/cash/order',
+            params: {
+                startDate: startTime,
+                endDate: endTime,
+                enterId: id,
+                classify: type,
+                name: goodsName
+            }
+        })
+            .then(res => {
+                console.log('查询订单成功', res)
+                if (res.data.data) {
+                    this.setState({ data: res.data.data })
+                } else {
+                    this.setState({ data: [] })
+                }
+            })
+            .catch(err => {
+                console.log('查询订单失败', err)
+            })
+    }
+    componentDidMount() {
+        const date = new Date()
+        let Y = date.getFullYear()
+        let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
+        let D = date.getDate();
+        const nowDate = Y + '-' + M + '-' + D
+        console.log(nowDate)
 
+        date.setMonth(date.getMonth() - 1)
+        let y = date.getFullYear()
+        let m = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
+        let d = date.getDate()
+        const preDate = y + '-' + m + '-' + d
+        console.log(preDate)
+
+        const id = JSON.parse(localStorage.getItem('user')).id
+
+        this.setState({
+            startTime: preDate,
+            endTime: nowDate,
+            id: id
+        }, () => {
+            console.log(id)
+            // 本月销量
+            this.getMonthData(id)
+            // 总营收数据
+            this.getAllData(id)
+            // 订单数据
+            this.getOrderData(id, 1)
+        })
+    }
+    // 搜索
+    search = () => {
+        const { orderType } = this.state
+        const id = JSON.parse(localStorage.getItem('user')).id
+        this.getOrderData(id, orderType + 1)
+    }
+    // 时间戳转换
+    formatTime = (time) => {
+        let newMonth, newDay, newMin, newSec, newHours
+        let date = new Date(time * 1000)
+        // console.log(date, time)
+        let newYear = date.getFullYear()
+        let month = date.getMonth() + 1;
+        if (month < 10) {
+            newMonth = '0' + month
+        } else { newMonth = month }
+        let day = date.getDate();
+        if (day < 10) {
+            newDay = '0' + day
+        } else { newDay = day }
+        let hours = date.getHours();
+        if (hours < 10) {
+            newHours = '0' + hours
+        } else { newHours = hours }
+        let minutes = date.getMinutes();
+        if (minutes < 10) {
+            newMin = '0' + minutes
+        } else { newMin = minutes }
+        let seconds = date.getSeconds();
+        if (seconds < 10) {
+            newSec = '0' + seconds
+        } else { newSec = seconds }
+        return newYear + '-' + newMonth + '-' + newDay + ' ' + newHours + ':' + newMin + ':' + newSec
+    }
     render() {
         const { tabCheck, eyeTrue, allEyeTrue, orderVisible,
-            linkEmploy, visible, username, orderId, orderName, orderNum, orderStagePrice, orderPayType,
-            orderPrice, orderPay, orderCreate, orderRemarks,
-            orderOtherNum, modalType, type, startTime, endTime, } = this.state
+            startTime, endTime, data, monthConut,
+            monthNum, monthTrueCount, monthTrueNum, allNum,
+            onlineNum, offlineNum, id, orderType,
+            orderId, paid, name, amount,
+            stagesNum, type, classify, sales,
+            stock, stagesPrice, stagesNumber, surplus,
+            payType, payPrice, addTime, mark,
+            staffName, goodsName } = this.state
+        let newData
+        if (data.length > 0) {
+            newData = data.filter(item => {
+                return item.classify === orderType
+            })
+        } else {
+            newData = []
+        }
+        const newText = orderType === 1 ? '线上商品收银统计表' : '线下商品收银统计表'
         const columns = [
             {
                 title: '序号',
                 dataIndex: 'id',
                 key: 'id',
-                render: text => <a>{text}</a>,
-                align:'center'
+                align: 'center'
             },
             {
                 title: '项目图片',
-                dataIndex: 'photo',
-                key: 'photo',
-                render: src => {
-                    let arr = src.split(',')
+                dataIndex: 'image',
+                key: 'image',
+                render: text => {
+                    let arr = text.split(',')
                     return (
                         <Image className='goods-item-img' src={arr[0]}></Image>
                     )
                 },
-                align:'center'
+                align: 'center'
             },
             {
                 title: '项目名称',
                 dataIndex: 'name',
                 key: 'name',
-                align:'center'
+                align: 'center'
             },
             {
                 title: '分类',
-                dataIndex: 'cateName',
-                key: 'cateName',
-                align:'center'
+                dataIndex: 'classify',
+                key: 'classify',
+                align: 'center',
+                render: text => (
+                    <div>
+                        {
+                            text === 1 ? '线上订单' : '线下订单'
+                        }
+                    </div>
+                )
             },
             {
                 title: '实付金额',
-                dataIndex: 'truePay',
-                key: 'truePay',
-                render: text => <>￥{text}</>,
-                align:'center'
+                dataIndex: 'payPrice',
+                key: 'payPrice',
+                align: 'center',
+                render: text => <>￥{text}</>
             },
             {
                 title: '订单总额',
                 key: 'totalPrice',
                 dataIndex: 'totalPrice',
-                render: text => <>￥{text}</>,
-                align:'center'
+                align: 'center',
+                render: text => <>￥{text}</>
             },
             {
                 title: '销量',
                 key: 'sales',
                 dataIndex: 'sales',
-                render: tags => (
-                    <>{tags}</>
-                ),
-                align:'center'
+                align: 'center'
             },
             {
                 title: '库存',
                 key: 'stock',
                 dataIndex: 'stock',
-                render: tags => (
-                    <>{tags}</>
-                ),
-                align:'center'
+                align: 'center'
             },
             {
                 title: '交易时间',
-                key: 'tradingTime',
-                dataIndex: 'tradingTime',
-                render: tags => (
-                    <>{tags}</>
-                ),
-                align:'center'
+                key: 'creatTime',
+                dataIndex: 'creatTime',
+                align: 'center'
             },
             {
                 title: '客户备注',
-                key: 'remarks',
-                dataIndex: 'remarks',
-                render: (text, record) => <>{text}</>,
-                align:'center'
+                key: 'mark',
+                dataIndex: 'mark',
+                align: 'center',
+                render: text => (<>{text ? text : '无'}</>)
             },
             {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => {
                     return <Space>
-                        <span className='look-action actions' onClick={() => this.detail('look', 0)}>查看</span>
-                        <span className='edit-action actions' onClick={() => this.detail('edit', record)}>编辑</span>
+                        <span className='look-action actions' onClick={() => this.detail('look', record)}>查看详情</span>
+                        {/* <span className='edit-action actions' onClick={() => this.detail('edit', record)}>编辑</span> */}
                     </Space>
                 },
-                align:'center'
+                align: 'center'
             },
         ]
-        const data = [
-            {
-                id: 1,
-                photo: '',
-                name: '项目名',
-                cateName: '线上订单',
-                truePay: 199,
-                totalPrice: 399,
-                sales: 999,
-                stock: 9999,
-                tradingTime: '2020-10-10',
-                remarks: '备注信息'
-            }
-        ]
-        let date = new Date()
         return (
             <div className="cashier">
                 <div className='cashierTop'>
@@ -226,12 +444,12 @@ class Cashier extends Component {
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
                             <span style={{ float: "left" }}>10月实收总额</span>
-                            <span style={{ float: "right" }}>123单</span>
+                            <span style={{ float: "right" }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
                         </div>
                         <div className='sumTotal'>
                             <div style={{ float: "left", overflow: 'hidden' }}>
                                 {eyeTrue
-                                    ? <span className='month-num'>15400</span>
+                                    ? <span className='month-num'>{monthTrueNum ? monthTrueNum : '0'}</span>
                                     : <span className='month-num'>*****</span>}
                                 <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
                             </div>
@@ -245,12 +463,12 @@ class Cashier extends Component {
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
                             <span style={{ float: "left" }}>10月订单总额</span>
-                            <span style={{ float: "right" }}>123单</span>
+                            <span style={{ float: "right" }}>{monthConut ? monthConut : '0'}单</span>
                         </div>
                         <div className='sumTotal'>
                             <div style={{ float: "left", overflow: 'hidden' }}>
                                 {allEyeTrue
-                                    ? <span className='month-num'>15400</span>
+                                    ? <span className='month-num'>{monthNum ? monthNum : '0'}</span>
                                     : <span className='month-num'>*****</span>}
                                 <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
                             </div>
@@ -262,35 +480,58 @@ class Cashier extends Component {
                         </div>
                     </div>
                 </div>
+
                 <div className='goodsBody'>
                     <div className='goodsBodyTab'>
                         <div className={tabCheck === 1 ? 'gtActive' : 'gbTabBtn'}
-                            onClick={() => this.setState({ tabCheck: 1 })}>全部订单</div>
+                            onClick={() => {
+                                this.setState({ tabCheck: 1 })
+                                this.getOrderData(id, 1)
+                            }}>全部订单</div>
                         <div className={tabCheck === 2 ? 'gtActive' : 'gbTabBtn'}
-                            onClick={() => this.setState({ tabCheck: 2 })}>线上订单</div>
+                            onClick={() => {
+                                this.setState({ tabCheck: 2 })
+                                this.getOrderData(id, 2)
+                            }}>线上订单</div>
                         <div className={tabCheck === 3 ? 'gtActive' : 'gbTabBtn'}
-                            onClick={() => this.setState({ tabCheck: 3 })}>线下订单</div>
+                            onClick={() => {
+                                this.setState({ tabCheck: 3 })
+                                this.getOrderData(id, 3)
+                            }}>线下订单</div>
                         <div className='tableTips'>
                             “线上”即app成交订单，“线下”即收银牌收银订单。线下订单提交后需操作完善订单详情。
                         </div>
                     </div>
                     <div className='gbTableTop'>
                         <RangePicker
-                            // locale={locale}
+                            locale={locale}
                             className='datePicker'
                             value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
                             format={dateFormat}
                             onChange={this.setTime}
                         />
-                        <Input placeholder='请输入商品名' className='nameInput'></Input>
-                        <Select className='classSelect' placeholder='分类' allowClear={true} clearIcon={<CloseCircleOutlined />}>
+                        <Input placeholder='请输入商品名'
+                            className='nameInput'
+                            value={goodsName}
+                            onChange={e => this.setState({ goodsName: e.target.value })}
+                        />
+                        <Select className='classSelect'
+                            placeholder='分类'
+                            allowClear={true}
+                            value={orderType}
+                            clearIcon={<CloseCircleOutlined />}
+                            onChange={
+                                e => {
+                                    this.setState({ orderType: e })
+                                }
+                            }>
                             <Option value={1} label='线上订单'>线上订单</Option>
                             <Option value={2} label='线下订单'>线下订单</Option>
                         </Select>
-                        <div className='search-btn'><SearchOutlined />搜索</div>
+                        <div className='search-btn' onClick={this.search}><SearchOutlined />搜索</div>
                         <div className='daochu-btn' onClick={() => {
-                            this.exportExcel(columns, data,"人员名单.xlsx")
-                        }}><DownloadOutlined />导出表格</div>
+                            this.exportExcel(columns, newData, newText)
+                        }}><DownloadOutlined />导出</div>
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         <Table columns={columns}
@@ -300,17 +541,12 @@ class Cashier extends Component {
                             locale={{ emptyText: '暂无数据' }} />
                     </div>
                 </div>
+
                 <Modal
                     visible={orderVisible}
                     title="订单信息"
                     onOk={() => this.setState({ orderVisible: false })}
                     onCancel={() => this.setState({ orderVisible: false })}
-                    footer={[
-                        modalType === 'edit' ?
-                            <Button key="submit" type="primary" onClick={() => this.stageChange()}>
-                                确认修改
-                        </Button> : null
-                    ]}
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
@@ -318,34 +554,12 @@ class Cashier extends Component {
                     <div className='modalheader'>
                         <div className='modalItem'>
                             <span style={{ marginRight: 10 }}>美疗师</span>
-                            <Popover
-                                content={
-                                    <a>ddd</a>
-                                    // <Table columns={employColumns}
-                                    //     dataSource={data}
-                                    //     style={{ textAlign: 'center' }}
-                                    //     pagination={{ pageSize: 2 }} 
-                                    //     locale={{emptyText:'暂无数据'}} />
-                                }
-                                trigger="hover"
-                                visible={visible}
-                            // onVisibleChange={this.handleVisibleChange}
-                            >
-                                <Input style={{ width: 150, margin: '0 20px' }}
-                                    placeholder='关联员工'
-                                    disabled={this.state.islook}
-                                    value={linkEmploy}
-                                    onFocus={() => this.setState({ visible: true })}></Input>
-                            </Popover>
+                            <span>{staffName ? staffName : '未分配美疗师'}</span>
                         </div>
-                        <div className='modalItem'>
+                        {/* <div className='modalItem'>
                             <span style={{ marginRight: 10 }}>客户</span>
-                            <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='客户姓名/昵称'
-                                disabled={this.state.islook}
-                                value={username}
-                                onChange={e => this.setState({ username: e.target.value })}></Input>
-                        </div>
+                            <Input style={{ width: 150, margin: '0 20px' }}></Input>
+                        </div> */}
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
@@ -356,75 +570,79 @@ class Cashier extends Component {
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目名称</span>
-                                <span>{orderName}</span>
+                                <span>{name}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目总数</span>
-                                <span>1</span>
+                                <span>{stagesNum}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分类</span>
-                                <span>线下订单</span>
+                                <span>{classify === 1 ? '线上项目' : '线下项目'}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>库存</span>
-                                <span>123</span>
+                                <span>{stock}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>支付方式</span>
-                                <span style={{ color: '#13CE66' }}>{orderPayType}</span>
+                                <span style={{ color: '#13CE66' }}>{payType}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>创建时间</span>
-                                <span>2020-05-20 11：20：20</span>
+                                <span>{this.formatTime(addTime)}</span>
                             </div>
                         </div>
                         <div className='modalBodyChild'>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>订单状态</span>
-                                <span>
-                                    {type === 4 ? '未支付' : '已支付'}
-                                </span>
+                                <span>{paid === 0 ? '未支付' : '已支付'}</span>
                             </div>
-                            <div className='mbLabel'>
+
+                            {amount ? <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期总额</span>
-                                <span>{orderPrice}</span>
-                            </div>
-                            <div className='mbLabel'>
+                                <span>{amount}</span>
+                            </div> : null}
+
+                            {type ? <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分期状态</span>
-                                <span style={{ color: '#1089EB' }}>正常分期中</span>
-                            </div>
+                                <span style={{ color: '#1089EB' }}>{type}</span>
+                            </div> : null}
+
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>销量</span>
-                                <span>1000</span>
+                                <span>{sales}</span>
                             </div>
-                            <div className='mbLabel'>
+
+                            {amount ? <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期</span>
-                                <span>￥{orderStagePrice}/{orderNum}期</span>
-                                <span style={{ color: '#1089EB' }}>剩余￥{orderStagePrice}/{orderOtherNum}期</span>
-                            </div>
+                                <span>￥{amount}/{stagesNum}</span>
+                                <span style={{ color: '#1089EB' }}>剩余{stagesPrice}/{surplus}期</span>
+                            </div> : null}
+
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>实际支付</span>
-                                <span>￥300</span>
+                                <span>￥{payPrice}</span>
                             </div>
                         </div>
                     </div>
                     <div className='modalNote'>
                         <div style={{ width: '100%' }}><span>备注</span></div>
                         <div>
-                            <TextArea rows={4} value={orderRemarks} disabled={this.state.islook}
-                                onChange={e => this.setState({ orderRemarks: e.target.value })} />
+                            <TextArea rows={4} value={mark} disabled={true} />
                         </div>
                     </div>
                 </Modal>
+
                 <div className='footer-statistical'>
-                    <span>总销售额：￥{132564.00}</span>
-                    <span>线上总销售额：￥{12345.00}</span>
-                    <span>线下总销售额：￥{12345.00}</span>
+                    <span>总销售额：￥{allNum ? allNum : 0}</span>
+                    <span>线上总销售额：￥{onlineNum ? onlineNum : 0}</span>
+                    <span>线下总销售额：￥{offlineNum ? offlineNum : 0}</span>
                 </div>
             </div>
         )
     }
 }
+
 
 export default Cashier

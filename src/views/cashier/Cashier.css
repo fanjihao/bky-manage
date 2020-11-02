@@ -118,6 +118,7 @@
     background-color: orange;
     color:white;
     margin-right: 10px;
+    cursor: pointer;
 }
 .search-btn:hover, .daochu-btn:hover{
     cursor: pointer;
