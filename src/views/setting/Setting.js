@@ -111,7 +111,8 @@ class Setting extends Component {
     }
     componentDidMount() {
         console.log('信息', this.props.userInfo)
-        this.getUserInfo(this.props.userInfo.id)
+        const id = JSON.parse(localStorage.getItem('user')).id
+        this.getUserInfo(id)
     }
     // 修改信息按钮
     edit = () => {
@@ -182,8 +183,8 @@ class Setting extends Component {
                 // 账户银行
                 depositBank: merchantDetailInfo.depositBank,
                 // 商户id
-                id: this.props.userInfo.id,
-                systemStoreId: this.props.userInfo.systemStoreId
+                id: JSON.parse(localStorage.getItem('user')).id,
+                systemStoreId: JSON.parse(localStorage.getItem('user')).systemStoreId
             }
         })
             .then(res => {

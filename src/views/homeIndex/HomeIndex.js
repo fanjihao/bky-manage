@@ -87,9 +87,9 @@ class HomeIndex extends Component {
                         return item
                     })
                     this.setState({
-                        stageTimeList: newList1,
-                        stageNumList: newList2,
-                        stageTotalList: newList3
+                        stageTimeList: newList1.reverse(),
+                        stageNumList: newList2.reverse(),
+                        stageTotalList: newList3.reverse()
                     })
                 }
             })
@@ -209,9 +209,9 @@ class HomeIndex extends Component {
                         return item
                     })
                     this.setState({
-                        onlineTimeList: newList1,
-                        onlineNumList: newList2,
-                        onlineTotalList: newList3
+                        onlineTimeList: newList1.reverse(),
+                        onlineNumList: newList2.reverse(),
+                        onlineTotalList: newList3.reverse()
                     })
                 }
             })
@@ -255,7 +255,7 @@ class HomeIndex extends Component {
         let d = date.getDate()
         const preDate = y + '-' + m + '-' + d
         // console.log(preDate)
-        
+
         const id = JSON.parse(localStorage.getItem('user')).id
 
         this.setState({
@@ -317,6 +317,138 @@ class HomeIndex extends Component {
             stageRankList, onlineData, onlineNumList, onlineTimeList,
             onlineTotalList, onlineRankList } = this.state
         let personInfo = JSON.parse(localStorage.getItem('user'))
+
+        let stageOption, onlineOption
+
+        if (stageNumList.length === 0 && stageTimeList.length === 0 && stageTotalList === 0) {
+            stageOption = {
+                title: {
+                    text: '暂无数据',
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        color: '#65ABE7',
+                        fontWeight: 'normal',
+                        fontSize: 16
+                    }
+                }
+            }
+        } else {
+            stageOption = {
+                title: {
+                    text: '分期项目统计图',
+                    textStyle: {
+                        fontSize: 14
+                    },
+                    left: 10,
+                    top: 10
+                },
+                legend: {
+                    top: 30
+                },
+                grid: {
+                    left: '10%',
+                    right: '10%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                xAxis: {
+                    type: "category",
+                    data: stageTimeList,
+                    boundaryGap: true,
+                },
+                yAxis: {
+                    type: "value"
+                },
+                series: [
+                    {
+                        data: stageNumList,
+                        type: "line",
+                        smooth: true,
+                        name: '单量'
+                    },
+                    {
+                        data: stageTotalList,
+                        type: 'line',
+                        name: '交易额'
+                    }
+                ]
+            }
+        }
+
+        if (onlineNumList.length === 0 && onlineTimeList.length === 0 && onlineTotalList.length === 0) {
+            onlineOption = {
+                title: {
+                    text: '暂无数据',
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        color: '#65ABE7',
+                        fontWeight: 'normal',
+                        fontSize: 16
+                    }
+                }
+            }
+        } else {
+            onlineOption = {
+                title: {
+                    text: '线上商品统计图',
+                    textStyle: {
+                        fontSize: 14
+                    },
+                    left: 10,
+                    top: 10
+                },
+                legend: {
+                    top: 30
+                },
+                grid: {
+                    left: '10%',
+                    right: '10%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                xAxis: {
+                    type: "category",
+                    data: onlineTimeList,
+                    boundaryGap: true,
+                },
+                yAxis: {
+                    type: "value"
+                },
+                series: [
+                    {
+                        data: onlineNumList,
+                        type: "line",
+                        smooth: true,
+                        name: '单量'
+                    },
+                    {
+                        data: onlineTotalList,
+                        type: 'line',
+                        name: '交易额'
+                    }
+                ]
+            }
+        }
         return (
             <div className="homeIndex">
                 <div className="homeIndex-header">
@@ -379,57 +511,7 @@ class HomeIndex extends Component {
                         {/* 分期统计图表 */}
                         <div className="homeIndex-stageCharts">
                             <div className="charts">
-                                <ReactEcharts option={
-                                    {
-                                        title: {
-                                            text: '分期项目统计图',
-                                            textStyle: {
-                                                fontSize: 14
-                                            },
-                                            left: 10,
-                                            top: 10
-                                        },
-                                        legend: {
-                                            top: 30
-                                        },
-                                        grid: {
-                                            left: '10%',
-                                            right: '10%',
-                                            bottom: '5%',
-                                            containLabel: true
-                                        },
-                                        tooltip: {
-                                            trigger: 'axis',
-                                            axisPointer: {
-                                                type: 'cross',
-                                                label: {
-                                                    backgroundColor: '#6a7985'
-                                                }
-                                            }
-                                        },
-                                        xAxis: {
-                                            type: "category",
-                                            data: stageTimeList,
-                                            boundaryGap: true,
-                                        },
-                                        yAxis: {
-                                            type: "value"
-                                        },
-                                        series: [
-                                            {
-                                                data: stageNumList,
-                                                type: "line",
-                                                smooth: true,
-                                                name: '单量'
-                                            },
-                                            {
-                                                data: stageTotalList,
-                                                type: 'line',
-                                                name: '交易额'
-                                            }
-                                        ]
-                                    }
-                                } />
+                                <ReactEcharts option={stageOption} />
                             </div>
                             <div className="stageManage-list">
                                 <p className="stageManage-list-title">分期项目排行榜</p>
@@ -437,75 +519,28 @@ class HomeIndex extends Component {
                                     stageRankList === null
                                         ? <p className="noData">暂无数据</p>
                                         : stageRankList.map((item, index) => {
-                                            return (
-                                                <div className="stagemanage-list-item" key={index}>
-                                                    <span className="stagemanage-list-ranking">{index + 1}</span>
-                                                    <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
-                                                    <div className="stagemenage-list-data">
-                                                        <span>{item.stageMoney}元</span>
-                                                        <span>{item.stageCount}单</span>
+                                            if (index < 4 && index >= 0) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index}>
+                                                        <span className="stagemanage-list-ranking">{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
                                                     </div>
-                                                    <p className="stagemanage-list-name">{item.name}</p>
-                                                </div>
-                                            )
+                                                )
+                                            }
                                         })
                                 }
+                                {/* <div className="moreStages">查看更多</div> */}
                             </div>
                         </div>
                         {/* 线上商品统计图表 */}
                         <div className="homeIndex-stageCharts">
                             <div className="charts">
-                                <ReactEcharts option={
-                                    {
-                                        title: {
-                                            text: '线上商品统计图',
-                                            textStyle: {
-                                                fontSize: 14
-                                            },
-                                            left: 10,
-                                            top: 10
-                                        },
-                                        legend: {
-                                            top: 30
-                                        },
-                                        grid: {
-                                            left: '10%',
-                                            right: '10%',
-                                            bottom: '5%',
-                                            containLabel: true
-                                        },
-                                        tooltip: {
-                                            trigger: 'axis',
-                                            axisPointer: {
-                                                type: 'cross',
-                                                label: {
-                                                    backgroundColor: '#6a7985'
-                                                }
-                                            }
-                                        },
-                                        xAxis: {
-                                            type: "category",
-                                            data: onlineTimeList,
-                                            boundaryGap: true,
-                                        },
-                                        yAxis: {
-                                            type: "value"
-                                        },
-                                        series: [
-                                            {
-                                                data: onlineNumList,
-                                                type: "line",
-                                                smooth: true,
-                                                name: '单量'
-                                            },
-                                            {
-                                                data: onlineTotalList,
-                                                type: 'line',
-                                                name: '交易额'
-                                            }
-                                        ]
-                                    }
-                                } />
+                                <ReactEcharts option={onlineOption} />
                             </div>
                             <div className="stageManage-list">
                                 <p className="stageManage-list-title">线上商品排行榜</p>
@@ -513,17 +548,19 @@ class HomeIndex extends Component {
                                     onlineRankList === null
                                         ? <p className="noData">暂无数据</p>
                                         : onlineRankList.map((item, index) => {
-                                            return (
-                                                <div className="stagemanage-list-item" key={index}>
-                                                    <span className="stagemanage-list-ranking">{index + 1}</span>
-                                                    <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankingImg" />
-                                                    <div className="stagemenage-list-data">
-                                                        <span>{item.stageMoney}元</span>
-                                                        <span>{item.stageCount}单</span>
+                                            if (index < 4 && index >= 0) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index}>
+                                                        <span className="stagemanage-list-ranking">{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankingImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
                                                     </div>
-                                                    <p className="stagemanage-list-name">{item.name}</p>
-                                                </div>
-                                            )
+                                                )
+                                            }
                                         })
                                 }
                             </div>
