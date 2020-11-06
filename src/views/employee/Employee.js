@@ -33,7 +33,8 @@ export default class Employee extends Component {
         name: '',
         phone: '',
         data: [],
-        avatar: ''
+        avatar: '',
+        loading:true
     }
     getEmploy = () => {
         let user = JSON.parse(localStorage.getItem('user'))
@@ -52,9 +53,9 @@ export default class Employee extends Component {
         })
             .then(res => {
                 console.log(res)
-                message.success('查询员工列表成功')
                 this.setState({
-                    data: res.data.data.list
+                    data: res.data.data.list,
+                    loading:false
                 })
             })
             .catch(err => {
@@ -108,10 +109,11 @@ export default class Employee extends Component {
         })
             .then(res => {
                 if (res.data.status === 200) {
-                    message.success('添加成功')
-                    this.getEmploy()
                     this.setState({
-                        detailVisible: false
+                        detailVisible: false,
+                        loading:true
+                    }, () => {
+                        this.getEmploy()
                     })
                 }
             })
@@ -136,7 +138,6 @@ export default class Employee extends Component {
             })
         } else if (what === 'look') {
             let sex, marital
-            console.log(item)
             if(item.sex === 1) {
                 sex = '男'
             } else {
@@ -147,7 +148,6 @@ export default class Employee extends Component {
             } else {
                 marital = '已婚'
             }
-            console.log(item.nation, item.education)
             this.setState({
                 whatDo: '查看',
                 detailVisible: true,
@@ -199,6 +199,7 @@ export default class Employee extends Component {
                 employHighest: item.education, // 员工最高学历
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
+                avatar:item.avatar
             })
         }
     }
@@ -232,9 +233,11 @@ export default class Employee extends Component {
             .then(res => {
                 if (res.data.status === 200) {
                     message.success('修改成功')
-                    this.getEmploy()
                     this.setState({
-                        detailVisible: false
+                        detailVisible: false, 
+                        loading:true
+                    }, () => {
+                        this.getEmploy()
                     })
                 }
             })
@@ -430,7 +433,7 @@ export default class Employee extends Component {
             // employNo,
             employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor,
-            employGraduate, name, 
+            employGraduate, name, loading, 
             // phone, 
             data, idWrong, telWrong, avatar } = this.state
         let modalFootDom
@@ -487,7 +490,7 @@ export default class Employee extends Component {
                             onChange={e => this.setPhone(e)}></Input> */}
                         <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
                             type='primary'
-                            onClick={() => this.getEmploy()}>搜索</Button>
+                            onClick={() => this.setState({ loading:true }, () => { this.getEmploy() })}>搜索</Button>
                         <Button style={{ margin: '0 20px 0 0' }} type='primary'
                             onClick={() => this.employDetail('add', 0)}>+新增员工</Button>
                     </div>
@@ -496,6 +499,7 @@ export default class Employee extends Component {
                             dataSource={data}
                             style={{ textAlign: 'center' }}
                             pagination={{ pageSize: 10 }}
+                            loading={loading}
                             locale={{emptyText:'暂无数据'}} />
                     </div>
                 </div>

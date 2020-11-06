@@ -33,7 +33,7 @@ class Cashier extends Component {
         // 本月订单总额
         monthNum: null,
         // 本月订单数
-        monthConut: null,
+        monthCount: null,
         // 总销售额
         allNum: null,
         // 线上总销售额
@@ -54,9 +54,9 @@ class Cashier extends Component {
         // 项目名称
         name: null,
         // 项目分期总额
-        amount: 0,
+        amount: null,
         // 项目分期总数
-        stagesNum: 0,
+        stagesNum: null,
         // 分期状态
         type: null,
         // 分类
@@ -189,6 +189,8 @@ class Cashier extends Component {
         }, () => {
             // 订单数据
             this.getOrderData(id, 1)
+            // 月营收数据
+            this.getMonthData(id)
         })
     }
     // 月营收数据
@@ -203,12 +205,12 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                // console.log('查询成功', res)
+                console.log('查询成功', res)
                 this.setState({
-                    monthTrueNum: res.data.data.orderMoneyMonth,
-                    monthNum: res.data.data.actOrderMoneyMonth,
+                    monthTrueNum: res.data.data.actOrderMoneyMonth,
+                    monthNum: res.data.data.orderMoneyMonth,
                     monthTrueCount: res.data.data.actCount,
-                    monthConut: res.data.data.sumCount
+                    monthCount: res.data.data.sumCount
                 })
             })
             .catch(err => {
@@ -329,7 +331,7 @@ class Cashier extends Component {
     }
     render() {
         const { tabCheck, eyeTrue, allEyeTrue, orderVisible,
-            startTime, endTime, data, monthConut,
+            startTime, endTime, data, monthCount,
             monthNum, monthTrueCount, monthTrueNum, allNum,
             onlineNum, offlineNum, id, orderType,
             orderId, paid, name, amount,
@@ -337,6 +339,8 @@ class Cashier extends Component {
             stock, stagesPrice, stagesNumber, surplus,
             payType, payPrice, addTime, mark,
             staffName, goodsName } = this.state
+
+        console.log(amount === null ? '1111' : '0000')
         let newData
         if (data.length > 0) {
             newData = data.filter(item => {
@@ -443,7 +447,7 @@ class Cashier extends Component {
                 <div className='cashierHeader'>
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>10月实收总额</span>
+                            <span style={{ float: "left" }}>{endTime ? endTime.split('-')[1] : null}月实收总额</span>
                             <span style={{ float: "right" }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
                         </div>
                         <div className='sumTotal'>
@@ -462,8 +466,8 @@ class Cashier extends Component {
                     </div>
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>10月订单总额</span>
-                            <span style={{ float: "right" }}>{monthConut ? monthConut : '0'}单</span>
+                            <span style={{ float: "left" }}>{endTime ? endTime.split('-')[1] : null}月订单总额</span>
+                            <span style={{ float: "right" }}>{monthCount ? monthCount : '0'}单</span>
                         </div>
                         <div className='sumTotal'>
                             <div style={{ float: "left", overflow: 'hidden' }}>
@@ -542,6 +546,7 @@ class Cashier extends Component {
                     </div>
                 </div>
 
+                {/* 订单信息详情 */}
                 <Modal
                     visible={orderVisible}
                     title="订单信息"
@@ -590,7 +595,7 @@ class Cashier extends Component {
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>创建时间</span>
-                                <span>{this.formatTime(addTime)}</span>
+                                <span>{addTime}</span>
                             </div>
                         </div>
                         <div className='modalBodyChild'>
@@ -599,26 +604,26 @@ class Cashier extends Component {
                                 <span>{paid === 0 ? '未支付' : '已支付'}</span>
                             </div>
 
-                            {amount ? <div className='mbLabel'>
+                            {amount === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期总额</span>
                                 <span>{amount}</span>
-                            </div> : null}
+                            </div>}
 
-                            {type ? <div className='mbLabel'>
+                            {type === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分期状态</span>
                                 <span style={{ color: '#1089EB' }}>{type}</span>
-                            </div> : null}
+                            </div>}
 
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>销量</span>
                                 <span>{sales}</span>
                             </div>
 
-                            {amount ? <div className='mbLabel'>
+                            {amount === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期</span>
                                 <span>￥{amount}/{stagesNum}</span>
                                 <span style={{ color: '#1089EB' }}>剩余{stagesPrice}/{surplus}期</span>
-                            </div> : null}
+                            </div>}
 
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>实际支付</span>

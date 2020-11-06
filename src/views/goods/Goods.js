@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import './Goods.css'
-import { Input, Select, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover } from 'antd'
+import { Input, Select, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover, TreeSelect } from 'antd'
 import axios from '../../http/index'
 import Modal from 'antd/lib/modal/Modal'
 
-const { Option } = Select
 const { TextArea } = Input
 
 class Goods extends Component {
@@ -45,7 +44,6 @@ class Goods extends Component {
         goodsFileList: [],
         // 线上商品
         onlineGoods: [],
-        goodsFenleiList: [],
         goodsModal: false,
         goodsMoInfo: '',
         goodsNo: '',
@@ -64,6 +62,10 @@ class Goods extends Component {
         goodsProModal: false,
         goodsProInfo: '',
         goodsProId: '',
+        
+        treeData:[],
+        value:'',
+        loading:true
     }
     getStageItem = () => {
         const { name, goodsTable, cateName } = this.state
@@ -82,8 +84,8 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                message.success('查询商品成功')
                 this.setState({
+                    loading:false,
                     stageData: res.data.data.list
                 })
             })
@@ -114,9 +116,8 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                console.log('============', res.data.data)
-                message.success('查询商品成功')
                 this.setState({
+                    loading:false,
                     onlineGoods: res.data.data.list
                 })
             })
@@ -129,38 +130,46 @@ class Goods extends Component {
             url: '/api/yxStoreCategory',
             method: 'GET',
             params: {
-                page: 1
+                page: 0,
+                size: 1000,
+                sort: 'id,desc'
             }
         })
             .then(res => {
-                this.setState({
-                    goodsFenleiList: res.data.content
+                let treeArr = []
+                treeArr = res.data.content.map(item => {
+                    let obj = new Object()
+                    obj = {
+                        title: item.label,
+                        value: item.id,
+                        children: []
+                    }
+                    if (item.children) {
+                        for (let i = 0; i < item.children.length; i++) {
+                            let childObj = new Object()
+                            childObj = {
+                                title: item.children[i].label,
+                                value: item.children[i].id,
+                                pid: item.id
+                            }
+                            obj.children.push(childObj)
+                        }
+                    }
+                    return obj
                 })
+                this.setState({ treeData: treeArr })
             })
             .catch(err => {
                 console.log(err)
             })
     }
-    getFenlei = () => {
-        axios({
-            url: '/api/yxStoreCategory',
-            method: 'GET',
-            params: {
-                page: 1,
-            }
-        })
-            .then(res => {
-                this.setState({
-                    fenleiList: res.data.content
-                })
-            })
-            .catch(err => {
-                console.log(err)
-            })
+    treeChange = (value, label, extra) => {
+        console.log(value, label, extra)
+        this.setState({ value })
     }
     componentDidMount() {
         this.getStageItem()
-        this.getFenlei()
+        this.goodsFenleiList()
     }
     setName = e => {
         this.setState({
@@ -216,7 +225,7 @@ class Goods extends Component {
     sureChange = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { stageName, stageKeyWord, stagePrice,
-            stageSales, stageNumVal, stageAmount, stageRemarks, stageFenlei, stageNo, fenleiList, fileList } = this.state
+            stageSales, stageNumVal, stageAmount, stageRemarks, stageNo, fileList, value } = this.state
         let photoStr = ''
         let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
         for (let i = 0; i < fileList.length; i++) {
@@ -235,8 +244,7 @@ class Goods extends Component {
             }
         }
         let formData = new FormData()
-        let cateid = fenleiList.filter(item => stageFenlei === item.cateName)[0].id
-        formData.append('cateId', cateid)
+        formData.append('cateId', value)
         formData.append('enterId', user.id)
         formData.append('id', stageNo)
         formData.append('keyword', stageKeyWord)
@@ -380,12 +388,6 @@ class Goods extends Component {
             stageVisiInfo: type
         }, () => {
             if (type === 'edit') {
-                let fenlei
-                if (this.state.fenleiList.filter(item => i.cateId === item.id) === true) {
-                    fenlei = this.state.fenleiList.filter(item => i.cateId === item.id)[0].cateName
-                } else {
-                    fenlei = ''
-                }
                 let imgArr = []
                 let urlArr = i.photo.split(',')
                 for (let i = 0; i < urlArr.length; i++) {
@@ -396,7 +398,6 @@ class Goods extends Component {
                     imgArr.push(obj)
                 }
                 this.setState({
-                    stageFenlei: fenlei,
                     stageName: i.name,
                     stageKeyWord: i.keyWord,
                     fileList: imgArr,
@@ -405,7 +406,8 @@ class Goods extends Component {
                     stageNumVal: i.stagesNumber,
                     stageAmount: i.prepaymentAmount,
                     stageRemarks: i.remarks,
-                    stageNo: i.id
+                    stageNo: i.id,
+                    value:i.cateId
                 })
             } else {
                 this.setState({
@@ -419,7 +421,8 @@ class Goods extends Component {
                     stageRemarks: '',
                     stageNo: '',
                     cateId: '',
-                    fileList: []
+                    fileList: [],
+                    value:''
                 })
             }
         })
@@ -432,21 +435,12 @@ class Goods extends Component {
         }, () => {
             if (i === 1) {
                 this.getStageItem()
-                this.getFenlei()
             } else {
                 this.getOnlineItem()
-                this.goodsFenleiList()
             }
         })
     }
 
-    changeGoodsClass = val => {
-        let className = this.state.goodsFenleiList.filter(item => item.id === val)[0].cateName
-        this.setState({
-            goodsClass: val,
-            goodsClassVal: className
-        })
-    }
     // 添加商品-新增并上架
     goodsOkShelves = (which) => {
         let user = JSON.parse(localStorage.getItem('user'))
@@ -692,13 +686,12 @@ class Goods extends Component {
 
     render() {
         const { goodsIndex, goodsTable, name, stageVisible, stageName, stageKeyWord,
-            stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks, fenleiList, stageData, promptModal,
-            promptInfo, stageVisiInfo, stageFenlei, goodsFenleiList,
-            goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
-            previewVisible, previewImage, fileList, previewTitle,
+            stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks, stageData, promptModal,
+            promptInfo, stageVisiInfo, goodsModal, goodsMoInfo, goodsName, goodsKey1, goodsKey2, goodsKey3,
+            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku,
+            previewVisible, previewImage, fileList, previewTitle, loading,
             goodsimgVisible, goodsImage, goodsFileList, onlineGoods,
-            goodsProModal, goodsProInfo, goodsProId, visible, cateName,
+            goodsProModal, goodsProInfo, cateName, treeData, 
             emptyText } = this.state
         const columns = [
             {
@@ -947,16 +940,6 @@ class Goods extends Component {
 
             },
         ]
-        const fenleiDom = fenleiList.map(item => {
-            return <div key={item.id} className='goodsCate' onClick={() => this.setState({
-                visible: false, cateName: item.cateName
-            })}>
-                {item.cateName}
-            </div>
-        })
-        const goodsClassDom = goodsFenleiList.map(item => {
-            return <Option value={item.id} key={item.id}>{item.cateName}</Option>
-        })
         let _that = this
         const uploadButton = (
             <div>
@@ -1074,27 +1057,26 @@ class Goods extends Component {
                             placeholder='请输入搜索条件'
                             value={name}
                             onChange={e => this.setName(e)}></Input>
-                        <Popover
-                            content={fenleiDom}
-                            trigger="hover"
-                            visible={visible}
-                            onVisibleChange={this.handleVisibleChange}
-                        >
-                            <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='分类'
+                            <TreeSelect
+                                style={{ width: 150, margin: '0 20px' }}
                                 value={cateName}
-                                onFocus={() => this.setState({ visible: true })}
-                                onChange={e => this.setState({ cateName: e.target.value })}></Input>
-                        </Popover>
+                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                treeData={treeData}
+                                allowClear
+                                placeholder="选择商品分类"
+                                treeDefaultExpandAll
+                                onChange={(value, label, extra) => this.setState({ cateName:label[0] })}
+                            >
+                            </TreeSelect>
                         {goodsIndex === 1
                             ? <Button
                                 style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
                                 type='primary'
-                                onClick={() => this.getStageItem()}>搜索</Button>
+                                onClick={() => this.setState({ loading:true }, () => { this.getStageItem() })}>搜索</Button>
                             : <Button
                                 style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
                                 type='primary'
-                                onClick={() => this.getOnlineItem()}>搜索</Button>}
+                                onClick={() => this.setState({ loading:true }, () => { this.getOnlineItem() })}>搜索</Button>}
                         {goodsIndex === 1
                             ? <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.editStage('add', 0)}>+新增分期项目</Button>
                             : <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.editOnline('add', 0)}>+新增商品</Button>}
@@ -1105,12 +1087,14 @@ class Goods extends Component {
                                 dataSource={stageData}
                                 style={{ textAlign: 'center', paddingBottom: '10px' }}
                                 pagination={{ pageSize: 10 }}
-                                locale={{emptyText:emptyText}} /> :
+                                loading={loading}
+                                locale={{ emptyText: emptyText }} /> :
                             <Table columns={colOnline}
                                 dataSource={onlineGoods}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} 
-                                locale={{emptyText:emptyText}} />}
+                                pagination={{ pageSize: 10 }}
+                                loading={loading}
+                                locale={{ emptyText: emptyText }} />}
                     </div>
                     <Modal
                         visible={goodsModal}
@@ -1136,11 +1120,17 @@ class Goods extends Component {
                     >
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>商品分类</span>
-                            <Select placeholder='请选择商品分类' style={{ width: 150 }}
-                                defaultValue={goodsClassVal}
-                                onChange={this.changeGoodsClass}>
-                                {goodsClassDom}
-                            </Select>
+                            <TreeSelect
+                                style={{ width: 150 }}
+                                value={this.state.value}
+                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                treeData={treeData}
+                                allowClear
+                                placeholder="选择商品分类"
+                                treeDefaultExpandAll
+                                onChange={this.treeChange}
+                            >
+                            </TreeSelect>
                         </div>
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>商品名称</span>
@@ -1272,11 +1262,17 @@ class Goods extends Component {
                     >
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>项目分类</span>
-                            <Select placeholder='' style={{ width: 150 }}
-                                defaultValue={stageFenlei}
-                                onChange={this.changeFenlei}>
-                                {fenleiDom}
-                            </Select>
+                            <TreeSelect
+                                style={{ width: 150 }}
+                                value={this.state.value}
+                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                treeData={treeData}
+                                allowClear
+                                placeholder="选择商品分类"
+                                treeDefaultExpandAll
+                                onChange={this.treeChange}
+                            >
+                            </TreeSelect>
                         </div>
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>项目名称</span>

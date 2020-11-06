@@ -49,7 +49,8 @@ class Order extends Component {
         goodsState: '',
 
         stateVisible:'',
-        stateVal:''
+        stateVal:'',
+        loading:true
     }
 
     getStoreStage() {
@@ -66,9 +67,9 @@ class Order extends Component {
             .then(res => {
                 if (res.data.status === 200) {
                     this.setState({
-                        listPhased: res.data.data.list
+                        listPhased: res.data.data.list,
+                        loading:false
                     })
-                    message.success('查询门店分期订单成功')
                 }
             })
             .catch(err => {
@@ -91,7 +92,8 @@ class Order extends Component {
             .then(res => {
                 if (res.data.status === 200) {
                     this.setState({
-                        listPhased: res.data.data.list
+                        listPhased: res.data.data.list,
+                        loading:false
                     })
                 }
             })
@@ -117,9 +119,9 @@ class Order extends Component {
                 console.log(res)
                 if (res.data.status === 200) {
                     this.setState({
-                        listOnline: res.data.data.list
+                        listOnline: res.data.data.list,
+                        loading:false
                     })
-                    message.success('查询线上商品订单成功')
                 }
             })
             .catch(err => {
@@ -481,7 +483,7 @@ class Order extends Component {
             orderId, orderName, orderNum, orderStagePrice, orderPayType,
             orderPrice, orderState, orderPay, orderCreate, orderRemarks,
             orderOtherNum, username, modalType, visible, stateVisible, data, linkEmploy,
-            stageName, type, stateVal, 
+            stageName, type, stateVal, loading,
             goodsVisible, goodsOrderid, goodsOrdertime, goodsPerson, goodsPhone, goodsAddress,
             goodsTotalNum, goodsTotalPrice, goodsPostage, goodsState } = this.state
         let stateDom
@@ -548,7 +550,7 @@ class Order extends Component {
                                     onChange={e => this.setState({ stateVal: e.target.value })}></Input>
                             </Popover>
                             <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
-                                onClick={() => this.getStageState()}>搜索</Button>
+                                onClick={() => this.setState({ loading:true }, () => { this.getStageState() })}>搜索</Button>
                         </div>
                         : <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
@@ -568,7 +570,8 @@ class Order extends Component {
                                 <Option value="已退款">已退款</Option>
                                 <Option value="已删除">已删除</Option>
                             </Select>
-                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'>搜索</Button>
+                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
+                                onClick={() => this.setState({ loading:true }, () => { this.getStageState() })}>搜索</Button>
                         </div>}
                     <div style={{ width: '100%' }}>
                         {goodsIndex === 1
@@ -576,11 +579,13 @@ class Order extends Component {
                                 dataSource={listPhased}
                                 style={{ textAlign: 'center' }}
                                 pagination={{ pageSize: 10 }} 
+                                loading={loading}
                                 locale={{emptyText:'暂无数据'}} />
                             : <Table columns={colOnline}
                                 dataSource={listOnline}
                                 style={{ textAlign: 'center' }}
                                 pagination={{ pageSize: 10 }} 
+                                loading={loading}
                                 locale={{emptyText:'暂无数据'}} />}
                     </div>
                 </div>
