@@ -1469,15 +1469,15 @@ function bankCardAttribution(bankCard) {
         }]
     }]
 
-    function getBankNameByBankCode(bankcode) {
-        for (var i = 0, len = bankcardList.length; i < len; i++) {
-            var bankcard = bankcardList[i];
-            if (bankcode == bankcard.bankCode) {
-                return bankcard.bankName;
-            }
-        }
-        return "";
-    }
+    // function getBankNameByBankCode(bankcode) {
+    //     for (var i = 0, len = bankcardList.length; i < len; i++) {
+    //         var bankcard = bankcardList[i];
+    //         if (bankcode === bankcard.bankCode) {
+    //             return bankcard.bankName;
+    //         }
+    //     }
+    //     return "";
+    // }
 
     function _getBankInfoByCardNo(cardNo) {
         for (var i = 0, len = bankcardList.length; i < len; i++) {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import './Setting.css'
 import {
-    Button, Input, Select, Upload,message
+    Button, Input, Upload,message
     // Modal
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons';
@@ -9,7 +9,6 @@ import { connect } from 'react-redux'
 import axios from '../../http/index'
 import bankCardAttribution from '../../component/bankCard'
 
-const { Option } = Select
 class Setting extends Component {
     state = {
         disabled: true,
@@ -309,6 +308,36 @@ class Setting extends Component {
         }
     }
 
+    // 时间戳转换
+    formatTime = (time) => {
+        let newMonth, newDay
+        // newMin, newSec, newHours
+        let date = new Date(time * 1000)
+        // console.log(date, time)
+        let newYear = date.getFullYear()
+        let month = date.getMonth() + 1;
+        if (month < 10) {
+            newMonth = '0' + month
+        } else { newMonth = month }
+        let day = date.getDate();
+        if (day < 10) {
+            newDay = '0' + day
+        } else { newDay = day }
+        // let hours = date.getHours();
+        // if (hours < 10) {
+        //     newHours = '0' + hours
+        // } else { newHours = hours }
+        // let minutes = date.getMinutes();
+        // if (minutes < 10) {
+        //     newMin = '0' + minutes
+        // } else { newMin = minutes }
+        // let seconds = date.getSeconds();
+        // if (seconds < 10) {
+        //     newSec = '0' + seconds
+        // } else { newSec = seconds }
+        return newYear + '-' + newMonth + '-' + newDay 
+    }
+
     render() {
         const { merchantDetailInfo, disabled, editStatus,
             // modalImage, showModal 
@@ -475,7 +504,7 @@ class Setting extends Component {
                                         <span>成立日期</span>
                                     </div>
                                     <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.addTime}</span>
+                                        <span>{this.formatTime(merchantDetailInfo.addTime)}</span>
                                     </div>
                                 </div>
                                 <div className='sbodyFormItem'>

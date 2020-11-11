@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import '../goods/Goods.css'
 import './Order.css'
-import { Input, Select, Button, Space, Table, Tag, Popconfirm, Modal, message, Image, Popover } from 'antd'
+import { Input, Select, Button, Space, Table, Tag, Modal, message, Image, Popover } from 'antd'
 import axios from '../../http/index'
 
 const { Option } = Select

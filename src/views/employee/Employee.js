@@ -172,7 +172,7 @@ export default class Employee extends Component {
                 avatar: item.avatar
             })
         } else {
-            let sex, marital
+            // let sex, marital
             console.log(item, '11111')
             // if(item.sex === 1) {
             //     sex = '男'

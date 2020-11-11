@@ -403,7 +403,9 @@ class Cashier extends Component {
             onlineNum, offlineNum, id, orderType,
             orderId, paid, name, amount,
             stagesNum, type, classify, sales,
-            stock, stagesPrice, stagesNumber, surplus,
+            stock, stagesPrice,
+            // stagesNumber,
+            surplus,
             payType, payPrice, addTime, mark,
             staffName, goodsName, time, loading,
             employList, visible, userPhone } = this.state
@@ -463,12 +465,12 @@ class Cashier extends Component {
                 align: 'center',
                 render: text => <>￥{text}</>
             },
-            {
-                title: '销量',
-                key: 'sales',
-                dataIndex: 'sales',
-                align: 'center'
-            },
+            // {
+            //     title: '销量',
+            //     key: 'sales',
+            //     dataIndex: 'sales',
+            //     align: 'center'
+            // },
             // {
             //     title: '库存',
             //     key: 'stock',
@@ -529,7 +531,7 @@ class Cashier extends Component {
                 <div className='cashierTop'>
                     <span>收银管理</span>
                 </div>
-                <div style={{margin: 25, marginBottom: 0}}>
+                {/* <div style={{ margin: 25, marginBottom: 0 }}>
                     <RangePicker
                         locale={locale}
                         className='datePicker'
@@ -537,7 +539,7 @@ class Cashier extends Component {
                         format={dateFormat}
                         onChange={this.setTime}
                     />
-                </div>
+                </div> */}
                 <div className='cashierHeader'>
 
                     <div className='headerTips'>
@@ -559,7 +561,7 @@ class Cashier extends Component {
                             </div>
                         </div>
                     </div>
-                    <div className='headerTips'>
+                    {/* <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
                             <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
                             <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
@@ -596,7 +598,7 @@ class Cashier extends Component {
                                     : <EyeOutlined className='eyeIcon' onClick={this.changeEyeTrue} />}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
@@ -641,13 +643,13 @@ class Cashier extends Component {
                         </div>
                     </div>
                     <div className='gbTableTop'>
-                        {/* <RangePicker
+                        <RangePicker
                             locale={locale}
                             className='datePicker'
                             value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
                             format={dateFormat}
                             onChange={this.setTime}
-                        /> */}
+                        />
 
                         <Input placeholder='输入商品名或客户电话查询'
                             className='nameInput'
@@ -673,7 +675,8 @@ class Cashier extends Component {
                         }}><DownloadOutlined />导出</div>
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
-                        <Table columns={columns}
+                        <Table
+                            columns={columns}
                             dataSource={data}
                             style={{ textAlign: 'center', paddingBottom: '10px' }}
                             pagination={{ pageSize: 4, position: ['bottomLeft'] }}

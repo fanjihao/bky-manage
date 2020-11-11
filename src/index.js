@@ -16,14 +16,12 @@ import store from './store'
 moment.locale('zh-cn');
 
 ReactDOM.render(
-    <React.StrictMode>
-        <Provider store={store}>
-            <Router>
-                <App />
-            </Router>
-        </Provider>
-    </React.StrictMode>,
-  document.getElementById('root')
+    <Provider store={store}>
+        <Router>
+            <App />
+        </Router>
+    </Provider>,
+    document.getElementById('root')
 );
 
 

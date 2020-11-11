@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './Goods.css'
-import { Input, Select, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover, TreeSelect } from 'antd'
+import { Input, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover, TreeSelect } from 'antd'
 import axios from '../../http/index'
 import Modal from 'antd/lib/modal/Modal'
 
@@ -138,7 +138,7 @@ class Goods extends Component {
             .then(res => {
                 let treeArr = []
                 treeArr = res.data.content.map(item => {
-                    let obj = new Object()
+                    let obj = {}
                     obj = {
                         title: item.label,
                         value: item.id,
@@ -146,7 +146,7 @@ class Goods extends Component {
                     }
                     if (item.children) {
                         for (let i = 0; i < item.children.length; i++) {
-                            let childObj = new Object()
+                            let childObj = {}
                             childObj = {
                                 title: item.children[i].label,
                                 value: item.children[i].id,
@@ -277,7 +277,7 @@ class Goods extends Component {
     okShelves = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { stageName, stageKeyWord, stagePrice,
-            stageSales, stageNumVal, stageAmount, stageRemarks, stageFenlei, fileList } = this.state
+            stageSales, stageNumVal, stageAmount, stageRemarks, fileList, value } = this.state
         let photoStr = ''
         let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
         for (let i = 0; i < fileList.length; i++) {
@@ -288,7 +288,7 @@ class Goods extends Component {
             }
         }
         let formData = new FormData()
-        formData.append('cateId', stageFenlei)
+        formData.append('cateId', value)
         formData.append('enterId', user.id)
         formData.append('keyWord', stageKeyWord)
         formData.append('name', stageName)

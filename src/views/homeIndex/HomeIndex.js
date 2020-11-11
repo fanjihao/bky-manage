@@ -12,12 +12,12 @@ const { RangePicker } = DatePicker;
 class HomeIndex extends Component {
     state = {
         merchantInfo: {
-            merchantName: "情怀一北",
-            legalPerson: "嬴政",
-            businessTime: "8:00-23:00",
-            province: "北京市",
-            city: "北京市",
-            district: "东城区",
+            merchantName: "",
+            legalPerson: "",
+            businessTime: "",
+            province: "",
+            city: "",
+            district: "",
             address: ""
         },
         startTime: '2020-07-25',
@@ -318,9 +318,11 @@ class HomeIndex extends Component {
             onlineTotalList, onlineRankList } = this.state
         let personInfo = JSON.parse(localStorage.getItem('user'))
 
+        // console.log(stageNumList, stageTimeList, stageTotalList)
+
         let stageOption, onlineOption
 
-        if (stageNumList.length === 0 && stageTimeList.length === 0 && stageTotalList === 0) {
+        if (stageNumList.length === 0 && stageTimeList.length === 0 && stageTotalList.length === 0) {
             stageOption = {
                 title: {
                     text: '暂无数据',
@@ -585,7 +587,7 @@ class HomeIndex extends Component {
                         {/* 店铺信息 */}
                         <div className="storeInfo">
                             <header className="storeInfo-header">
-                                <img src={require('../../assets/imgs/logo.png')} alt="商家图标" style={{height: 36,width: 36}}/>
+                                <img src={require('../../assets/imgs/logo.png')} alt="商家图标" style={{ height: 36, width: 36 }} />
                                 <span style={{ marginLeft: 20 }}>{merchantInfo.merchantName}</span>
                             </header>
                             <section className="storeInfo-section">
@@ -625,6 +627,5 @@ class HomeIndex extends Component {
         )
     }
 }
-
 
 export default HomeIndex
