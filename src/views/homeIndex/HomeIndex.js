@@ -585,7 +585,7 @@ class HomeIndex extends Component {
                         {/* 店铺信息 */}
                         <div className="storeInfo">
                             <header className="storeInfo-header">
-                                <img src={require('../../assets/imgs/logo.png')} alt="商家图标" />
+                                <img src={require('../../assets/imgs/logo.png')} alt="商家图标" style={{height: 36,width: 36}}/>
                                 <span style={{ marginLeft: 20 }}>{merchantInfo.merchantName}</span>
                             </header>
                             <section className="storeInfo-section">

@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import './home.css'
-import { Row, Col } from 'antd'
-import { HomeOutlined, SettingFilled, MenuFoldOutlined } from '@ant-design/icons'
+import { Layout, Menu } from 'antd'
 import { Route, NavLink, Redirect } from 'react-router-dom'
 import HomeIndex from '../homeIndex/HomeIndex'
 import Goods from '../goods/Goods'
@@ -11,47 +10,12 @@ import Setting from '../setting/Setting'
 import Cashier from '../cashier/Cashier'
 import { connect } from 'react-redux'
 
-const tab = [
-    {
-        id: 1,
-        name: '首页',
-        icon: <HomeOutlined />,
-        path: '/home/homeindex'
-    }, {
-        id: 2,
-        name: '收银管理',
-        icon: <SettingFilled />,
-        path: '/home/cashier'
-    }, {
-        id: 3,
-        name: '商品管理',
-        icon: <MenuFoldOutlined />,
-        path: '/home/goods'
-    }, {
-        id: 4,
-        name: '订单管理',
-        icon: 'home',
-        path: '/home/order'
-    }, {
-        id: 5,
-        name: '员工管理',
-        icon: 'home',
-        path: '/home/employee'
-    }, {
-        id: 6,
-        name: '设置',
-        icon: <SettingFilled />,
-        path: '/home/setting'
-    },
-]
+const { Content, Sider } = Layout
+const { SubMenu } = Menu
 
 class Home extends Component {
-    
-    // 切换选项卡
-    checkTab = (i) => {
-        this.setState({
-            checkCode: i
-        })
+    state = {
+        merchantName: null
     }
 
     // 退出登录
@@ -61,48 +25,85 @@ class Home extends Component {
         })
     }
 
-    render() {
+    componentDidMount() {
+        const merchantName = JSON.parse(localStorage.getItem('user')).merchantName
+        this.setState({ merchantName })
+    }
+
+    render = () => {
         const { userInfo } = this.props
+        const { merchantName } = this.state
         return (
             <div className="home">
-                <Row>
-                    <Col span={4} className="home-navigate">
+                <Layout>
+                    <Sider
+                        style={{
+                            overflow: 'auto',
+                            height: '100vh',
+                            position: 'fixed',
+                            left: 0,
+                            background: 'white',
+                            fontWeight: 700
+                        }}
+                        width={250}
+                    >
                         <div className="header">
                             <img src={require('../../assets/imgs/logo.png')} className="header-image" alt="图标"></img>
                             <h2>博客云商家版</h2>
                         </div>
-
-                        {
-                            tab.map((item, index) => {
-                                return (
-                                    <div key={item.id} className="tab">
-                                        <NavLink to={item.path} className="tab-items">{item.name}</NavLink>
-                                    </div>
-                                )
-                            })
-                        }
+                        <Menu theme="light" mode="inline" defaultSelectedKeys={['1']} style={{textAlign: 'center'}}>
+                            <Menu.Item key="1">
+                                <NavLink to='/home/homeindex'>首页</NavLink>
+                            </Menu.Item>
+                            <Menu.Item key="2">
+                                <NavLink to='/home/cashier'>收银管理</NavLink>
+                            </Menu.Item>
+                            {/* <SubMenu key="2" title="收银管理">
+                                <Menu.Item key="21">
+                                    <NavLink to='/home/cashier'>营收管理</NavLink>
+                                </Menu.Item>
+                                <Menu.Item key="22">
+                                    <NavLink to='/home/cashier'>客户管理</NavLink>
+                                </Menu.Item>
+                            </SubMenu> */}
+                            <Menu.Item key="3">
+                                <NavLink to='/home/goods'>商品管理</NavLink>
+                            </Menu.Item>
+                            <Menu.Item key="4">
+                                <NavLink to='/home/order'>订单管理</NavLink>
+                            </Menu.Item>
+                            <Menu.Item key="5">
+                                <NavLink to='/home/employee'>员工管理</NavLink>
+                            </Menu.Item>
+                            <Menu.Item key="6">
+                                <NavLink to='/home/setting'>设置</NavLink>
+                            </Menu.Item>
+                        </Menu>
 
                         <div className="loginOut">
-
                             {
                                 userInfo.avatar
                                     ? <img className="headImage" alt="loginLogo" src={userInfo.avatar} />
                                     : <img className="headImage" alt="loginLogo" src={require('../../assets/imgs/logo.png')} />
                             }
-                            <p className="welcome">欢迎{userInfo.merchantName}</p>
+                            <p className="welcome">欢迎：{merchantName}</p>
                             <p className="out" onClick={this.loginOut}>退出登录</p>
                         </div>
-                    </Col>
-                    <Col span={20} className="home-content">
-                        <Redirect from="/home" to="/home/homeindex" />
-                        <Route path="/home/homeindex" component={HomeIndex} />
-                        <Route path="/home/cashier" component={Cashier} />
-                        <Route path="/home/goods" component={Goods} />
-                        <Route path="/home/order" component={Order} />
-                        <Route path="/home/employee" component={Employee} />
-                        <Route path="/home/setting" component={Setting} />
-                    </Col>
-                </Row>
+                    </Sider>
+                    <Layout className="site-layout" style={{ marginLeft: 250 }}>
+                        <Content style={{ overflow: 'initial', background: 'white' }}>
+                            <div className="site-layout-background">
+                                <Redirect from="/home" to="/home/homeindex" />
+                                <Route path="/home/homeindex" component={HomeIndex} />
+                                <Route path="/home/cashier" component={Cashier} />
+                                <Route path="/home/goods" component={Goods} />
+                                <Route path="/home/order" component={Order} />
+                                <Route path="/home/employee" component={Employee} />
+                                <Route path="/home/setting" component={Setting} />
+                            </div>
+                        </Content>
+                    </Layout>
+                </Layout>,
             </div>
         )
     }

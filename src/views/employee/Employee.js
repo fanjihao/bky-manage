@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import './Employee.css'
 import { Input, Button, Table, Space, Popconfirm, Modal, Select, DatePicker, message, Upload, Avatar } from 'antd'
+import locale from 'antd/lib/date-picker/locale/zh_CN'
 import axios from '../../http/index'
 import { UploadOutlined } from '@ant-design/icons'
 const { Option } = Select
@@ -34,7 +35,7 @@ export default class Employee extends Component {
         phone: '',
         data: [],
         avatar: '',
-        loading:true
+        loading: true
     }
     getEmploy = () => {
         let user = JSON.parse(localStorage.getItem('user'))
@@ -55,7 +56,7 @@ export default class Employee extends Component {
                 console.log(res)
                 this.setState({
                     data: res.data.data.list,
-                    loading:false
+                    loading: false
                 })
             })
             .catch(err => {
@@ -78,6 +79,8 @@ export default class Employee extends Component {
     publicData = (type) => {
         const { employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar } = this.state
+        console.log(employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
+            employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar)
         let user = JSON.parse(localStorage.getItem('user'))
         let formData = new FormData()
         formData.append("staffName", employName)
@@ -111,7 +114,7 @@ export default class Employee extends Component {
                 if (res.data.status === 200) {
                     this.setState({
                         detailVisible: false,
-                        loading:true
+                        loading: true
                     }, () => {
                         this.getEmploy()
                     })
@@ -138,12 +141,12 @@ export default class Employee extends Component {
             })
         } else if (what === 'look') {
             let sex, marital
-            if(item.sex === 1) {
+            if (item.sex === 1) {
                 sex = '男'
             } else {
                 sex = '女'
             }
-            if(item.maritalStatus === 1) {
+            if (item.maritalStatus === 1) {
                 marital = '未婚'
             } else {
                 marital = '已婚'
@@ -166,29 +169,29 @@ export default class Employee extends Component {
                 employHighest: item.education, // 员工最高学历
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
-                avatar:item.avatar
+                avatar: item.avatar
             })
         } else {
             let sex, marital
-            console.log(item)
-            if(item.sex === 1) {
-                sex = '男'
-            } else {
-                sex = '女'
-            }
-            if(item.maritalStatus === 1) {
-                marital = '未婚'
-            } else {
-                marital = '已婚'
-            }
+            console.log(item, '11111')
+            // if(item.sex === 1) {
+            //     sex = '男'
+            // } else {
+            //     sex = '女'
+            // }
+            // if(item.maritalStatus === 1) {
+            //     maritalStatus = '未婚'
+            // } else {
+            //     maritalStatus = '已婚'
+            // }
             this.setState({
                 whatDo: '修改',
                 detailVisible: true,
                 isLook: false,
                 employNo: item.id, // 员工工号
                 employId: item.idCard, // 员工身份证
-                employSex: sex, // 员工性别
-                employMarital: marital, // 员工婚姻状态
+                employSex: item.sex, // 员工性别
+                employMarital: item.maritalStatus, // 员工婚姻状态
                 employhomeAdd: item.address, // 员工户籍地址
                 employName: item.staffName, // 员工名字
                 employPhone: item.phone, // 员工电话
@@ -199,16 +202,20 @@ export default class Employee extends Component {
                 employHighest: item.education, // 员工最高学历
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
-                avatar:item.avatar
+                avatar: item.avatar
             })
         }
     }
+    // 改变性别
     sexChange = (val) => {
+        console.log(val)
         this.setState({
             employSex: val
         })
     }
+    // 婚姻状况
     maritalChange = (val) => {
+        console.log(val)
         this.setState({
             employMarital: val
         })
@@ -234,8 +241,8 @@ export default class Employee extends Component {
                 if (res.data.status === 200) {
                     message.success('修改成功')
                     this.setState({
-                        detailVisible: false, 
-                        loading:true
+                        detailVisible: false,
+                        loading: true
                     }, () => {
                         this.getEmploy()
                     })
@@ -429,11 +436,11 @@ export default class Employee extends Component {
 
             },
         ]
-        const { detailVisible, whatDo, isLook, 
+        const { detailVisible, whatDo, isLook,
             // employNo,
             employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor,
-            employGraduate, name, loading, 
+            employGraduate, name, loading,
             // phone, 
             data, idWrong, telWrong, avatar } = this.state
         let modalFootDom
@@ -490,7 +497,7 @@ export default class Employee extends Component {
                             onChange={e => this.setPhone(e)}></Input> */}
                         <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
                             type='primary'
-                            onClick={() => this.setState({ loading:true }, () => { this.getEmploy() })}>搜索</Button>
+                            onClick={() => this.setState({ loading: true }, () => { this.getEmploy() })}>搜索</Button>
                         <Button style={{ margin: '0 20px 0 0' }} type='primary'
                             onClick={() => this.employDetail('add', 0)}>+新增员工</Button>
                     </div>
@@ -500,7 +507,7 @@ export default class Employee extends Component {
                             style={{ textAlign: 'center' }}
                             pagination={{ pageSize: 10 }}
                             loading={loading}
-                            locale={{emptyText:'暂无数据'}} />
+                            locale={{ emptyText: '暂无数据' }} />
                     </div>
                 </div>
                 <Modal
@@ -514,16 +521,16 @@ export default class Employee extends Component {
                     width={800}
                 >
                     <div className='modalItem'>
-                        <span style={{ color: '#1089EB', marginLeft:30 }}>基本信息</span>
+                        <span style={{ color: '#1089EB', marginLeft: 30 }}>基本信息</span>
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
                             <div className='embLabel'>
                                 <span>员工头像</span>
                                 <Upload {...props} disabled={isLook} className='avatar-uploader' showUploadList={false}>
-                                    {avatar 
-                                    ? <Avatar src={avatar} alt="avatar" size={128} />
-                                    : <Button icon={<UploadOutlined />}>Click to Upload</Button>}
+                                    {avatar
+                                        ? <Avatar src={avatar} alt="avatar" size={128} />
+                                        : <Button icon={<UploadOutlined />}>Click to Upload</Button>}
                                 </Upload>
                             </div>
                             <div className='embLabel'>
@@ -597,7 +604,7 @@ export default class Employee extends Component {
                         </div>
                     </div>
                     <div className='modalItem'>
-                        <span style={{ color: '#1089EB', marginLeft:30 }}>学历信息</span>
+                        <span style={{ color: '#1089EB', marginLeft: 30 }}>学历信息</span>
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
@@ -636,9 +643,12 @@ export default class Employee extends Component {
                                     ? <Input value={employGraduate} style={{ width: '60%' }} disabled={isLook}></Input>
                                     : <DatePicker
                                         // defaultPickerValue={employGraduate}
-                                        style={{ width: '60%' }} disabled={isLook}
+                                        style={{ width: '60%' }}
+                                        disabled={isLook}
                                         placeholder={employGraduate}
-                                        onChange={(date, dateString) => this.onChange('毕业时间', date, dateString)} />}
+                                        onChange={(date, dateString) => this.onChange('毕业时间', date, dateString)}
+                                        locale={locale}
+                                    />}
                             </div>
                         </div>
                     </div>

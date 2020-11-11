@@ -215,7 +215,7 @@ class Login extends React.Component {
                         <img src={require('../../assets/imgs/bkyManagementLogo.png')} className='loginImg' alt="logo" />
                         <div className='loginForm'>
                             <div className='loginFormItem loginLogo'>
-                                <img alt='logo' src={require('../../assets/imgs/ic_launcher.png')}
+                                <img alt='logo' src={require('../../assets/imgs/logo.png')}
                                     style={{ width: '30px', height: '30px', margin: '0 20px 0' }}></img>
                                 <span>博客云</span>
                             </div>

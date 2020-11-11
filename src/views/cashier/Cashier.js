@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import axios from '../../http'
 import './Cashier.css'
-import { Input, Select, Space, Table, Modal, message, Image, DatePicker } from 'antd'
+import { Input, Select, Space, Table, Modal, message, Image, DatePicker, Popover, Button } from 'antd'
 import moment from 'moment'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
 import { CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
@@ -24,6 +24,7 @@ class Cashier extends Component {
         // 时间
         startTime: null,
         endTime: null,
+        time: null,
         // 订单表数据
         data: [],
         // 本月实收总额
@@ -81,7 +82,13 @@ class Cashier extends Component {
         mark: null,
         // 美疗师
         staffName: null,
-
+        // 客户电话
+        userPhone: null,
+        loading: false,
+        // 员工
+        employList: null,
+        // 气泡
+        visible: false
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -122,7 +129,8 @@ class Cashier extends Component {
                     payPrice: res.data.data.payPrice,
                     addTime: res.data.data.addTime,
                     mark: res.data.data.mark,
-                    staffName: res.data.data.staffName
+                    staffName: res.data.data.staffName,
+                    userPhone: res.data.data.userPhone
                 }, () => {
                     this.setState({
                         orderVisible: true
@@ -195,17 +203,18 @@ class Cashier extends Component {
     }
     // 月营收数据
     getMonthData = id => {
-        const { endTime } = this.state
+        const { time } = this.state
+        console.log('月', time)
         axios({
             method: 'GET',
             url: '/cash/money',
             params: {
-                date: endTime,
+                date: time,
                 enterId: id
             }
         })
             .then(res => {
-                console.log('查询成功', res)
+                console.log('查询月营收数据成功', res)
                 this.setState({
                     monthTrueNum: res.data.data.actOrderMoneyMonth,
                     monthNum: res.data.data.orderMoneyMonth,
@@ -241,6 +250,7 @@ class Cashier extends Component {
     // 订单数据
     getOrderData = (id, type) => {
         const { startTime, endTime, goodsName } = this.state
+        // console.log(goodsName)
         axios({
             method: 'GET',
             url: '/cash/order',
@@ -255,13 +265,37 @@ class Cashier extends Component {
             .then(res => {
                 console.log('查询订单成功', res)
                 if (res.data.data) {
-                    this.setState({ data: res.data.data })
+                    this.setState({ data: res.data.data, loading: false })
                 } else {
-                    this.setState({ data: [] })
+                    this.setState({ data: [], loading: false })
                 }
             })
             .catch(err => {
                 console.log('查询订单失败', err)
+            })
+    }
+    // 获取员工信息
+    getEmploy = () => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url: '/merchantOrder/listStoreStaff',
+            method: 'GET',
+            params: {
+                enterId: user.id,
+                limit: 10,
+                name: '',
+                offset: 1,
+                order: '',
+                phone: '',
+            }
+        })
+            .then(res => {
+                console.log('获取员工信息成功', res)
+                this.setState({
+                    employList: res.data.data.list
+                })
+            })
+            .catch(err => {
             })
     }
     componentDidMount() {
@@ -270,33 +304,38 @@ class Cashier extends Component {
         let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
         let D = date.getDate();
         const nowDate = Y + '-' + M + '-' + D
-        console.log(nowDate)
+        // console.log(nowDate)
 
         date.setMonth(date.getMonth() - 1)
         let y = date.getFullYear()
         let m = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
         let d = date.getDate()
         const preDate = y + '-' + m + '-' + d
-        console.log(preDate)
+        // console.log(preDate)
 
         const id = JSON.parse(localStorage.getItem('user')).id
 
         this.setState({
             startTime: preDate,
             endTime: nowDate,
-            id: id
+            id: id,
+            time: nowDate,
+            loading: true
         }, () => {
-            console.log(id)
+            // console.log(id)
             // 本月销量
             this.getMonthData(id)
             // 总营收数据
             this.getAllData(id)
             // 订单数据
             this.getOrderData(id, 1)
+            // 员工
+            this.getEmploy()
         })
     }
     // 搜索
     search = () => {
+        this.setState({ loading: true })
         const { orderType } = this.state
         const id = JSON.parse(localStorage.getItem('user')).id
         this.getOrderData(id, orderType + 1)
@@ -329,6 +368,34 @@ class Cashier extends Component {
         } else { newSec = seconds }
         return newYear + '-' + newMonth + '-' + newDay + ' ' + newHours + ':' + newMin + ':' + newSec
     }
+    // 修改订单信息
+    updateOrder = () => {
+        const { staffName, mark, orderId } = this.state
+        const id = JSON.parse(localStorage.getItem('user')).id
+        axios({
+            method: 'POST',
+            url: '/cash/update',
+            data: {
+                staffName,
+                mark,
+                orderId
+            }
+        })
+            .then(res => {
+                console.log('修改成功', res)
+                if (res.data.status === 200) {
+                    message.success('修改成功')
+                    this.getOrderData(id, 1)
+                    this.setState({ visible: false, orderVisible: false })
+                } else {
+                    message.error('修改失败')
+                }
+            })
+            .catch(err => {
+                console.log('修改失败', err)
+                message.error('修改失败')
+            })
+    }
     render() {
         const { tabCheck, eyeTrue, allEyeTrue, orderVisible,
             startTime, endTime, data, monthCount,
@@ -338,9 +405,9 @@ class Cashier extends Component {
             stagesNum, type, classify, sales,
             stock, stagesPrice, stagesNumber, surplus,
             payType, payPrice, addTime, mark,
-            staffName, goodsName } = this.state
+            staffName, goodsName, time, loading,
+            employList, visible, userPhone } = this.state
 
-        console.log(amount === null ? '1111' : '0000')
         let newData
         if (data.length > 0) {
             newData = data.filter(item => {
@@ -351,12 +418,6 @@ class Cashier extends Component {
         }
         const newText = orderType === 1 ? '线上商品收银统计表' : '线下商品收银统计表'
         const columns = [
-            {
-                title: '序号',
-                dataIndex: 'id',
-                key: 'id',
-                align: 'center'
-            },
             {
                 title: '项目图片',
                 dataIndex: 'image',
@@ -375,19 +436,19 @@ class Cashier extends Component {
                 key: 'name',
                 align: 'center'
             },
-            {
-                title: '分类',
-                dataIndex: 'classify',
-                key: 'classify',
-                align: 'center',
-                render: text => (
-                    <div>
-                        {
-                            text === 1 ? '线上订单' : '线下订单'
-                        }
-                    </div>
-                )
-            },
+            // {
+            //     title: '分类',
+            //     dataIndex: 'classify',
+            //     key: 'classify',
+            //     align: 'center',
+            //     render: text => (
+            //         <div>
+            //             {
+            //                 text === 1 ? '线上订单' : '线下订单'
+            //             }
+            //         </div>
+            //     )
+            // },
             {
                 title: '实付金额',
                 dataIndex: 'payPrice',
@@ -408,17 +469,23 @@ class Cashier extends Component {
                 dataIndex: 'sales',
                 align: 'center'
             },
-            {
-                title: '库存',
-                key: 'stock',
-                dataIndex: 'stock',
-                align: 'center'
-            },
+            // {
+            //     title: '库存',
+            //     key: 'stock',
+            //     dataIndex: 'stock',
+            //     align: 'center'
+            // },
             {
                 title: '交易时间',
                 key: 'creatTime',
                 dataIndex: 'creatTime',
                 align: 'center'
+            },
+            {
+                title: '客户电话',
+                key: 'userPhone',
+                align: 'center',
+                dataIndex: 'userPhone'
             },
             {
                 title: '客户备注',
@@ -439,16 +506,44 @@ class Cashier extends Component {
                 align: 'center'
             },
         ]
+        const employColumns = [
+            {
+                title: '编号',
+                dataIndex: 'id',
+                key: 'id'
+            },
+            {
+                title: '姓名',
+                dataIndex: 'staffName',
+                key: 'staffName',
+            },
+            {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => <a onClick={() => this.setState({ visible: false, staffName: record.staffName })}>选择</a>
+
+            },
+        ]
         return (
             <div className="cashier">
                 <div className='cashierTop'>
                     <span>收银管理</span>
                 </div>
+                <div style={{margin: 25, marginBottom: 0}}>
+                    <RangePicker
+                        locale={locale}
+                        className='datePicker'
+                        value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
+                        format={dateFormat}
+                        onChange={this.setTime}
+                    />
+                </div>
                 <div className='cashierHeader'>
+
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>{endTime ? endTime.split('-')[1] : null}月实收总额</span>
-                            <span style={{ float: "right" }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
+                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
+                            <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
                         </div>
                         <div className='sumTotal'>
                             <div style={{ float: "left", overflow: 'hidden' }}>
@@ -466,7 +561,46 @@ class Cashier extends Component {
                     </div>
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>{endTime ? endTime.split('-')[1] : null}月订单总额</span>
+                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
+                            <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
+                        </div>
+                        <div className='sumTotal'>
+                            <div style={{ float: "left", overflow: 'hidden' }}>
+                                {eyeTrue
+                                    ? <span className='month-num'>{monthTrueNum ? monthTrueNum : '0'}</span>
+                                    : <span className='month-num'>*****</span>}
+                                <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
+                            </div>
+                            <div style={{ float: "right" }}>
+                                {eyeTrue
+                                    ? <EyeInvisibleOutlined className='eyeIcon' onClick={this.changeEyeTrue} />
+                                    : <EyeOutlined className='eyeIcon' onClick={this.changeEyeTrue} />}
+                            </div>
+                        </div>
+                    </div>
+                    <div className='headerTips'>
+                        <div className='sumTotal' style={{ marginBottom: 20 }}>
+                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
+                            <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
+                        </div>
+                        <div className='sumTotal'>
+                            <div style={{ float: "left", overflow: 'hidden' }}>
+                                {eyeTrue
+                                    ? <span className='month-num'>{monthTrueNum ? monthTrueNum : '0'}</span>
+                                    : <span className='month-num'>*****</span>}
+                                <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
+                            </div>
+                            <div style={{ float: "right" }}>
+                                {eyeTrue
+                                    ? <EyeInvisibleOutlined className='eyeIcon' onClick={this.changeEyeTrue} />
+                                    : <EyeOutlined className='eyeIcon' onClick={this.changeEyeTrue} />}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='headerTips'>
+                        <div className='sumTotal' style={{ marginBottom: 20 }}>
+                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月订单总额</span>
                             <span style={{ float: "right" }}>{monthCount ? monthCount : '0'}单</span>
                         </div>
                         <div className='sumTotal'>
@@ -489,17 +623,17 @@ class Cashier extends Component {
                     <div className='goodsBodyTab'>
                         <div className={tabCheck === 1 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 1 })
+                                this.setState({ tabCheck: 1, loading: true })
                                 this.getOrderData(id, 1)
                             }}>全部订单</div>
                         <div className={tabCheck === 2 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 2 })
+                                this.setState({ tabCheck: 2, loading: true })
                                 this.getOrderData(id, 2)
                             }}>线上订单</div>
                         <div className={tabCheck === 3 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 3 })
+                                this.setState({ tabCheck: 3, loading: true })
                                 this.getOrderData(id, 3)
                             }}>线下订单</div>
                         <div className='tableTips'>
@@ -507,14 +641,15 @@ class Cashier extends Component {
                         </div>
                     </div>
                     <div className='gbTableTop'>
-                        <RangePicker
+                        {/* <RangePicker
                             locale={locale}
                             className='datePicker'
                             value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
                             format={dateFormat}
                             onChange={this.setTime}
-                        />
-                        <Input placeholder='请输入商品名'
+                        /> */}
+
+                        <Input placeholder='输入商品名或客户电话查询'
                             className='nameInput'
                             value={goodsName}
                             onChange={e => this.setState({ goodsName: e.target.value })}
@@ -541,8 +676,10 @@ class Cashier extends Component {
                         <Table columns={columns}
                             dataSource={data}
                             style={{ textAlign: 'center', paddingBottom: '10px' }}
-                            pagination={{ pageSize: 10 }}
-                            locale={{ emptyText: '暂无数据' }} />
+                            pagination={{ pageSize: 4, position: ['bottomLeft'] }}
+                            locale={{ emptyText: '暂无数据' }}
+                            loading={loading}
+                        />
                     </div>
                 </div>
 
@@ -550,16 +687,40 @@ class Cashier extends Component {
                 <Modal
                     visible={orderVisible}
                     title="订单信息"
-                    onOk={() => this.setState({ orderVisible: false })}
-                    onCancel={() => this.setState({ orderVisible: false })}
+                    onOk={() => this.updateOrder()}
+                    onCancel={() => this.setState({ orderVisible: false, visible: false })}
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
+                    okText="修改"
+                    cancelText="取消"
                 >
                     <div className='modalheader'>
                         <div className='modalItem'>
                             <span style={{ marginRight: 10 }}>美疗师</span>
-                            <span>{staffName ? staffName : '未分配美疗师'}</span>
+                            {/* <span>{staffName ? staffName : '未分配美疗师'}</span> */}
+                            <Popover
+                                content={<Table
+                                    columns={employColumns}
+                                    dataSource={employList}
+                                    style={{ textAlign: 'center' }}
+                                    pagination={{ pageSize: 2 }}
+                                    locale={{ emptyText: '暂无数据' }} />}
+                                trigger="hover"
+                                visible={visible}
+                            >
+
+                                {
+                                    staffName
+                                        ? <Input style={{ width: 150, margin: '0 20px' }}
+                                            placeholder='关联员工'
+                                            disabled={false}
+                                            value={staffName}
+                                            onFocus={() => this.setState({ visible: true })} />
+                                        : <Button type="primary" danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>
+                                }
+                            </Popover>
+
                         </div>
                         {/* <div className='modalItem'>
                             <span style={{ marginRight: 10 }}>客户</span>
@@ -571,7 +732,7 @@ class Cashier extends Component {
                             <div className='mbLabel'>
                                 <span>订单编号</span>
                                 <span>{orderId}</span>
-                                <span style={{ color: '#1089EB' }}>复制</span>
+                                {/* <span style={{ color: '#1089EB' }}>复制</span> */}
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目名称</span>
@@ -591,7 +752,11 @@ class Cashier extends Component {
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>支付方式</span>
-                                <span style={{ color: '#13CE66' }}>{payType}</span>
+                                <span style={{ color: '#13CE66' }}>
+                                    {payType === 'bank' ? '银行卡' : null}
+                                    {payType === 'alipay' ? '支付宝' : null}
+                                    {payType === 'weixin' ? '微信' : null}
+                                </span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>创建时间</span>
@@ -611,7 +776,12 @@ class Cashier extends Component {
 
                             {type === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分期状态</span>
-                                <span style={{ color: '#1089EB' }}>{type}</span>
+                                <span style={{ color: '#1089EB' }}>
+                                    {type === 1 ? '分期中' : null}
+                                    {type === 2 ? '已完成分期' : null}
+                                    {type === 3 ? '异常分期' : null}
+                                    {type === 4 ? '未处理' : null}
+                                </span>
                             </div>}
 
                             <div className='mbLabel'>
@@ -621,20 +791,30 @@ class Cashier extends Component {
 
                             {amount === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期</span>
-                                <span>￥{amount}/{stagesNum}</span>
-                                <span style={{ color: '#1089EB' }}>剩余{stagesPrice}/{surplus}期</span>
+                                <span>￥{stagesNum * stagesPrice}/{stagesNum}</span>
+                                {
+                                    surplus === 0 ? null : <span style={{ color: '#1089EB' }}>剩余{stagesPrice}/{surplus}期</span>
+                                }
                             </div>}
 
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>实际支付</span>
                                 <span>￥{payPrice}</span>
                             </div>
+
+                            <div className='mbLabel'>
+                                <span style={{ marginRight: 10 }}>客户电话</span>
+                                <span>{userPhone}</span>
+                            </div>
                         </div>
                     </div>
                     <div className='modalNote'>
                         <div style={{ width: '100%' }}><span>备注</span></div>
                         <div>
-                            <TextArea rows={4} value={mark} disabled={true} />
+                            <TextArea rows={4}
+                                value={mark}
+                                onChange={e => this.setState({ mark: e.target.value })}
+                            />
                         </div>
                     </div>
                 </Modal>

@@ -506,8 +506,7 @@ class Goods extends Component {
                 }
                 this.setState({
                     goodsNo: i.id,
-                    goodsClass: i.cateId,
-                    goodsClassVal: i.cateName,
+                    value:i.cateId,
                     goodsName: i.name,
                     goodsKey1: keyArr[0],
                     goodsKey2: keyArr[1],
@@ -535,7 +534,8 @@ class Goods extends Component {
                     goodsPostage: '',
                     goodsSales: '',
                     goodsSku: '',
-                    goodsFileList: []
+                    goodsFileList: [],
+                    value:''
                 })
             }
         })
@@ -1086,13 +1086,13 @@ class Goods extends Component {
                             <Table columns={columns}
                                 dataSource={stageData}
                                 style={{ textAlign: 'center', paddingBottom: '10px' }}
-                                pagination={{ pageSize: 10 }}
+                                pagination={{ pageSize: 4, position: ['bottomLeft'] }}
                                 loading={loading}
                                 locale={{ emptyText: emptyText }} /> :
                             <Table columns={colOnline}
                                 dataSource={onlineGoods}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }}
+                                pagination={{ pageSize: 4, position: ['bottomLeft'] }}
                                 loading={loading}
                                 locale={{ emptyText: emptyText }} />}
                     </div>

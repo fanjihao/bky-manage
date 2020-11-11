@@ -7,6 +7,7 @@ import {
 import { PlusOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux'
 import axios from '../../http/index'
+import bankCardAttribution from '../../component/bankCard'
 
 const { Option } = Select
 class Setting extends Component {
@@ -111,6 +112,7 @@ class Setting extends Component {
     }
     componentDidMount() {
         console.log('信息', this.props.userInfo)
+        console.log(bankCardAttribution('6215584402021608328'))
         const id = JSON.parse(localStorage.getItem('user')).id
         this.getUserInfo(id)
     }
@@ -570,19 +572,8 @@ class Setting extends Component {
                                         <span>收款账户类型</span>
                                     </div>
                                     <div className='formItemCon'>
-                                        <Select value={merchantDetailInfo.collectionType} 
-                                        className="select" 
-                                        disabled={disabled}
-                                        onChange={e => this.setState({
-                                            merchantDetailInfo: {
-                                                ...this.state.merchantDetailInfo,
-                                                collectionType: e
-                                            }
-                                        })}>
-                                            <Option value={1}>微信</Option>
-                                            <Option value={2}>支付宝</Option>
-                                            <Option value={3}>银行卡</Option>
-                                        </Select>
+                                        <Input value={bankCardAttribution(merchantDetailInfo.accountNo).cardTypeName}
+                                            disabled={true} />
                                     </div>
                                 </div>
                                 <div className='sbodyFormItem'>
@@ -637,14 +628,8 @@ class Setting extends Component {
                                         <span>账户银行</span>
                                     </div>
                                     <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.depositBank}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    depositBank: e.target.value
-                                                }
-                                            })} />
+                                        <Input value={bankCardAttribution(merchantDetailInfo.accountNo).bankName}
+                                            disabled={true} />
                                     </div>
                                 </div>
                                 <div className='sbodyFormItem'>

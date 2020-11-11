@@ -48,9 +48,9 @@ class Order extends Component {
         goodsPostage: '',
         goodsState: '',
 
-        stateVisible:'',
-        stateVal:'',
-        loading:true
+        stateVisible: '',
+        stateVal: '',
+        loading: true
     }
 
     getStoreStage() {
@@ -68,7 +68,7 @@ class Order extends Component {
                 if (res.data.status === 200) {
                     this.setState({
                         listPhased: res.data.data.list,
-                        loading:false
+                        loading: false
                     })
                 }
             })
@@ -93,7 +93,7 @@ class Order extends Component {
                 if (res.data.status === 200) {
                     this.setState({
                         listPhased: res.data.data.list,
-                        loading:false
+                        loading: false
                     })
                 }
             })
@@ -120,7 +120,7 @@ class Order extends Component {
                 if (res.data.status === 200) {
                     this.setState({
                         listOnline: res.data.data.list,
-                        loading:false
+                        loading: false
                     })
                 }
             })
@@ -231,8 +231,8 @@ class Order extends Component {
         this.setState({ visible })
     }
     VisibleChange = stateVisible => {
-        this.setState({ 
-            stateVisible 
+        this.setState({
+            stateVisible
         })
     }
     stageChange = () => {
@@ -403,7 +403,7 @@ class Order extends Component {
             {
                 title: '操作',
                 key: 'action',
-                render: (text, record) => <a onClick={() => this.setState({ linkEmploy: record.staffName, linkId: record.id })}>选择</a>
+                render: (text, record) => <a onClick={() => this.setState({ linkEmploy: record.staffName, linkId: record.id, visible: false })}>选择</a>
 
             },
         ]
@@ -516,28 +516,28 @@ class Order extends Component {
                                 onChange={e => this.setState({ stageName: e.target.value })}></Input>
                             <Popover
                                 content={
-                                <div style={{display:"flex", flexDirection:'column',justifyContent:'center', alignItems:'center'}}>
-                                    <span className='flexitem' onClick={() => {
-                                        this.setState({ stateVal:'未处理分期' }, () => {
-                                            this.getStageState(4)
-                                        })
-                                    }}>未处理分期</span>
-                                    <span className='flexitem' onClick={() => {
-                                        this.setState({ stateVal:'分期中' }, () => {
-                                            this.getStageState(1)
-                                        })
-                                    }}>分期中</span>
-                                    <span className='flexitem' onClick={() => {
-                                        this.setState({ stateVal:'已完成分期' }, () => {
-                                            this.getStageState(2)
-                                        })
-                                    }}>已完成分期</span>
-                                    <span className='flexitem' onClick={() => {
-                                        this.setState({ stateVal:'异常分期' }, () => {
-                                            this.getStageState(3)
-                                        })
-                                    }}>异常分期</span>
-                                </div>
+                                    <div style={{ display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                                        <span className='flexitem' onClick={() => {
+                                            this.setState({ stateVal: '未处理分期' }, () => {
+                                                this.getStageState(4)
+                                            })
+                                        }}>未处理分期</span>
+                                        <span className='flexitem' onClick={() => {
+                                            this.setState({ stateVal: '分期中' }, () => {
+                                                this.getStageState(1)
+                                            })
+                                        }}>分期中</span>
+                                        <span className='flexitem' onClick={() => {
+                                            this.setState({ stateVal: '已完成分期' }, () => {
+                                                this.getStageState(2)
+                                            })
+                                        }}>已完成分期</span>
+                                        <span className='flexitem' onClick={() => {
+                                            this.setState({ stateVal: '异常分期' }, () => {
+                                                this.getStageState(3)
+                                            })
+                                        }}>异常分期</span>
+                                    </div>
                                 }
                                 trigger="hover"
                                 visible={stateVisible}
@@ -550,7 +550,7 @@ class Order extends Component {
                                     onChange={e => this.setState({ stateVal: e.target.value })}></Input>
                             </Popover>
                             <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
-                                onClick={() => this.setState({ loading:true }, () => { this.getStageState() })}>搜索</Button>
+                                onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>搜索</Button>
                         </div>
                         : <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
@@ -571,22 +571,22 @@ class Order extends Component {
                                 <Option value="已删除">已删除</Option>
                             </Select>
                             <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
-                                onClick={() => this.setState({ loading:true }, () => { this.getStageState() })}>搜索</Button>
+                                onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>搜索</Button>
                         </div>}
                     <div style={{ width: '100%' }}>
                         {goodsIndex === 1
                             ? <Table columns={columns}
                                 dataSource={listPhased}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} 
+                                pagination={{ pageSize: 4, position: ['bottomLeft'] }}
                                 loading={loading}
-                                locale={{emptyText:'暂无数据'}} />
+                                locale={{ emptyText: '暂无数据' }} />
                             : <Table columns={colOnline}
                                 dataSource={listOnline}
                                 style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 10 }} 
+                                pagination={{ pageSize: 4, position: ['bottomLeft'] }}
                                 loading={loading}
-                                locale={{emptyText:'暂无数据'}} />}
+                                locale={{ emptyText: '暂无数据' }} />}
                     </div>
                 </div>
 
@@ -612,11 +612,10 @@ class Order extends Component {
                                 content={<Table columns={employColumns}
                                     dataSource={data}
                                     style={{ textAlign: 'center' }}
-                                    pagination={{ pageSize: 2 }} 
-                                    locale={{emptyText:'暂无数据'}} />}
+                                    pagination={{ pageSize: 2 }}
+                                    locale={{ emptyText: '暂无数据' }} />}
                                 trigger="hover"
                                 visible={visible}
-                                onVisibleChange={this.handleVisibleChange}
                             >
                                 <Input style={{ width: 150, margin: '0 20px' }}
                                     placeholder='关联员工'
@@ -639,7 +638,7 @@ class Order extends Component {
                             <div className='mbLabel'>
                                 <span>订单编号</span>
                                 <span>{orderId}</span>
-                                <span style={{ color: '#1089EB' }}>复制</span>
+                                {/* <span style={{ color: '#1089EB' }}>复制</span> */}
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目名称</span>
@@ -656,7 +655,11 @@ class Order extends Component {
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>支付方式</span>
-                                <span style={{ color: '#13CE66' }}>{orderPayType}</span>
+                                <span style={{ color: '#13CE66' }}>
+                                    {orderPayType === 'bank' ? '银行卡' : null}
+                                    {orderPayType === 'alipay' ? '支付宝' : null}
+                                    {orderPayType === 'weixin' ? '微信' : null}
+                                </span>
                             </div>
                         </div>
                         <div className='modalBodyChild'>
