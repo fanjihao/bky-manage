@@ -64,7 +64,7 @@ class Goods extends Component {
         goodsProId: '',
         
         treeData:[],
-        value:'',
+        value:1,
         loading:true
     }
     getStageItem = () => {
@@ -317,19 +317,6 @@ class Goods extends Component {
                 console.log(err)
             })
     }
-    changeFenlei = val => {
-        this.setState({
-            stageFenlei: val
-        })
-    }
-    changefl = val => {
-        let checkedFl = this.state.fenleiList.filter(item => val === item.id)
-        this.setState({
-            cateName: checkedFl[0].cateName,
-            cateId: val,
-
-        })
-    }
     dismount = (i, type) => {
         axios({
             url: '/statistics/dismountPhasedProject',
@@ -445,7 +432,7 @@ class Goods extends Component {
     goodsOkShelves = (which) => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { goodsClass, goodsName, goodsKey1, goodsKey2, goodsKey3,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsFileList } = this.state
+            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsFileList, value } = this.state
         let photoStr = ''
         let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
         for (let i = 0; i < goodsFileList.length; i++) {
@@ -458,7 +445,7 @@ class Goods extends Component {
         let formData = new FormData()
         formData.append('merId', user.id)
         formData.append('keyword', goodsKey1 + ',' + goodsKey2 + ',' + goodsKey3)
-        formData.append('cateId', goodsClass)
+        formData.append('cateId', value)
         formData.append('name', goodsName)
         formData.append('price', Number(goodsPrice))
         formData.append('vipPrice', Number(goodsVip))
@@ -493,6 +480,7 @@ class Goods extends Component {
             goodsModal: true,
             goodsMoInfo: type
         }, () => {
+            console.log(i)
             if (type === 'edit') {
                 let keyArr = i.keyword.split(',')
                 let imgArr = []
@@ -543,7 +531,7 @@ class Goods extends Component {
     onlineSure = (i) => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { goodsNo, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsClass,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, goodsClassVal,
+            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, value,
             goodsFileList } = this.state
         let photoStr = ''
         let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
@@ -569,8 +557,7 @@ class Goods extends Component {
             isshow = 0
         }
         let formData = new FormData()
-        formData.append('cateId', goodsClass)
-        formData.append('cateName', goodsClassVal)
+        formData.append('cateId', value)
         formData.append('ficti', goodsSales)
         formData.append('id', goodsNo)
         formData.append('image', photoStr)

@@ -157,8 +157,8 @@ export default class Employee extends Component {
                 isLook: true,
                 employNo: item.id, // 员工工号
                 employId: item.idCard, // 员工身份证
-                employSex: sex, // 员工性别
-                employMarital: marital, // 员工婚姻状态
+                employSexVal: sex, // 员工性别
+                employMaritalVal: marital, // 员工婚姻状态
                 employhomeAdd: item.address, // 员工户籍地址
                 employName: item.staffName, // 员工名字
                 employPhone: item.phone, // 员工电话
@@ -172,26 +172,28 @@ export default class Employee extends Component {
                 avatar: item.avatar
             })
         } else {
-            // let sex, marital
+            let sex, maritalStatus
             console.log(item, '11111')
-            // if(item.sex === 1) {
-            //     sex = '男'
-            // } else {
-            //     sex = '女'
-            // }
-            // if(item.maritalStatus === 1) {
-            //     maritalStatus = '未婚'
-            // } else {
-            //     maritalStatus = '已婚'
-            // }
+            if(item.sex === 1) {
+                sex = '男'
+            } else {
+                sex = '女'
+            }
+            if(item.maritalStatus === 1) {
+                maritalStatus = '未婚'
+            } else {
+                maritalStatus = '已婚'
+            }
             this.setState({
                 whatDo: '修改',
                 detailVisible: true,
                 isLook: false,
                 employNo: item.id, // 员工工号
                 employId: item.idCard, // 员工身份证
-                employSex: item.sex, // 员工性别
-                employMarital: item.maritalStatus, // 员工婚姻状态
+                employSex:item.sex,
+                employMarital:item.maritalStatus,
+                employSexVal: sex, // 员工性别
+                employMaritalVal: maritalStatus, // 员工婚姻状态
                 employhomeAdd: item.address, // 员工户籍地址
                 employName: item.staffName, // 员工名字
                 employPhone: item.phone, // 员工电话
@@ -207,15 +209,13 @@ export default class Employee extends Component {
         }
     }
     // 改变性别
-    sexChange = (val) => {
-        console.log(val)
+    sexChange = (val, label) => {
         this.setState({
             employSex: val
         })
     }
     // 婚姻状况
     maritalChange = (val) => {
-        console.log(val)
         this.setState({
             employMarital: val
         })
@@ -438,7 +438,7 @@ export default class Employee extends Component {
         ]
         const { detailVisible, whatDo, isLook,
             // employNo,
-            employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
+            employId, employSex, employMarital, employSexVal, employMaritalVal, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor,
             employGraduate, name, loading,
             // phone, 
@@ -543,19 +543,19 @@ export default class Employee extends Component {
                             <div className='embLabel'>
                                 <span>性别</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
-                                    placeholder='请选择性别' defaultValue={employSex}
+                                    placeholder='请选择性别' defaultValue={employSexVal}
                                     onChange={this.sexChange}>
-                                    <Option value='1'>男</Option>
-                                    <Option value='2'>女</Option>
+                                    <Option value={1} label='男' key={1}>男</Option>
+                                    <Option value={2} label='女' key={2}>女</Option>
                                 </Select>
                             </div>
                             <div className='embLabel'>
                                 <span>婚姻状态</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
-                                    placeholder='请选择婚姻状况' defaultValue={employMarital}
+                                    placeholder='请选择婚姻状况' defaultValue={employMaritalVal}
                                     onChange={this.maritalChange}>
-                                    <Option value='1'>未婚</Option>
-                                    <Option value='2'>已婚</Option>
+                                    <Option value={1} key='1'>未婚</Option>
+                                    <Option value={2} key='2'>已婚</Option>
                                 </Select>
                             </div>
                             <div className='embLabel'>
@@ -620,13 +620,13 @@ export default class Employee extends Component {
                                     defaultValue={employHighest}
                                     placeholder='请选择员工最高学历'
                                     onChange={this.educateChange}>
-                                    <Option value='博士'>博士</Option>
-                                    <Option value='硕士'>硕士/研究生</Option>
-                                    <Option value='本科'>本科</Option>
-                                    <Option value='专科'>专科</Option>
-                                    <Option value='高中'>高中</Option>
-                                    <Option value='初中'>初中</Option>
-                                    <Option value='小学'>小学</Option>
+                                    <Option value='博士' key='1'>博士</Option>
+                                    <Option value='硕士' key='2'>硕士/研究生</Option>
+                                    <Option value='本科' key='3'>本科</Option>
+                                    <Option value='专科' key='4'>专科</Option>
+                                    <Option value='高中' key='5'>高中</Option>
+                                    <Option value='初中' key='6'>初中</Option>
+                                    <Option value='小学' key='7'>小学</Option>
                                 </Select>
                             </div>
                         </div>
