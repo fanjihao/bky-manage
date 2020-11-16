@@ -611,7 +611,7 @@ class HomeIndex extends Component {
                                     className='qrcode'
                                     size={200}
                                 />
-                                <div className="download-text">博客云扫码下载</div>
+                                <div className="download-text">博客云商家码</div>
                             </div>
 
                             <div className="handle">

@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import './home.css'
 import { Layout, Menu } from 'antd'
+import { HomeOutlined, ShoppingOutlined, AccountBookOutlined, SettingOutlined, TeamOutlined, TransactionOutlined } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'
 import HomeIndex from '../homeIndex/HomeIndex'
 import Goods from '../goods/Goods'
@@ -51,11 +52,11 @@ class Home extends Component {
                             <img src={require('../../assets/imgs/logo.png')} className="header-image" alt="图标"></img>
                             <h2>博客云商家版</h2>
                         </div>
-                        <Menu theme="light" mode="inline" defaultSelectedKeys={['1']} style={{textAlign: 'center'}}>
-                            <Menu.Item key="1">
+                        <Menu theme="light" mode="inline" defaultSelectedKeys={['1']}>
+                            <Menu.Item key="1" icon={<HomeOutlined />}>
                                 <NavLink to='/home/homeindex'>首页</NavLink>
                             </Menu.Item>
-                            <Menu.Item key="2">
+                            <Menu.Item key="2" icon={<TransactionOutlined />}>
                                 <NavLink to='/home/cashier'>收银管理</NavLink>
                             </Menu.Item>
                             {/* <SubMenu key="2" title="收银管理">
@@ -66,16 +67,16 @@ class Home extends Component {
                                     <NavLink to='/home/cashier'>客户管理</NavLink>
                                 </Menu.Item>
                             </SubMenu> */}
-                            <Menu.Item key="3">
+                            <Menu.Item key="3" icon={<ShoppingOutlined />}>
                                 <NavLink to='/home/goods'>商品管理</NavLink>
                             </Menu.Item>
-                            <Menu.Item key="4">
+                            <Menu.Item key="4" icon={<AccountBookOutlined />}>
                                 <NavLink to='/home/order'>订单管理</NavLink>
                             </Menu.Item>
-                            <Menu.Item key="5">
+                            <Menu.Item key="5" icon={<TeamOutlined />}>
                                 <NavLink to='/home/employee'>员工管理</NavLink>
                             </Menu.Item>
-                            <Menu.Item key="6">
+                            <Menu.Item key="6" icon={<SettingOutlined />}>
                                 <NavLink to='/home/setting'>设置</NavLink>
                             </Menu.Item>
                         </Menu>
