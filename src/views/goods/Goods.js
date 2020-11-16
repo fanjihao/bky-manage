@@ -3,6 +3,7 @@ import './Goods.css'
 import { Input, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover, TreeSelect } from 'antd'
 import axios from '../../http/index'
 import Modal from 'antd/lib/modal/Modal'
+import { UploadOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons'
 
 const { TextArea } = Input
 
@@ -84,10 +85,16 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                this.setState({
-                    loading:false,
-                    stageData: res.data.data.list
-                })
+                if(res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map(item => {
+                        item.key = item.id
+                    })
+                    this.setState({
+                        loading:false,
+                        stageData: list
+                    })
+                }
             })
             .catch(err => {
                 message.error('查询商品失败')
@@ -116,10 +123,16 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                this.setState({
-                    loading:false,
-                    onlineGoods: res.data.data.list
-                })
+                if(res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map(item => {
+                        item.key = item.id
+                    })
+                    this.setState({
+                        loading:false,
+                        onlineGoods: list
+                    })
+                }
             })
             .catch(err => {
                 message.error('查询商品失败')
@@ -1056,17 +1069,29 @@ class Goods extends Component {
                             >
                             </TreeSelect>
                         {goodsIndex === 1
-                            ? <Button
-                                style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
-                                type='primary'
-                                onClick={() => this.setState({ loading:true }, () => { this.getStageItem() })}>搜索</Button>
-                            : <Button
-                                style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
-                                type='primary'
-                                onClick={() => this.setState({ loading:true }, () => { this.getOnlineItem() })}>搜索</Button>}
+                            ? 
+                            // <Button
+                            //     style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
+                            //     type='primary'
+                            //     onClick={() => this.setState({ loading:true }, () => { this.getStageItem() })}>搜索</Button>
+                            <div onClick={() => this.setState({ loading:true }, () => { this.getStageItem() })} className='search-btn'>
+                                <SearchOutlined />搜索
+                            </div>
+                            : 
+                            // <Button
+                            //     style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
+                            //     type='primary'
+                            //     onClick={() => this.setState({ loading:true }, () => { this.getOnlineItem() })}>搜索</Button>}
+                            <div onClick={() => this.setState({ loading:true }, () => { this.getOnlineItem() })} className='search-btn'>
+                                <SearchOutlined />搜索
+                            </div>}
                         {goodsIndex === 1
-                            ? <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.editStage('add', 0)}>+新增分期项目</Button>
-                            : <Button style={{ margin: '0 20px 0 0' }} type='primary' onClick={() => this.editOnline('add', 0)}>+新增商品</Button>}
+                            ? <div className='add-btn' onClick={() => this.editStage('add', 0)} style={{width:120}}>
+                                <PlusOutlined />新增分期项目
+                            </div>
+                            : <div className='add-btn' onClick={() => this.editOnline('add', 0)}>
+                                <PlusOutlined />新增商品
+                            </div>}
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         {goodsIndex === 1 ?

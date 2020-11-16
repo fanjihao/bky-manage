@@ -110,7 +110,7 @@
     height: 30px;
     line-height: 30px;
     text-align: center;
-    border-radius: 5px;
+    border-radius: 4px;
     background-color: #13CE66;
     color:white;
     margin-right: 10px;
@@ -120,7 +120,7 @@
     height: 30px;
     line-height: 30px;
     text-align: center;
-    border-radius: 5px;
+    border-radius: 4px;
     background-color: orange;
     color:white;
     margin-right: 10px;
@@ -143,4 +143,31 @@
     width: 50px;
     height: 50px;
     border: 1px solid #eee;
+}
+.input-box{
+    width: 150px;
+    display: inline-block;
+    /* float: right; */
+}
+.cashmbLabel{
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+.project-img{
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+.add-pro-span{
+    display: inline-block;
+    width: 18%;
+    height: 35px;
+    line-height: 35px;
+}
+.addBody{
+    width: 90%;
+    margin: 0 auto;
 }

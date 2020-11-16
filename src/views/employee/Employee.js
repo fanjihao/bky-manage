@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import './Employee.css'
-import { Input, Button, Table, Space, Popconfirm, Modal, Select, DatePicker, message, Upload, Avatar } from 'antd'
+import { Input, Button, Table, Space, Popconfirm, Modal, Select, DatePicker, message, Upload, Avatar, notification } from 'antd'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
 import axios from '../../http/index'
-import { UploadOutlined } from '@ant-design/icons'
+import { UploadOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons'
 const { Option } = Select
 
 const nationArr = ["汉族", "蒙古族", "回族", "藏族", "维吾尔族", "苗族", "彝族", "壮族", "布依族", "朝鲜族", "满族", "侗族", "瑶族", "白族", "土家族",
@@ -31,6 +31,8 @@ export default class Employee extends Component {
         employHighest: '', // 员工最高学历
         employMajor: '', // 员工所学专业
         employGraduate: '', // 员工毕业时间
+        employGrade: '', // 员工等级
+        employGradeVal: '', // 员工等级
         name: '',
         phone: '',
         data: [],
@@ -53,13 +55,19 @@ export default class Employee extends Component {
             }
         })
             .then(res => {
-                console.log(res)
-                this.setState({
-                    data: res.data.data.list,
-                    loading: false
-                })
+                if (res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map((item) => {
+                        item.key = item.id
+                    })
+                    this.setState({
+                        data: list,
+                        loading: false
+                    })
+                }
             })
             .catch(err => {
+                console.log(err)
                 message.error('查询员工列表失败')
             })
     }
@@ -78,7 +86,7 @@ export default class Employee extends Component {
     }
     publicData = (type) => {
         const { employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
-            employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar } = this.state
+            employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar, employGrade } = this.state
         console.log(employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar)
         let user = JSON.parse(localStorage.getItem('user'))
@@ -98,6 +106,7 @@ export default class Employee extends Component {
         formData.append("education", employHighest)
         formData.append("avatar", avatar)
         formData.append("graduationTime", employGraduate)
+        formData.append("grade", employGrade)
         if (type === 'edit') {
             formData.append("id", employNo)
         }
@@ -105,24 +114,62 @@ export default class Employee extends Component {
     }
     addEmploy = () => {
         let formData = this.publicData()
-        axios({
-            url: '/merchantOrder/addStaff',
-            method: 'POST',
-            data: formData
-        })
-            .then(res => {
-                if (res.data.status === 200) {
-                    this.setState({
-                        detailVisible: false,
-                        loading: true
-                    }, () => {
-                        this.getEmploy()
-                    })
-                }
+        const { employId, employSex, employhomeAdd, employName, employPhone,
+            employNation, employNowAdd, avatar, employGrade } = this.state
+        if (employSex === '' || employName === '' || employPhone === '' || employNation === '' || employNowAdd === ''
+            || avatar === '' || employGrade === '' || employhomeAdd === '' || employId === '') {
+            notification.open({
+                message: '提示',
+                duration:3,
+                description:
+                    '*号为必填字段，不能为空，请您检查后再确认',
+                style:{
+                    color:"red"
+                },
+                onClick: () => {
+                    console.log('Notification Clicked!');
+                },
             })
-            .catch(err => {
-                message.error('添加失败')
+        } else {
+            axios({
+                url: '/merchantOrder/addStaff',
+                method: 'POST',
+                data: formData
             })
+                .then(res => {
+                    console.log(res, 'ddddddddd')
+                    if (res.data.status === 200) {
+                        this.setState({
+                            detailVisible: false,
+                            loading: true,
+                            employNo: '', // 员工工号
+                            employId: '', // 员工身份证
+                            idWrong: false,
+                            telWrong: false,
+                            employSex: '', // 员工性别
+                            employMarital: '', // 员工婚姻状态
+                            employhomeAdd: '', // 员工户籍地址
+                            employName: '', // 员工名字
+                            employPhone: '', // 员工电话
+                            employBirth: '', // 员工生日
+                            employNation: '', // 员工民族
+                            employNowAdd: '', // 员工现居地址
+                            employSchool: '', // 员工毕业院校
+                            employHighest: '', // 员工最高学历
+                            employMajor: '', // 员工所学专业
+                            employGraduate: '', // 员工毕业时间
+                            employGrade: '', // 员工等级
+                            employGradeVal: '', // 员工等级
+                            avatar: '',
+                        }, () => {
+                            this.getEmploy()
+                        })
+                    }
+                })
+                .catch(err => {
+                    message.error('添加失败')
+                })
+        }
     }
     // 气泡取消
     cancel = () => {
@@ -151,6 +198,7 @@ export default class Employee extends Component {
             } else {
                 marital = '已婚'
             }
+            console.log(item)
             this.setState({
                 whatDo: '查看',
                 detailVisible: true,
@@ -169,17 +217,18 @@ export default class Employee extends Component {
                 employHighest: item.education, // 员工最高学历
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
-                avatar: item.avatar
+                avatar: item.avatar,
+                employGrade:item.grade,
+                employGradeVal:item.grade + '级'
             })
         } else {
             let sex, maritalStatus
-            console.log(item, '11111')
-            if(item.sex === 1) {
+            if (item.sex === 1) {
                 sex = '男'
             } else {
                 sex = '女'
             }
-            if(item.maritalStatus === 1) {
+            if (item.maritalStatus === 1) {
                 maritalStatus = '未婚'
             } else {
                 maritalStatus = '已婚'
@@ -190,8 +239,8 @@ export default class Employee extends Component {
                 isLook: false,
                 employNo: item.id, // 员工工号
                 employId: item.idCard, // 员工身份证
-                employSex:item.sex,
-                employMarital:item.maritalStatus,
+                employSex: item.sex,
+                employMarital: item.maritalStatus,
                 employSexVal: sex, // 员工性别
                 employMaritalVal: maritalStatus, // 员工婚姻状态
                 employhomeAdd: item.address, // 员工户籍地址
@@ -204,7 +253,9 @@ export default class Employee extends Component {
                 employHighest: item.education, // 员工最高学历
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
-                avatar: item.avatar
+                avatar: item.avatar,
+                employGrade:item.grade,
+                employGradeVal:item.grade + '级'
             })
         }
     }
@@ -232,25 +283,43 @@ export default class Employee extends Component {
     }
     changeStaff = () => {
         let data = this.publicData('edit')
-        axios({
-            url: '/merchantOrder/updateStaff',
-            method: 'POST',
-            data: data
-        })
-            .then(res => {
-                if (res.data.status === 200) {
-                    message.success('修改成功')
-                    this.setState({
-                        detailVisible: false,
-                        loading: true
-                    }, () => {
-                        this.getEmploy()
-                    })
-                }
+        const { employId, employSex, employhomeAdd, employName, employPhone,
+            employNation, employNowAdd, avatar, employGrade } = this.state
+        if (employSex === '' || employName === '' || employPhone === '' || employNation === '' || employNowAdd === ''
+            || avatar === '' || employGrade === '' || employhomeAdd === '' || employId === '') {
+            notification.open({
+                message: '提示',
+                duration:3,
+                description:
+                    '*号为必填字段，不能为空，请您检查后再确认',
+                style:{
+                    color:"red"
+                },
+                onClick: () => {
+                    console.log('Notification Clicked!');
+                },
             })
-            .catch(err => {
-                message.error('修改失败')
+        } else {
+            axios({
+                url: '/merchantOrder/updateStaff',
+                method: 'POST',
+                data: data
             })
+                .then(res => {
+                    if (res.data.status === 200) {
+                        message.success('修改成功')
+                        this.setState({
+                            detailVisible: false,
+                            loading: true
+                        }, () => {
+                            this.getEmploy()
+                        })
+                    }
+                })
+                .catch(err => {
+                    message.error('修改失败')
+                })
+        }
     }
     restore = (i) => {
         axios({
@@ -338,6 +407,13 @@ export default class Employee extends Component {
             })
         }
     }
+    // 选择员工等级
+    gradeChange = (val, i) => {
+        this.setState({
+            employGrade: val,
+            employGradeVal: i.label
+        })
+    }
     render() {
         let nationDom = nationArr.map((item, index) => {
             return <Option value={item} key={index}>{item}</Option>
@@ -368,10 +444,20 @@ export default class Employee extends Component {
                 }
             },
             {
+                title: '员工等级',
+                dataIndex: 'grade',
+                key: 'grade',
+                render: src => {
+                    return (
+                        <span>{src + '级'}</span>
+                    )
+                }
+            },
+            {
                 title: '手机号',
                 dataIndex: 'phone',
                 key: 'phone',
-                render: (text, record) => <span>{text}</span>
+                render: (text, record) => <span>{text.substr(0, 3) + '****' + text.substr(7)}</span>
                 ,
             },
             {
@@ -379,7 +465,7 @@ export default class Employee extends Component {
                 dataIndex: 'idCard',
                 key: 'idCard',
                 render: (text, record) =>
-                    <span>{text}</span>
+                    <span>{text.substr(0, 6) + '********'}</span>
                 ,
             },
             {
@@ -438,8 +524,8 @@ export default class Employee extends Component {
         ]
         const { detailVisible, whatDo, isLook,
             // employNo,
-            employId, employSex, employMarital, employSexVal, employMaritalVal, employhomeAdd, employName, employPhone, employBirth,
-            employNation, employNowAdd, employSchool, employHighest, employMajor,
+            employId, employSexVal, employMaritalVal, employhomeAdd, employName, employPhone, employBirth,
+            employNation, employNowAdd, employSchool, employHighest, employMajor, employGrade, employGradeVal,
             employGraduate, name, loading,
             // phone, 
             data, idWrong, telWrong, avatar } = this.state
@@ -495,11 +581,12 @@ export default class Employee extends Component {
                             placeholder='请输入手机号码'
                             value={phone}
                             onChange={e => this.setPhone(e)}></Input> */}
-                        <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
-                            type='primary'
-                            onClick={() => this.setState({ loading: true }, () => { this.getEmploy() })}>搜索</Button>
-                        <Button style={{ margin: '0 20px 0 0' }} type='primary'
-                            onClick={() => this.employDetail('add', 0)}>+新增员工</Button>
+                        <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getEmploy() })}>
+                            <SearchOutlined />搜索
+                        </div>
+                        <div className='add-btn' onClick={() => this.employDetail('add', 0)}>
+                            <PlusOutlined />新增员工
+                        </div>
                     </div>
                     <div style={{ width: '100%' }}>
                         <Table columns={columns}
@@ -526,7 +613,7 @@ export default class Employee extends Component {
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
                             <div className='embLabel'>
-                                <span>员工头像</span>
+                                <span><span style={{ color: 'red' }}>*</span>员工头像</span>
                                 <Upload {...props} disabled={isLook} className='avatar-uploader' showUploadList={false}>
                                     {avatar
                                         ? <Avatar src={avatar} alt="avatar" size={128} />
@@ -534,14 +621,14 @@ export default class Employee extends Component {
                                 </Upload>
                             </div>
                             <div className='embLabel'>
-                                <span>身份证号</span>
+                                <span><span style={{ color: 'red' }}>*</span>身份证号</span>
                                 <Input placeholder='请输入身份证号' disabled={isLook}
                                     value={employId}
                                     onChange={e => this.setNo(e, 'id')}
                                     style={{ borderColor: idWrong ? 'red' : null }}></Input>
                             </div>
                             <div className='embLabel'>
-                                <span>性别</span>
+                                <span><span style={{ color: 'red' }}>*</span>性别</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
                                     placeholder='请选择性别' defaultValue={employSexVal}
                                     onChange={this.sexChange}>
@@ -559,7 +646,7 @@ export default class Employee extends Component {
                                 </Select>
                             </div>
                             <div className='embLabel'>
-                                <span>户籍地址</span>
+                                <span><span style={{ color: 'red' }}>*</span>户籍地址</span>
                                 <Input placeholder='输入户籍地址' disabled={isLook}
                                     value={employhomeAdd}
                                     onChange={e => this.setNo(e, 'home')}></Input>
@@ -567,13 +654,13 @@ export default class Employee extends Component {
                         </div>
                         <div className='modalBodyChild'>
                             <div className='embLabel'>
-                                <span>员工姓名</span>
+                                <span><span style={{ color: 'red' }}>*</span>员工姓名</span>
                                 <Input placeholder='请输入员工姓名' disabled={isLook}
                                     value={employName}
                                     onChange={e => this.setNo(e, 'name')}></Input>
                             </div>
                             <div className='embLabel'>
-                                <span>手机号码</span>
+                                <span><span style={{ color: 'red' }}>*</span>手机号码</span>
                                 <Input placeholder='请输入员工手机号码' disabled={isLook}
                                     value={employPhone}
                                     onChange={e => this.setNo(e, 'phone')}
@@ -587,7 +674,7 @@ export default class Employee extends Component {
                                     style={{ width: '60%' }} />
                             </div>
                             <div className='embLabel'>
-                                <span>民族</span>
+                                <span><span style={{ color: 'red' }}>*</span>民族</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
                                     defaultValue={employNation}
                                     placeholder='请选择民族'
@@ -596,10 +683,26 @@ export default class Employee extends Component {
                                 </Select>
                             </div>
                             <div className='embLabel'>
-                                <span>现居地址</span>
+                                <span><span style={{ color: 'red' }}>*</span>现居地址</span>
                                 <Input placeholder='请输入现在居住地址' disabled={isLook}
                                     value={employNowAdd}
                                     onChange={e => this.setNo(e, 'now')}></Input>
+                            </div>
+                        </div>
+                        <div className='modalBodyChild'>
+                            <div className='embLabel'>
+                                <span><span style={{ color: 'red' }}>*</span>员工等级</span>
+                                <Select style={{ width: '60%' }} disabled={isLook}
+                                    defaultValue={employGradeVal}
+                                    placeholder='请选择等级'
+                                    onChange={this.gradeChange}
+                                >
+                                    <Option value={'A'} label='A级' key='1'>A级</Option>
+                                    <Option value={'B'} label='B级' key='2'>B级</Option>
+                                    <Option value={'C'} label='C级' key='3'>C级</Option>
+                                    <Option value={'D'} label='D级' key='4'>D级</Option>
+                                    <Option value={'E'} label='E级' key='5'>E级</Option>
+                                </Select>
                             </div>
                         </div>
                     </div>

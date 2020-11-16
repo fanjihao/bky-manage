@@ -4,13 +4,13 @@ import './Cashier.css'
 import { Input, Select, Space, Table, Modal, message, Image, DatePicker, Popover, Button } from 'antd'
 import moment from 'moment'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
-import { CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
+import { CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons'
 import XLSX from 'xlsx'
 
 const { RangePicker } = DatePicker
 const { Option } = Select
 const { TextArea } = Input
-const dateFormat = 'YYYY/MM/DD'
+const dateFormat = 'YYYY/MM/DD/HH'
 
 class Cashier extends Component {
     state = {
@@ -82,13 +82,24 @@ class Cashier extends Component {
         mark: null,
         // 美疗师
         staffName: null,
+        staffId:null, 
         // 客户电话
         userPhone: null,
         loading: false,
         // 员工
         employList: null,
         // 气泡
-        visible: false
+        visible: false,
+        // 添加线下
+        offlineAmount: '',
+        offlineUserPhone: '',
+        addVisible: false,
+        offlineStaff: '',
+        offlineMark: '',
+        projectList:[],
+        projectName:'',
+        projectImage:'',
+        projectId:''
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -130,7 +141,8 @@ class Cashier extends Component {
                     addTime: res.data.data.addTime,
                     mark: res.data.data.mark,
                     staffName: res.data.data.staffName,
-                    userPhone: res.data.data.userPhone
+                    userPhone: res.data.data.userPhone,
+                    staffId:res.data.data.staffId
                 }, () => {
                     this.setState({
                         orderVisible: true
@@ -263,9 +275,12 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('查询订单成功', res)
                 if (res.data.data) {
-                    this.setState({ data: res.data.data, loading: false })
+                    let data = res.data.data
+                    data.map(item => {
+                        item.key = item.orderId
+                    })
+                    this.setState({ data, loading: false })
                 } else {
                     this.setState({ data: [], loading: false })
                 }
@@ -290,19 +305,46 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('获取员工信息成功', res)
-                this.setState({
-                    employList: res.data.data.list
-                })
+                if (res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map(item => item.key = item.id)
+                    this.setState({
+                        employList: list
+                    })
+                }
             })
             .catch(err => {
             })
+    }
+    // 获取商家项目
+    getProject = () => {
+        const id = JSON.parse(localStorage.getItem('user')).id
+        axios({
+            url:'/consume',
+            method:'GET',
+            params:{
+                enter:id
+            }
+        })
+        .then(res => {
+            if(res.data.data) {
+                let data = res.data.data
+                data.map(item => item.key = item.phases_id)
+                this.setState({
+                    projectList:data
+                })
+            }
+            console.log(res.data.data)
+        })
+        .catch(err => {
+            console.log(err)
+        })
     }
     componentDidMount() {
         const date = new Date()
         let Y = date.getFullYear()
         let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
-        let D = date.getDate();
+        let D = date.getDate() + 1;
         const nowDate = Y + '-' + M + '-' + D
         // console.log(nowDate)
 
@@ -331,6 +373,8 @@ class Cashier extends Component {
             this.getOrderData(id, 1)
             // 员工
             this.getEmploy()
+            // 商店项目
+            this.getProject()
         })
     }
     // 搜索
@@ -339,6 +383,39 @@ class Cashier extends Component {
         const { orderType } = this.state
         const id = JSON.parse(localStorage.getItem('user')).id
         this.getOrderData(id, orderType + 1)
+    }
+    // 添加线下订单
+    addProject = () => {
+        this.setState({
+            addVisible:true
+        })
+    }
+    addOrder = () => {
+        const { offlineAmount, offlineUserPhone, offlineStaff, offlineMark, projectId, projectImage, projectName } = this.state
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            url: '/consume',
+            method: 'POST',
+            data: {
+                amount: Number(offlineAmount),
+                classify: 2,
+                enterId: user.id,
+                image: projectImage,
+                mark: offlineMark,
+                name:projectName,
+                orderId: '',
+                phasesId:projectId,
+                staff: offlineStaff,
+                storeId: user.systemStoreId,
+                userPhone: offlineUserPhone
+            }
+        })
+            .then(res => {
+                console.log(res, 'asdasdssssss')
+            })
+            .catch(err => {
+                console.log(err)
+            })
     }
     // 时间戳转换
     formatTime = (time) => {
@@ -370,15 +447,16 @@ class Cashier extends Component {
     }
     // 修改订单信息
     updateOrder = () => {
-        const { staffName, mark, orderId } = this.state
+        const { staffId, mark, orderId, classify } = this.state
         const id = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'POST',
             url: '/cash/update',
             data: {
-                staffName,
+                staffId,
                 mark,
-                orderId
+                orderId,
+                classify
             }
         })
             .then(res => {
@@ -408,7 +486,10 @@ class Cashier extends Component {
             surplus,
             payType, payPrice, addTime, mark,
             staffName, goodsName, time, loading,
-            employList, visible, userPhone } = this.state
+            employList, visible, userPhone,
+            // 线下
+            offlineAmount, offlineUserPhone, addVisible, offlineStaff, offlineMark, projectList, projectVis,
+            projectName, projectImage } = this.state
 
         let newData
         if (data.length > 0) {
@@ -425,9 +506,12 @@ class Cashier extends Component {
                 dataIndex: 'image',
                 key: 'image',
                 render: text => {
-                    let arr = text.split(',')
+                    let src
+                    if(text) {
+                        src = text.split(',')[0]
+                    }
                     return (
-                        <Image className='goods-item-img' src={arr[0]}></Image>
+                        <Image className='goods-item-img' src={src}></Image>
                     )
                 },
                 align: 'center'
@@ -438,19 +522,6 @@ class Cashier extends Component {
                 key: 'name',
                 align: 'center'
             },
-            // {
-            //     title: '分类',
-            //     dataIndex: 'classify',
-            //     key: 'classify',
-            //     align: 'center',
-            //     render: text => (
-            //         <div>
-            //             {
-            //                 text === 1 ? '线上订单' : '线下订单'
-            //             }
-            //         </div>
-            //     )
-            // },
             {
                 title: '实付金额',
                 dataIndex: 'payPrice',
@@ -465,18 +536,6 @@ class Cashier extends Component {
                 align: 'center',
                 render: text => <>￥{text}</>
             },
-            // {
-            //     title: '销量',
-            //     key: 'sales',
-            //     dataIndex: 'sales',
-            //     align: 'center'
-            // },
-            // {
-            //     title: '库存',
-            //     key: 'stock',
-            //     dataIndex: 'stock',
-            //     align: 'center'
-            // },
             {
                 title: '交易时间',
                 key: 'creatTime',
@@ -522,7 +581,33 @@ class Cashier extends Component {
             {
                 title: '操作',
                 key: 'action',
-                render: (text, record) => <a onClick={() => this.setState({ visible: false, staffName: record.staffName })}>选择</a>
+                render: (text, record) => <a onClick={() => {
+                    if (addVisible) {
+                        this.setState({ visible: false, offlineStaff: record.id })
+                    } else {
+                        this.setState({ visible: false, staffName: record.staffName, staffId:record.id })
+                    }
+                }}>选择</a>
+
+            },
+        ]
+        const projectColumns = [
+            {
+                title: '编号',
+                dataIndex: 'phases_id',
+                key: 'phases_id'
+            },
+            {
+                title: '项目名称',
+                dataIndex: 'name',
+                key: 'name',
+            },
+            {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => <a onClick={() => {
+                    this.setState({ projectVis: false, projectName: record.name, projectImage:record.image, projectId:record.phases_id })
+                }}>选择</a>
 
             },
         ]
@@ -531,15 +616,6 @@ class Cashier extends Component {
                 <div className='cashierTop'>
                     <span>收银管理</span>
                 </div>
-                {/* <div style={{ margin: 25, marginBottom: 0 }}>
-                    <RangePicker
-                        locale={locale}
-                        className='datePicker'
-                        value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
-                        format={dateFormat}
-                        onChange={this.setTime}
-                    />
-                </div> */}
                 <div className='cashierHeader'>
 
                     <div className='headerTips'>
@@ -561,45 +637,6 @@ class Cashier extends Component {
                             </div>
                         </div>
                     </div>
-                    {/* <div className='headerTips'>
-                        <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
-                            <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
-                        </div>
-                        <div className='sumTotal'>
-                            <div style={{ float: "left", overflow: 'hidden' }}>
-                                {eyeTrue
-                                    ? <span className='month-num'>{monthTrueNum ? monthTrueNum : '0'}</span>
-                                    : <span className='month-num'>*****</span>}
-                                <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
-                            </div>
-                            <div style={{ float: "right" }}>
-                                {eyeTrue
-                                    ? <EyeInvisibleOutlined className='eyeIcon' onClick={this.changeEyeTrue} />
-                                    : <EyeOutlined className='eyeIcon' onClick={this.changeEyeTrue} />}
-                            </div>
-                        </div>
-                    </div>
-                    <div className='headerTips'>
-                        <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
-                            <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
-                        </div>
-                        <div className='sumTotal'>
-                            <div style={{ float: "left", overflow: 'hidden' }}>
-                                {eyeTrue
-                                    ? <span className='month-num'>{monthTrueNum ? monthTrueNum : '0'}</span>
-                                    : <span className='month-num'>*****</span>}
-                                <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
-                            </div>
-                            <div style={{ float: "right" }}>
-                                {eyeTrue
-                                    ? <EyeInvisibleOutlined className='eyeIcon' onClick={this.changeEyeTrue} />
-                                    : <EyeOutlined className='eyeIcon' onClick={this.changeEyeTrue} />}
-                            </div>
-                        </div>
-                    </div> */}
-
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
                             <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月订单总额</span>
@@ -673,6 +710,9 @@ class Cashier extends Component {
                         <div className='daochu-btn' onClick={() => {
                             this.exportExcel(columns, newData, newText)
                         }}><DownloadOutlined />导出</div>
+                        <div className='add-btn' style={{width:120}} onClick={this.addProject}>
+                            <PlusOutlined />添加线下订单
+                        </div>
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         <Table
@@ -685,7 +725,98 @@ class Cashier extends Component {
                         />
                     </div>
                 </div>
-
+                {/* 添加线下订单 */}
+                <Modal
+                    visible={addVisible}
+                    title="订单信息"
+                    onOk={() => this.addOrder()}
+                    onCancel={() => this.setState({ addVisible: false })}
+                    destroyOnClose={true}
+                    bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
+                    width={800}
+                    okText='确定'
+                    cancelText="取消"
+                >
+                    <div className='addBody'>
+                        <div className=''>
+                            <div className='cashmbLabel'>
+                                <span className='add-pro-span'>美疗师</span>
+                                <div className='input-box'>
+                                    <Popover
+                                        content={<Table
+                                            columns={employColumns}
+                                            dataSource={employList}
+                                            style={{ textAlign: 'center' }}
+                                            pagination={{ pageSize: 2 }}
+                                            locale={{ emptyText: '暂无数据' }} />}
+                                        trigger="hover"
+                                        visible={visible}>
+                                        {offlineStaff
+                                            ? <Input style={{ width: 150 }}
+                                                placeholder='关联员工'
+                                                value={offlineStaff}
+                                                onFocus={() => this.setState({ visible: true })} />
+                                            : <Button type="primary" danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>}
+                                    </Popover>
+                                </div>
+                            </div>
+                            <div className='cashmbLabel'>
+                                <span className='add-pro-span'>办理项目</span>
+                                <div className='input-box'>
+                                    <Popover
+                                        content={<Table
+                                            columns={projectColumns}
+                                            dataSource={projectList}
+                                            style={{ textAlign: 'center' }}
+                                            pagination={{ pageSize: 5 }}
+                                            locale={{ emptyText: '暂无数据' }} />}
+                                        trigger="hover"
+                                        visible={projectVis}>
+                                        {projectName
+                                            ? <Input style={{ width: 150 }}
+                                                placeholder='选择项目'
+                                                value={projectName}
+                                                onFocus={() => this.setState({ projectVis: true })} />
+                                            : <Button type="primary" danger onClick={() => this.setState({ projectVis: true })}>点击选择项目</Button>}
+                                    </Popover>
+                                </div>
+                            </div>
+                            <div className='project-img'>
+                                <span className='add-pro-span'>项目图片</span>
+                                <div className='input-box'>
+                                    {projectImage 
+                                    ? <div style={{width:150, height:150, border:'1px solid #eee', overflow:'hidden', lineHeight:'150px', textAlign:'center'}}>
+                                        <Image src={projectImage} style={{width:'100%', height:'100%'}}></Image>
+                                    </div> 
+                                    : <div style={{width:150, height:150, border:'1px solid #eee'}}></div>}
+                                </div>
+                            </div>
+                            <div className='cashmbLabel'>
+                                <span className='add-pro-span'>消费金额</span>
+                                <div className='input-box'>
+                                    <Input placeholder='请输入用户消费金额' value={offlineAmount} style={{ width: 200 }}
+                                        onChange={(e) => this.setState({ offlineAmount: e.target.value })}></Input>
+                                </div>
+                            </div>
+                            <div className='cashmbLabel'>
+                                <span className='add-pro-span'>用户手机号</span>
+                                <div className='input-box'>
+                                    <Input placeholder='请输入用户手机号' value={offlineUserPhone} style={{ width: 200 }}
+                                        onChange={(e) => this.setState({ offlineUserPhone: e.target.value })}></Input>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='modalNote'>
+                        <div style={{ width: '100%' }}><span>客户喜好</span></div>
+                        <div>
+                            <TextArea rows={4}
+                                value={offlineMark}
+                                onChange={e => this.setState({ offlineMark: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                </Modal>
                 {/* 订单信息详情 */}
                 <Modal
                     visible={orderVisible}

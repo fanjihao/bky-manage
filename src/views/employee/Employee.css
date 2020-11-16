@@ -29,6 +29,20 @@
     height: 50px;
     border: 1px solid #e6e6e6;
 }
+.add-btn{
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 4px;
+    background-color: rgb(44,157,255);
+    color:white;
+    margin-right: 10px;
+}
+.add-btn:hover{
+    cursor: pointer;
+    opacity: 0.7;
+}
 .embLabel{
     margin-bottom: 10px;
 }

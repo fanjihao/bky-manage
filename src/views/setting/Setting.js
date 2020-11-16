@@ -102,7 +102,6 @@ class Setting extends Component {
             url: `/merchantOrder/merchantDetails?id=${id}`,
         })
             .then(res => {
-                // console.log('商户信息', res.data)
                 this.setState({ merchantDetailInfo: res.data })
             })
             .catch(err => {
@@ -110,8 +109,6 @@ class Setting extends Component {
             })
     }
     componentDidMount() {
-        console.log('信息', this.props.userInfo)
-        console.log(bankCardAttribution('6215584402021608328'))
         const id = JSON.parse(localStorage.getItem('user')).id
         this.getUserInfo(id)
     }
@@ -132,7 +129,6 @@ class Setting extends Component {
     // 保存修改
     save = () => {
         const { merchantDetailInfo } = this.state
-        // console.log('修改的信息', merchantDetailInfo)
         axios({
             method: 'POST',
             url: '/merchantOrder/updateUserEnter',
@@ -189,7 +185,6 @@ class Setting extends Component {
             }
         })
             .then(res => {
-                console.log('修改成功', res.data)
                 if(res.data.status === 200){
                     message.success('修改信息成功')
                 }else{
@@ -201,7 +196,6 @@ class Setting extends Component {
                 })
             })
             .catch(err => {
-                console.log('修改失败', err)
                 message.error('修改信息失败')
             })
     }
@@ -253,11 +247,6 @@ class Setting extends Component {
             })
         }
     }
-
-    // // 图片预览
-    // previewHandle = type => {
-    //     console.log(type)
-    // }
 
     // 上传门店招牌照片
     signboardPhotoUpload = info => {
@@ -313,7 +302,6 @@ class Setting extends Component {
         let newMonth, newDay
         // newMin, newSec, newHours
         let date = new Date(time * 1000)
-        // console.log(date, time)
         let newYear = date.getFullYear()
         let month = date.getMonth() + 1;
         if (month < 10) {

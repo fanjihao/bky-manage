@@ -3,6 +3,7 @@ import '../goods/Goods.css'
 import './Order.css'
 import { Input, Select, Button, Space, Table, Tag, Modal, message, Image, Popover } from 'antd'
 import axios from '../../http/index'
+import { SearchOutlined } from '@ant-design/icons'
 
 const { Option } = Select
 const { TextArea } = Input
@@ -65,9 +66,13 @@ class Order extends Component {
             }
         })
             .then(res => {
-                if (res.data.status === 200) {
+                if (res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map(item => {
+                        item.key = item.id
+                    })
                     this.setState({
-                        listPhased: res.data.data.list,
+                        listPhased: list,
                         loading: false
                     })
                 }
@@ -90,9 +95,13 @@ class Order extends Component {
             }
         })
             .then(res => {
-                if (res.data.status === 200) {
+                if (res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map(item => {
+                        item.key = item.id
+                    })
                     this.setState({
-                        listPhased: res.data.data.list,
+                        listPhased: list,
                         loading: false
                     })
                 }
@@ -116,16 +125,18 @@ class Order extends Component {
             }
         })
             .then(res => {
-                console.log(res)
-                if (res.data.status === 200) {
+                if (res.data.data.list) {
+                    let list = res.data.data.list
+                    list.map(item => {
+                        item.key = item.id
+                    })
                     this.setState({
-                        listOnline: res.data.data.list,
+                        listOnline: list,
                         loading: false
                     })
                 }
             })
             .catch(err => {
-                console.log(err)
                 message.error('查询失败')
             })
     }
@@ -549,8 +560,11 @@ class Order extends Component {
                                     onFocus={() => this.setState({ stateVisible: true })}
                                     onChange={e => this.setState({ stateVal: e.target.value })}></Input>
                             </Popover>
-                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
-                                onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>搜索</Button>
+                            {/* <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
+                                >搜索</Button> */}
+                            <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>
+                            <SearchOutlined />搜索
+                            </div>
                         </div>
                         : <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
@@ -570,8 +584,12 @@ class Order extends Component {
                                 <Option value="已退款">已退款</Option>
                                 <Option value="已删除">已删除</Option>
                             </Select>
-                            <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
+                            {/* <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
                                 onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>搜索</Button>
+                             */}
+                            <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>
+                            <SearchOutlined />搜索
+                            </div>
                         </div>}
                     <div style={{ width: '100%' }}>
                         {goodsIndex === 1
