@@ -464,6 +464,7 @@ class HomeIndex extends Component {
                         value={[moment(startTime, 'YYYY-MM-DD'), moment(endTime, 'YYYY-MM-DD')]}
                         format={'YYYY-MM-DD'}
                         onChange={this.setTime}
+                        allowClear={false}
                     />
                 </div>
                 <div className="homeIndex-statistics">

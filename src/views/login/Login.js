@@ -90,8 +90,10 @@ class Login extends React.Component {
                         this.props.history.push({
                             pathname: '/home'
                         })
+                        message.success(res.data.message)
+                    } else {
+                        message.error(res.data.message)
                     }
-                    message.success('登录成功,欢迎您！')
                 })
                 .catch(err => {
                     message.error('登录失败，请重试！')
@@ -201,7 +203,7 @@ class Login extends React.Component {
         return (
             <div className="login" style={{ height }}>
                 <div className='loginPart'>
-                    <div className='loginTitle' style={{marginTop:0.2*height}}>
+                    <div className='loginTitle' style={{ marginTop: 0.2 * height }}>
                         <div className='loginTitleTop'>
                             <div className='loginTopLogo' >
                                 <img alt='logo' src={require('../../assets/imgs/ic_launcher.png')} style={{ width: '100%', height: '100%' }}></img>
@@ -240,7 +242,7 @@ class Login extends React.Component {
                                 : null}
                             {dom}
                             <div className='loginBtnBox'>
-                                <Button type="primary" size='large'className='loginBtn'onClick={this.toLogin}>登录</Button>
+                                <Button type="primary" size='large' className='loginBtn' onClick={this.toLogin}>登录</Button>
                             </div>
                         </div>
                     </div>

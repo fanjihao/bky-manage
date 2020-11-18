@@ -1,13 +1,23 @@
 import React, { Component } from 'react'
 import './Setting.css'
 import {
-    Button, Input, Upload,message
-    // Modal
+    Button, Input, Upload, message,
+    Modal
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux'
 import axios from '../../http/index'
-import bankCardAttribution from '../../component/bankCard'
+// import bankCardAttribution from '../../component/bankCard'
+
+// 预览相关
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
 
 class Setting extends Component {
     state = {
@@ -92,7 +102,13 @@ class Setting extends Component {
         },
         editStatus: false,
         modalImage: null,
-        showModal: false
+        showModal: false,
+        personInfo: null,
+        fileList: [],
+        newFileList: [],
+        previewVisible: false,
+        previewImage: '',
+        previewTitle: '',
     }
     // 查询商户详细信息
     getUserInfo = id => {
@@ -102,7 +118,25 @@ class Setting extends Component {
             url: `/merchantOrder/merchantDetails?id=${id}`,
         })
             .then(res => {
-                this.setState({ merchantDetailInfo: res.data })
+                let otherImgList = []
+                if(res.data.otherPhoto === ''){
+
+                }else{
+                    let otherImg = res.data.otherPhoto.split(',')
+                    for(let i = 0; i < otherImg.length; i ++ ) {
+                        let obj = {
+                            uid:i,
+                            url:otherImg[i]
+                        }
+                        otherImgList.push(obj)
+                    }
+                }
+                console.log(otherImgList,res)
+                this.setState({
+                    merchantDetailInfo: res.data,
+                    fileList: otherImgList,
+                    newFileList: otherImgList
+                })
             })
             .catch(err => {
                 console.log('失败', err)
@@ -111,6 +145,9 @@ class Setting extends Component {
     componentDidMount() {
         const id = JSON.parse(localStorage.getItem('user')).id
         this.getUserInfo(id)
+        this.setState({
+            personInfo: JSON.parse(localStorage.getItem('user'))
+        })
     }
     // 修改信息按钮
     edit = () => {
@@ -121,14 +158,33 @@ class Setting extends Component {
     }
     // 取消修改按钮
     cancel = () => {
+        let fileList = this.state.newFileList
         this.setState({
             editStatus: false,
-            disabled: true
+            disabled: true,
+            fileList: fileList
         })
     }
     // 保存修改
     save = () => {
-        const { merchantDetailInfo } = this.state
+        const { merchantDetailInfo, fileList } = this.state
+        let photoStr = ''
+        let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
+        for (let i = 0; i < fileList.length; i++) {
+            if (fileList[i].response) {
+                if (photoStr === '') {
+                    photoStr = baseUrl + fileList[i].response.data
+                } else {
+                    photoStr = baseUrl + fileList[i].response.data + ',' + photoStr
+                }
+            } else {
+                if (photoStr === '') {
+                    photoStr = fileList[i].url
+                } else {
+                    photoStr = fileList[i].url + ',' + photoStr
+                }
+            }
+        }
         axios({
             method: 'POST',
             url: '/merchantOrder/updateUserEnter',
@@ -169,8 +225,6 @@ class Setting extends Component {
                 storePhoto: merchantDetailInfo.storePhoto,
                 // 门店街景照片
                 instaPlacePhoto: merchantDetailInfo.instaPlacePhoto,
-                // 其他照片
-                otherPhoto: merchantDetailInfo.otherPhoto,
                 // 负责人姓名
                 personCharge: merchantDetailInfo.personCharge,
                 // 负责人身份证号
@@ -181,13 +235,19 @@ class Setting extends Component {
                 depositBank: merchantDetailInfo.depositBank,
                 // 商户id
                 id: JSON.parse(localStorage.getItem('user')).id,
-                systemStoreId: JSON.parse(localStorage.getItem('user')).systemStoreId
+                // 门店ID
+                systemStoreId: JSON.parse(localStorage.getItem('user')).systemStoreId,
+                // 其他照片
+                otherPhoto: photoStr,
             }
         })
             .then(res => {
-                if(res.data.status === 200){
+                console.log(res)
+                if (res.data.status === 200) {
                     message.success('修改信息成功')
-                }else{
+                    // this.setState({fileList: oldFileList})
+                    // this.getUserInfo(id)
+                } else {
                     message.error('修改信息失败')
                 }
                 this.setState({
@@ -199,54 +259,6 @@ class Setting extends Component {
                 message.error('修改信息失败')
             })
     }
-    // 上传营业执照照片
-    licensePhotoUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    licensePhoto: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
-    // 上传法人身份证人像面
-    humanFaceUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    humanFace: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
-    // 上传开户许可证照片
-    accountPhoteUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    accountPhote: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
-    // 上传法人身份证国徽面
-    nationalEmblemUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    nationalEmblem: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
 
     // 上传门店招牌照片
     signboardPhotoUpload = info => {
@@ -256,42 +268,6 @@ class Setting extends Component {
                 merchantDetailInfo: {
                     ...this.state.merchantDetailInfo,
                     signboardPhoto: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
-    // 上传门店街景照片
-    instaPlacePhotoUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    instaPlacePhoto: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
-    // 上传门店内景照片
-    storePhotoUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    storePhoto: 'https://www.bkysc.cn/api/files-upload/' + res.data
-                }
-            })
-        }
-    }
-    // 上传其他照片
-    otherPhotoUpload = info => {
-        const res = info.fileList[0].response
-        if (res) {
-            this.setState({
-                merchantDetailInfo: {
-                    ...this.state.merchantDetailInfo,
-                    otherPhoto: 'https://www.bkysc.cn/api/files-upload/' + res.data
                 }
             })
         }
@@ -323,355 +299,86 @@ class Setting extends Component {
         // if (seconds < 10) {
         //     newSec = '0' + seconds
         // } else { newSec = seconds }
-        return newYear + '-' + newMonth + '-' + newDay 
+        return newYear + '-' + newMonth + '-' + newDay
+    }
+    // 关闭预览
+    handleCancel = () => this.setState({ previewVisible: false });
+    // 预览
+    handlePreview = async file => {
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+
+        this.setState({
+            previewImage: file.url || file.preview,
+            previewVisible: true
+        });
+    };
+    // 多张图片上传
+    handleChange = (info) => {
+        if (info.file.status !== 'uploading') {
+            console.log('上传的文件', info.fileList)
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} 上传成功`)
+            this.setState({
+                fileList:info.fileList
+            })
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} 上传失败.`)
+        }
+    }
+    onRemove = (file) => {
+        let newList = this.state.fileList.filter(item => item.uid !== file.uid)
+        this.setState({
+            fileList: newList
+        })
     }
 
     render() {
-        const { merchantDetailInfo, disabled, editStatus,
-            // modalImage, showModal 
-        } = this.state
+        const { merchantDetailInfo, disabled, editStatus, fileList, previewVisible, previewImage, } = this.state
         const uploadButton = <PlusOutlined />
+        const uploadButtonA = (
+            <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>上传</div>
+            </div>
+        );
         return (
             <div className='setting'>
+
+                <Modal
+                    visible={previewVisible}
+                    footer={null}
+                    title={null}
+                    onCancel={this.handleCancel}
+                    width={'40%'}
+                >
+                    <img alt="preview" style={{ width: '90%' }} src={previewImage} />
+                </Modal>
+
                 <div className='setHeaderTop'>
                     <span>设置</span>
                 </div>
 
-                {/* <Modal
-                    visible={showModal}
-                    onCancel={() => this.setState({showModal: false})}
-                >
-                    <img alt="previewImg" style={{ width: 300 }} src={modalImage} />
-                </Modal> */}
+                {editStatus === false
+                    ? <div className='setHeaderBody'>
+                        <Button size='large' type="primary" onClick={this.edit} className='saveEditBtn'>修改</Button>
+                    </div>
+                    : <div className='setHeaderBody'>
+                        <Button size='large' type="primary" className='saveEditBtn' onClick={this.save}>保存修改</Button>
+                        <Button size='large' className='shBodyBtn' onClick={this.cancel}>取消</Button>
+                    </div>}
 
-                {
-                    editStatus === false
-                        ? <div className='setHeaderBody'>
-                            <Button size='large' type="primary" onClick={this.edit} className='saveEditBtn'>修改</Button>
-                        </div>
-                        : <div className='setHeaderBody'>
-                            <Button size='large' type="primary" className='saveEditBtn' onClick={this.save}>保存修改</Button>
-                            <Button size='large' className='shBodyBtn' onClick={this.cancel}>取消</Button>
-                        </div>
-                }
                 <div className='settingBody'>
                     <div className='settingSection'>
+
                         <div className='sectionTitle'>
-                            <span style={{ color: '#1089EB' }}>商户资料</span>
+                            <span style={{ color: '#1089EB', fontSize: 18 }}>门店资料</span>
                         </div>
+
                         <div className='sectionBody'>
-                            <div className='sbodyForm'>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>商户名称</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.merchantName}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>年销售额</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.salesVolume}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>统一社会信用代码</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.creditCode}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>注册地址</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.province + merchantDetailInfo.city + merchantDetailInfo.district}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>法定代表人</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.legalPerson}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    legalPerson: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>法人手机号</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.phone}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    phone: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>营业执照照片</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.licensePhotoUpload}
-                                        >
-                                            {
-                                                merchantDetailInfo.licensePhoto
-                                                    ? <img src={merchantDetailInfo.licensePhoto} alt="photos" className='fItemConimg' />
-                                                    : uploadButton
-                                            }
-                                        </Upload>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>法人身份证人像面</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.humanFaceUpload}
-                                        >
-                                            {
-                                                merchantDetailInfo.humanFace
-                                                    ? <img src={merchantDetailInfo.humanFace} alt="photos" className='fItemConimg' />
-                                                    : uploadButton
-                                            }
-                                        </Upload>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='sbodyForm'>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>年销售量</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.annualSales}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>商户性质</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.natureMerchant}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>成立日期</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{this.formatTime(merchantDetailInfo.addTime)}</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>注册资本</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <span>{merchantDetailInfo.registeredCapital}万</span>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>法人身份证号</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.idCard}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    idCard: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>营业期限</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.businessTerm}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    businessTerm: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>开户许可证照片</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.accountPhoteUpload}
-                                        >
-                                            {merchantDetailInfo.accountPhote
-                                                ? <img src={merchantDetailInfo.accountPhote} alt="photos" className='fItemConimg' />
-                                                : uploadButton}
-                                        </Upload>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>法人身份证国徽面</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.nationalEmblemUpload}
-                                        >
-                                            {merchantDetailInfo.nationalEmblem
-                                                ? <img src={merchantDetailInfo.nationalEmblem} alt="photos" className='fItemConimg' />
-                                                : uploadButton}
-                                        </Upload>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='settingSection'>
-                        <div className='sectionTitle'>
-                            <span style={{ color: '#1089EB' }}>账户信息</span>
-                        </div>
-                        <div className='sectionBody'>
-                            <div className='sbodyForm'>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>收款账户类型</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={bankCardAttribution(merchantDetailInfo.accountNo).cardTypeName}
-                                            disabled={true} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>开户身份证号</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.openCard}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    openCard: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>账户卡号</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.accountNo}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    accountNo: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='sbodyForm'>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>账户名称</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.collectionName}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    collectionName: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>账户银行</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={bankCardAttribution(merchantDetailInfo.accountNo).bankName}
-                                            disabled={true} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>预留手机号</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.reservePhone}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    reservePhone: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='settingSection'>
-                        <div className='sectionTitle'>
-                            <span style={{ color: '#1089EB' }}>门店资料</span>
-                        </div>
-                        <div className='sectionBody'>
+
                             <div className='sbodyForm'>
                                 <div className='sbodyFormItem'>
                                     <div className='formItemLabel'>
@@ -688,81 +395,7 @@ class Setting extends Component {
                                             })} />
                                     </div>
                                 </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>门店招牌照片</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // onPreview={() => this.previewHandle('signboardPhoto')}
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.signboardPhotoUpload}
-                                        >
-                                            {merchantDetailInfo.signboardPhoto
-                                                ? <img src={merchantDetailInfo.signboardPhoto} alt="photos" className='fItemConimg' />
-                                                : uploadButton}
-                                        </Upload>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>门店街景照片</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.instaPlacePhotoUpload}
-                                        >
-                                            {merchantDetailInfo.instaPlacePhoto
-                                                ? <img src={merchantDetailInfo.instaPlacePhoto} alt="photos" className='fItemConimg' />
-                                                : uploadButton}
-                                        </Upload>
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>负责人姓名</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.personCharge}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    personCharge: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>负责人电话</span>
-                                    </div>
-                                    <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.personPhone}
-                                            disabled={disabled}
-                                            onChange={e => this.setState({
-                                                merchantDetailInfo: {
-                                                    ...this.state.merchantDetailInfo,
-                                                    personPhone: e.target.value
-                                                }
-                                            })} />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='sbodyForm'>
+
                                 <div className='sbodyFormItem'>
                                     <div className='formItemLabel'>
                                         <span>营业时间</span>
@@ -778,62 +411,75 @@ class Setting extends Component {
                                             })} />
                                     </div>
                                 </div>
+
+                            </div>
+
+                            <div className='sbodyForm'>
                                 <div className='sbodyFormItem'>
                                     <div className='formItemLabel'>
-                                        <span>门店内景照片</span>
+                                        <span>负责人姓名</span>
                                     </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
+                                    <div className='formItemCon'>
+                                        <Input value={merchantDetailInfo.legalPerson}
                                             disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.storePhotoUpload}
-                                        >
-                                            {merchantDetailInfo.storePhoto
-                                                ? <img src={merchantDetailInfo.storePhoto} alt="photos" className='fItemConimg' />
-                                                : uploadButton}
-                                        </Upload>
+                                            onChange={e => this.setState({
+                                                merchantDetailInfo: {
+                                                    ...this.state.merchantDetailInfo,
+                                                    legalPerson: e.target.value
+                                                }
+                                            })} />
                                     </div>
                                 </div>
-                                <div className='sbodyFormItem'>
-                                    <div className='formItemLabel'>
-                                        <span>其他照片</span>
-                                    </div>
-                                    <div className='formItemImg'>
-                                        <Upload
-                                            // name="avatar" 
-                                            disabled={disabled}
-                                            listType="picture-card"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            action="http://47.108.174.202:9010/upload/files-upload"
-                                            // beforeUpload={beforeUpload}
-                                            onChange={this.otherPhotoUpload}
-                                        >
-                                            {merchantDetailInfo.otherPhoto
-                                                ? <img src={merchantDetailInfo.otherPhoto} alt="photos" className='fItemConimg' />
-                                                : uploadButton}
-                                        </Upload>
-                                    </div>
-                                </div>
+
                                 <div className='sbodyFormItem'>
                                     <div className='formItemLabel'>
                                         <span>负责人身份证号</span>
                                     </div>
                                     <div className='formItemCon'>
-                                        <Input value={merchantDetailInfo.personCard}
+                                        <Input value={merchantDetailInfo.idCard}
                                             disabled={disabled}
                                             onChange={e => this.setState({
                                                 merchantDetailInfo: {
                                                     ...this.state.merchantDetailInfo,
-                                                    personCard: e.target.value
+                                                    idCard: e.target.value
                                                 }
                                             })} />
                                     </div>
+                                </div>
+                            </div>
+
+
+                            <div className='storeImg'>
+                                <div className='storeImgTitle'>门店招牌照片</div>
+                                <div style={{ paddingLeft: 112 }}>
+                                    <Upload
+                                        disabled={disabled}
+                                        listType="picture-card"
+                                        showUploadList={false}
+                                        action="http://47.108.174.202:9010/upload/files-upload"
+                                        onChange={this.signboardPhotoUpload}
+                                    >
+                                        {merchantDetailInfo.signboardPhoto
+                                            ? <img src={merchantDetailInfo.signboardPhoto} alt="photos" className='fItemConimg' />
+                                            : uploadButton}
+                                    </Upload>
+                                </div>
+                            </div>
+
+                            <div className='storeImg'>
+                                <div className='storeImgTitle'>门店其他照片</div>
+                                <div style={{ paddingLeft: 112 }}>
+                                    <Upload
+                                        disabled={disabled}
+                                        action="http://47.108.174.202:9010/upload/files-upload"
+                                        listType="picture-card"
+                                        fileList={fileList}
+                                        onPreview={this.handlePreview}
+                                        onChange={this.handleChange}
+                                        onRemove={this.onRemove}
+                                    >
+                                        {fileList.length >= 3 ? null : uploadButtonA}
+                                    </Upload>
                                 </div>
                             </div>
                         </div>

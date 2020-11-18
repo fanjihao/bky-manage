@@ -25,3 +25,8 @@
     color: #1089EB;
     cursor: pointer;
 }
+.nav-span{
+    width: 80px;
+    display: inline-block;
+    text-align: left;
+}

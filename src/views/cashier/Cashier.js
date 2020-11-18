@@ -10,7 +10,7 @@ import XLSX from 'xlsx'
 const { RangePicker } = DatePicker
 const { Option } = Select
 const { TextArea } = Input
-const dateFormat = 'YYYY/MM/DD/HH'
+const dateFormat = 'YYYY/MM/DD'
 
 class Cashier extends Component {
     state = {
@@ -82,7 +82,7 @@ class Cashier extends Component {
         mark: null,
         // 美疗师
         staffName: null,
-        staffId:null, 
+        staffId: null,
         // 客户电话
         userPhone: null,
         loading: false,
@@ -96,10 +96,22 @@ class Cashier extends Component {
         addVisible: false,
         offlineStaff: '',
         offlineMark: '',
-        projectList:[],
-        projectName:'',
-        projectImage:'',
-        projectId:''
+        projectList: [],
+        projectName: '',
+        projectImage: '',
+        projectId: '',
+        // 客户
+        custom: null,
+        // 客户气泡弹框
+        customVisible: false,
+        // 客户列表
+        customData: [],
+        // 客户等级
+        clientLevel: null,
+        // 客户Id
+        clientId: null,
+        // 客户姓名
+        clientName: null
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -142,7 +154,9 @@ class Cashier extends Component {
                     mark: res.data.data.mark,
                     staffName: res.data.data.staffName,
                     userPhone: res.data.data.userPhone,
-                    staffId:res.data.data.staffId
+                    staffId: res.data.data.staffId,
+                    clientLevel: res.data.data.clientLevel,
+                    clientName: res.data.data.clientName
                 }, () => {
                     this.setState({
                         orderVisible: true
@@ -320,25 +334,43 @@ class Cashier extends Component {
     getProject = () => {
         const id = JSON.parse(localStorage.getItem('user')).id
         axios({
-            url:'/consume',
-            method:'GET',
-            params:{
-                enter:id
+            url: '/consume',
+            method: 'GET',
+            params: {
+                enter: id
             }
         })
-        .then(res => {
-            if(res.data.data) {
-                let data = res.data.data
-                data.map(item => item.key = item.phases_id)
-                this.setState({
-                    projectList:data
-                })
+            .then(res => {
+                if (res.data.data) {
+                    let data = res.data.data
+                    data.map(item => item.key = item.phases_id)
+                    this.setState({
+                        projectList: data
+                    })
+                }
+                console.log(res.data.data)
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+    // 查询所有客户
+    getAllCustom = () => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        axios({
+            method: 'GET',
+            url: '/client/all',
+            params: {
+                enterId: user.id
             }
-            console.log(res.data.data)
         })
-        .catch(err => {
-            console.log(err)
-        })
+            .then(res => {
+                console.log('查询所有客户成功', res)
+                this.setState({ customData: res.data.data.reverse() })
+            })
+            .catch(err => {
+                console.log('查询所有客户失败', err)
+            })
     }
     componentDidMount() {
         const date = new Date()
@@ -375,6 +407,8 @@ class Cashier extends Component {
             this.getEmploy()
             // 商店项目
             this.getProject()
+            // 客户
+            this.getAllCustom()
         })
     }
     // 搜索
@@ -387,11 +421,12 @@ class Cashier extends Component {
     // 添加线下订单
     addProject = () => {
         this.setState({
-            addVisible:true
+            addVisible: true
         })
     }
     addOrder = () => {
-        const { offlineAmount, offlineUserPhone, offlineStaff, offlineMark, projectId, projectImage, projectName } = this.state
+        const { offlineAmount, offlineUserPhone, offlineStaff, offlineMark,
+            projectId, projectImage, projectName } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
             url: '/consume',
@@ -402,9 +437,9 @@ class Cashier extends Component {
                 enterId: user.id,
                 image: projectImage,
                 mark: offlineMark,
-                name:projectName,
+                name: projectName,
                 orderId: '',
-                phasesId:projectId,
+                phasesId: projectId,
                 staff: offlineStaff,
                 storeId: user.systemStoreId,
                 userPhone: offlineUserPhone
@@ -447,7 +482,8 @@ class Cashier extends Component {
     }
     // 修改订单信息
     updateOrder = () => {
-        const { staffId, mark, orderId, classify } = this.state
+        const { staffId, mark, orderId, classify, clientId, clientLevel, clientName, amount } = this.state
+        console.log(clientName)
         const id = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'POST',
@@ -456,7 +492,12 @@ class Cashier extends Component {
                 staffId,
                 mark,
                 orderId,
-                classify
+                classify,
+                clientLevel,
+                clientId,
+                clientName,
+                enterId: id,
+                amount
             }
         })
             .then(res => {
@@ -489,7 +530,8 @@ class Cashier extends Component {
             employList, visible, userPhone,
             // 线下
             offlineAmount, offlineUserPhone, addVisible, offlineStaff, offlineMark, projectList, projectVis,
-            projectName, projectImage } = this.state
+            projectName, projectImage, clientName,
+            customData, customVisible, clientLevel } = this.state
 
         let newData
         if (data.length > 0) {
@@ -507,7 +549,7 @@ class Cashier extends Component {
                 key: 'image',
                 render: text => {
                     let src
-                    if(text) {
+                    if (text) {
                         src = text.split(',')[0]
                     }
                     return (
@@ -585,7 +627,7 @@ class Cashier extends Component {
                     if (addVisible) {
                         this.setState({ visible: false, offlineStaff: record.id })
                     } else {
-                        this.setState({ visible: false, staffName: record.staffName, staffId:record.id })
+                        this.setState({ visible: false, staffName: record.staffName, staffId: record.id })
                     }
                 }}>选择</a>
 
@@ -606,9 +648,37 @@ class Cashier extends Component {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => <a onClick={() => {
-                    this.setState({ projectVis: false, projectName: record.name, projectImage:record.image, projectId:record.phases_id })
+                    this.setState({ projectVis: false, projectName: record.name, projectImage: record.image, projectId: record.phases_id })
                 }}>选择</a>
 
+            },
+        ]
+        const customColumns = [
+            {
+                title: '姓名',
+                key: 'name',
+                dataIndex: 'name',
+                align: 'center'
+            },
+            {
+                title: '电话',
+                key: 'userPhone',
+                dataIndex: 'userPhone',
+                align: 'center'
+            },
+            {
+                title: '客户等级',
+                key: 'level',
+                dataIndex: 'level',
+                align: 'center'
+            }, {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => <a onClick={() => {
+                    console.log(record)
+                    this.setState({ clientLevel: record.level, customVisible: false, clientId: record.id, clientName: record.name })
+                }}>选择</a>,
+                align: 'center'
             },
         ]
         return (
@@ -686,6 +756,7 @@ class Cashier extends Component {
                             value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
                             format={dateFormat}
                             onChange={this.setTime}
+                            allowClear={false}
                         />
 
                         <Input placeholder='输入商品名或客户电话查询'
@@ -710,7 +781,7 @@ class Cashier extends Component {
                         <div className='daochu-btn' onClick={() => {
                             this.exportExcel(columns, newData, newText)
                         }}><DownloadOutlined />导出</div>
-                        <div className='add-btn' style={{width:120}} onClick={this.addProject}>
+                        <div className='add-btn' style={{ width: 130 }} onClick={this.addProject}>
                             <PlusOutlined />添加线下订单
                         </div>
                     </div>
@@ -730,7 +801,7 @@ class Cashier extends Component {
                     visible={addVisible}
                     title="订单信息"
                     onOk={() => this.addOrder()}
-                    onCancel={() => this.setState({ addVisible: false })}
+                    onCancel={() => this.setState({ addVisible: false, projectVis: false, visible: false })}
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
@@ -749,14 +820,14 @@ class Cashier extends Component {
                                             style={{ textAlign: 'center' }}
                                             pagination={{ pageSize: 2 }}
                                             locale={{ emptyText: '暂无数据' }} />}
-                                        trigger="hover"
-                                        visible={visible}>
+                                        trigger="click"
+                                        placement="bottom"
+                                        visible={visible}
+                                        onVisibleChange={visible => this.setState({ visible })}
+                                    >
                                         {offlineStaff
-                                            ? <Input style={{ width: 150 }}
-                                                placeholder='关联员工'
-                                                value={offlineStaff}
-                                                onFocus={() => this.setState({ visible: true })} />
-                                            : <Button type="primary" danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>}
+                                            ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ projectVis: true })}>{offlineStaff}</Button>
+                                            : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>}
                                     </Popover>
                                 </div>
                             </div>
@@ -770,25 +841,24 @@ class Cashier extends Component {
                                             style={{ textAlign: 'center' }}
                                             pagination={{ pageSize: 5 }}
                                             locale={{ emptyText: '暂无数据' }} />}
-                                        trigger="hover"
+                                        trigger="click"
+                                        placement="bottom"
+                                        onVisibleChange={projectVis => this.setState({ projectVis })}
                                         visible={projectVis}>
                                         {projectName
-                                            ? <Input style={{ width: 150 }}
-                                                placeholder='选择项目'
-                                                value={projectName}
-                                                onFocus={() => this.setState({ projectVis: true })} />
-                                            : <Button type="primary" danger onClick={() => this.setState({ projectVis: true })}>点击选择项目</Button>}
+                                            ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ projectVis: true })}>{projectName}</Button>
+                                            : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ projectVis: true })}>点击选择项目</Button>}
                                     </Popover>
                                 </div>
                             </div>
                             <div className='project-img'>
                                 <span className='add-pro-span'>项目图片</span>
                                 <div className='input-box'>
-                                    {projectImage 
-                                    ? <div style={{width:150, height:150, border:'1px solid #eee', overflow:'hidden', lineHeight:'150px', textAlign:'center'}}>
-                                        <Image src={projectImage} style={{width:'100%', height:'100%'}}></Image>
-                                    </div> 
-                                    : <div style={{width:150, height:150, border:'1px solid #eee'}}></div>}
+                                    {projectImage
+                                        ? <div style={{ width: 150, height: 150, border: '1px solid #eee', overflow: 'hidden', lineHeight: '150px', textAlign: 'center' }}>
+                                            <Image src={projectImage} style={{ width: '100%', height: '100%' }}></Image>
+                                        </div>
+                                        : <div style={{ width: 150, height: 150, border: '1px solid #eee' }}></div>}
                                 </div>
                             </div>
                             <div className='cashmbLabel'>
@@ -822,7 +892,7 @@ class Cashier extends Component {
                     visible={orderVisible}
                     title="订单信息"
                     onOk={() => this.updateOrder()}
-                    onCancel={() => this.setState({ orderVisible: false, visible: false })}
+                    onCancel={() => this.setState({ orderVisible: false, visible: false, customVisible: false })}
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
@@ -840,26 +910,42 @@ class Cashier extends Component {
                                     style={{ textAlign: 'center' }}
                                     pagination={{ pageSize: 2 }}
                                     locale={{ emptyText: '暂无数据' }} />}
-                                trigger="hover"
+                                trigger="click"
+                                onVisibleChange={visible => this.setState({ visible })}
+                                placement="bottom"
                                 visible={visible}
                             >
 
                                 {
                                     staffName
-                                        ? <Input style={{ width: 150, margin: '0 20px' }}
-                                            placeholder='关联员工'
-                                            disabled={false}
-                                            value={staffName}
-                                            onFocus={() => this.setState({ visible: true })} />
-                                        : <Button type="primary" danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>
+                                        ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ visible: true })}>{staffName}</Button>
+                                        : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>
                                 }
                             </Popover>
 
                         </div>
-                        {/* <div className='modalItem'>
+                        <div className='modalItem'>
                             <span style={{ marginRight: 10 }}>客户</span>
-                            <Input style={{ width: 150, margin: '0 20px' }}></Input>
-                        </div> */}
+                            <Popover
+                                content={<Table
+                                    columns={customColumns}
+                                    dataSource={customData}
+                                    style={{ textAlign: 'center' }}
+                                    pagination={{ pageSize: 2 }}
+                                    locale={{ emptyText: '暂无数据' }} />}
+                                trigger="click"
+                                onVisibleChange={customVisible => this.setState({ customVisible })}
+                                placement="bottom"
+                                visible={customVisible}
+                            >
+
+                                {
+                                    clientLevel
+                                        ? <Button style={{ width: 120 }} type="primary" onClick={() => this.setState({ customVisible: true })}>{clientName + '-' + clientLevel}</Button>
+                                        : <Button style={{ width: 120 }} type="primary" danger onClick={() => this.setState({ customVisible: true })}>点击关联客户</Button>
+                                }
+                            </Popover>
+                        </div>
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>

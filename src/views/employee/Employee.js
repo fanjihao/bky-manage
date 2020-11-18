@@ -114,17 +114,16 @@ export default class Employee extends Component {
     }
     addEmploy = () => {
         let formData = this.publicData()
-        const { employId, employSex, employhomeAdd, employName, employPhone,
-            employNation, employNowAdd, avatar, employGrade } = this.state
-        if (employSex === '' || employName === '' || employPhone === '' || employNation === '' || employNowAdd === ''
-            || avatar === '' || employGrade === '' || employhomeAdd === '' || employId === '') {
+        const { employId, employSex, employName, employPhone, employNowAdd, avatar, employGrade } = this.state
+        if (employSex === '' || employName === '' || employPhone === '' || employNowAdd === ''
+            || avatar === '' || employGrade === '' || employId === '') {
             notification.open({
                 message: '提示',
-                duration:3,
+                duration: 3,
                 description:
                     '*号为必填字段，不能为空，请您检查后再确认',
-                style:{
-                    color:"red"
+                style: {
+                    color: "red"
                 },
                 onClick: () => {
                     console.log('Notification Clicked!');
@@ -218,8 +217,8 @@ export default class Employee extends Component {
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
                 avatar: item.avatar,
-                employGrade:item.grade,
-                employGradeVal:item.grade + '级'
+                employGrade: item.grade,
+                employGradeVal: item.grade + '级'
             })
         } else {
             let sex, maritalStatus
@@ -254,8 +253,8 @@ export default class Employee extends Component {
                 employMajor: item.major, // 员工所学专业
                 employGraduate: item.graduationTime, // 员工毕业时间
                 avatar: item.avatar,
-                employGrade:item.grade,
-                employGradeVal:item.grade + '级'
+                employGrade: item.grade,
+                employGradeVal: item.grade + '级'
             })
         }
     }
@@ -289,11 +288,11 @@ export default class Employee extends Component {
             || avatar === '' || employGrade === '' || employhomeAdd === '' || employId === '') {
             notification.open({
                 message: '提示',
-                duration:3,
+                duration: 3,
                 description:
                     '*号为必填字段，不能为空，请您检查后再确认',
-                style:{
-                    color:"red"
+                style: {
+                    color: "red"
                 },
                 onClick: () => {
                     console.log('Notification Clicked!');
@@ -617,7 +616,7 @@ export default class Employee extends Component {
                                 <Upload {...props} disabled={isLook} className='avatar-uploader' showUploadList={false}>
                                     {avatar
                                         ? <Avatar src={avatar} alt="avatar" size={128} />
-                                        : <Button icon={<UploadOutlined />}>Click to Upload</Button>}
+                                        : <Button icon={<UploadOutlined />}>上传头像</Button>}
                                 </Upload>
                             </div>
                             <div className='embLabel'>
@@ -636,7 +635,23 @@ export default class Employee extends Component {
                                     <Option value={2} label='女' key={2}>女</Option>
                                 </Select>
                             </div>
-                            <div className='embLabel'>
+                            <div className='modalBodyChild'>
+                                <div className='embLabel'>
+                                    <span><span style={{ color: 'red' }}>*</span>员工等级</span>
+                                    <Select style={{ width: '60%' }} disabled={isLook}
+                                        defaultValue={employGradeVal}
+                                        placeholder='请选择等级'
+                                        onChange={this.gradeChange}
+                                    >
+                                        <Option value={'A'} label='A级' key='1'>A级</Option>
+                                        <Option value={'B'} label='B级' key='2'>B级</Option>
+                                        <Option value={'C'} label='C级' key='3'>C级</Option>
+                                        <Option value={'D'} label='D级' key='4'>D级</Option>
+                                        <Option value={'E'} label='E级' key='5'>E级</Option>
+                                    </Select>
+                                </div>
+                            </div>
+                            {/* <div className='embLabel'>
                                 <span>婚姻状态</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
                                     placeholder='请选择婚姻状况' defaultValue={employMaritalVal}
@@ -644,13 +659,13 @@ export default class Employee extends Component {
                                     <Option value={1} key='1'>未婚</Option>
                                     <Option value={2} key='2'>已婚</Option>
                                 </Select>
-                            </div>
-                            <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>户籍地址</span>
+                            </div> */}
+                            {/* <div className='embLabel'>
+                                <span>户籍地址</span>
                                 <Input placeholder='输入户籍地址' disabled={isLook}
                                     value={employhomeAdd}
                                     onChange={e => this.setNo(e, 'home')}></Input>
-                            </div>
+                            </div> */}
                         </div>
                         <div className='modalBodyChild'>
                             <div className='embLabel'>
@@ -673,15 +688,15 @@ export default class Employee extends Component {
                                     disabled={true}
                                     style={{ width: '60%' }} />
                             </div>
-                            <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>民族</span>
+                            {/* <div className='embLabel'>
+                                <span>民族</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
                                     defaultValue={employNation}
                                     placeholder='请选择民族'
                                     onChange={this.nationChange}>
                                     {nationDom}
                                 </Select>
-                            </div>
+                            </div> */}
                             <div className='embLabel'>
                                 <span><span style={{ color: 'red' }}>*</span>现居地址</span>
                                 <Input placeholder='请输入现在居住地址' disabled={isLook}
@@ -689,24 +704,8 @@ export default class Employee extends Component {
                                     onChange={e => this.setNo(e, 'now')}></Input>
                             </div>
                         </div>
-                        <div className='modalBodyChild'>
-                            <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>员工等级</span>
-                                <Select style={{ width: '60%' }} disabled={isLook}
-                                    defaultValue={employGradeVal}
-                                    placeholder='请选择等级'
-                                    onChange={this.gradeChange}
-                                >
-                                    <Option value={'A'} label='A级' key='1'>A级</Option>
-                                    <Option value={'B'} label='B级' key='2'>B级</Option>
-                                    <Option value={'C'} label='C级' key='3'>C级</Option>
-                                    <Option value={'D'} label='D级' key='4'>D级</Option>
-                                    <Option value={'E'} label='E级' key='5'>E级</Option>
-                                </Select>
-                            </div>
-                        </div>
                     </div>
-                    <div className='modalItem'>
+                    {/* <div className='modalItem'>
                         <span style={{ color: '#1089EB', marginLeft: 30 }}>学历信息</span>
                     </div>
                     <div className='modalBody'>
@@ -754,7 +753,7 @@ export default class Employee extends Component {
                                     />}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </Modal>
             </div>
         )

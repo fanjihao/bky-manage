@@ -106,21 +106,21 @@
     margin-right: 20px;
 }
 .search-btn{
-    width: 70px;
-    height: 30px;
-    line-height: 30px;
+    width: 75px;
+    height: 35px;
+    line-height: 35px;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 3px;
     background-color: #13CE66;
     color:white;
     margin-right: 10px;
 }
 .daochu-btn{
     width: 100px;
-    height: 30px;
-    line-height: 30px;
+    height: 35px;
+    line-height: 35px;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 3px;
     background-color: orange;
     color:white;
     margin-right: 10px;

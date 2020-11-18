@@ -20,15 +20,14 @@
     color: white;
     margin-left: 25px;
 }
-.shBodyBtn:hover{
+/* .shBodyBtn:hover{
     background-color: #13CE66;
     color: white;
-}
+} */
 .settingBody{
     width: 98%;
     margin: 0 auto;
     border-radius: 5px;
-    padding-bottom: 100px;
 }
 .settingSection{
     width: 100%;
@@ -51,7 +50,7 @@
 }
 .sbodyForm{
     width: 50%;
-    float: left;
+    display: inline-block;
 }
 .sbodyFormItem{
     width:100%;
@@ -62,8 +61,9 @@
     height: 50px;
     line-height: 50px;
     float: left;
-    text-align: right;
+    text-align: left;
     margin-right: 25px;
+    padding-left: 100px;
 }
 .formItemCon{
     width: 50%;
@@ -76,8 +76,8 @@
     width: 80%;
 }
 .formItemImg{
-    width: 200px;
-    height:200px;
+    width: 150px;
+    height:150px;
     float: left;
     margin-top: 11px;
 }
@@ -86,9 +86,16 @@
     height: 102px;
     border-radius: 2px;
 }
-.select{
-    width: 230px;
-}
 .saveEditBtn{
     width: 106px;
+}
+.storeImg{
+    width: 100%;
+    padding-left: 100px;
+}
+.storeImgTitle{
+    height: 50px;
+    line-height: 50px;
+    font-weight: bolder;
+    color: #666666;
 }
