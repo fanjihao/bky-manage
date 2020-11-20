@@ -32,7 +32,7 @@ export default class Employee extends Component {
         employMajor: '', // 员工所学专业
         employGraduate: '', // 员工毕业时间
         employGrade: '', // 员工等级
-        employGradeVal: '', // 员工等级
+        employGradeVal: 'E', // 员工等级
         name: '',
         phone: '',
         data: [],
@@ -55,6 +55,7 @@ export default class Employee extends Component {
             }
         })
             .then(res => {
+                console.log('获取员工信息成功', res)
                 if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map((item) => {
@@ -67,7 +68,7 @@ export default class Employee extends Component {
                 }
             })
             .catch(err => {
-                console.log(err)
+                console.log('获取员工信息失败', err)
                 message.error('查询员工列表失败')
             })
     }
@@ -87,8 +88,7 @@ export default class Employee extends Component {
     publicData = (type) => {
         const { employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
             employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar, employGrade } = this.state
-        console.log(employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
-            employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar)
+
         let user = JSON.parse(localStorage.getItem('user'))
         let formData = new FormData()
         formData.append("staffName", employName)
@@ -112,11 +112,29 @@ export default class Employee extends Component {
         }
         return formData
     }
+    cleanInfo = () => {
+        this.setState({
+            employNo: '', // 员工工号
+            employId: '', // 员工身份证
+            idWrong: false,
+            telWrong: false,
+            employSex: '', // 员工性别
+            employMarital: '', // 员工婚姻状态
+            employName: '', // 员工名字
+            employPhone: '', // 员工电话
+            employBirth: '', // 员工生日
+            employNowAdd: '', // 员工现居地址
+            employGrade: '', // 员工等级
+            employGradeVal: '', // 员工等级
+            avatar: '',
+            employSexVal: ''
+        })
+    }
     addEmploy = () => {
         let formData = this.publicData()
         const { employId, employSex, employName, employPhone, employNowAdd, avatar, employGrade } = this.state
         if (employSex === '' || employName === '' || employPhone === '' || employNowAdd === ''
-            || avatar === '' || employGrade === '' || employId === '') {
+            || employGrade === '' || employId === '') {
             notification.open({
                 message: '提示',
                 duration: 3,
@@ -136,7 +154,7 @@ export default class Employee extends Component {
                 data: formData
             })
                 .then(res => {
-                    console.log(res, 'ddddddddd')
+                    console.log('添加员工成功', res)
                     if (res.data.status === 200) {
                         this.setState({
                             detailVisible: false,
@@ -166,6 +184,7 @@ export default class Employee extends Component {
                     }
                 })
                 .catch(err => {
+                    console.log('添加员工失败', err)
                     message.error('添加失败')
                 })
         }
@@ -282,10 +301,9 @@ export default class Employee extends Component {
     }
     changeStaff = () => {
         let data = this.publicData('edit')
-        const { employId, employSex, employhomeAdd, employName, employPhone,
-            employNation, employNowAdd, avatar, employGrade } = this.state
-        if (employSex === '' || employName === '' || employPhone === '' || employNation === '' || employNowAdd === ''
-            || avatar === '' || employGrade === '' || employhomeAdd === '' || employId === '') {
+        const { employId, employSex, employName, employPhone, employNowAdd, avatar, employGrade } = this.state
+        if (employSex === '' || employName === '' || employPhone === '' || employNowAdd === ''
+            || employGrade === '' || employId === '') {
             notification.open({
                 message: '提示',
                 duration: 3,
@@ -305,6 +323,7 @@ export default class Employee extends Component {
                 data: data
             })
                 .then(res => {
+                    console.log('修改员工信息成功', res)
                     if (res.data.status === 200) {
                         message.success('修改成功')
                         this.setState({
@@ -312,10 +331,12 @@ export default class Employee extends Component {
                             loading: true
                         }, () => {
                             this.getEmploy()
+                            this.cleanInfo()
                         })
                     }
                 })
                 .catch(err => {
+                    console.log('修改员工信息失败', err)
                     message.error('修改失败')
                 })
         }
@@ -329,10 +350,12 @@ export default class Employee extends Component {
             }
         })
             .then(res => {
+                console.log('删除员工成功', res)
                 message.success('删除成功')
                 this.getEmploy()
             })
             .catch(err => {
+                console.log('删除员工失败')
                 message.error('删除失败')
             })
     }
@@ -432,16 +455,16 @@ export default class Employee extends Component {
                 render: (text, record) => <span>{text}</span>
                 ,
             },
-            {
-                title: '员工头像',
-                dataIndex: 'avatar',
-                key: 'avatar',
-                render: src => {
-                    return (
-                        <Avatar className='tableImg' src={src}></Avatar>
-                    )
-                }
-            },
+            // {
+            //     title: '员工头像',
+            //     dataIndex: 'avatar',
+            //     key: 'avatar',
+            //     render: src => {
+            //         return (
+            //             <Avatar className='tableImg' src={src}></Avatar>
+            //         )
+            //     }
+            // },
             {
                 title: '员工等级',
                 dataIndex: 'grade',
@@ -477,16 +500,16 @@ export default class Employee extends Component {
                         : <span>女</span>
                 ,
             },
-            {
-                title: '婚姻状态',
-                key: 'maritalStatus',
-                dataIndex: 'maritalStatus',
-                render: (text, record) =>
-                    text === 1
-                        ? <span>未婚</span>
-                        : <span>已婚</span>
-                ,
-            },
+            // {
+            //     title: '婚姻状态',
+            //     key: 'maritalStatus',
+            //     dataIndex: 'maritalStatus',
+            //     render: (text, record) =>
+            //         text === 1
+            //             ? <span>未婚</span>
+            //             : <span>已婚</span>
+            //     ,
+            // },
             {
                 title: '现居住地址',
                 key: 'currentAddress',
@@ -521,13 +544,10 @@ export default class Employee extends Component {
 
             },
         ]
-        const { detailVisible, whatDo, isLook,
-            // employNo,
-            employId, employSexVal, employMaritalVal, employhomeAdd, employName, employPhone, employBirth,
-            employNation, employNowAdd, employSchool, employHighest, employMajor, employGrade, employGradeVal,
-            employGraduate, name, loading,
-            // phone, 
-            data, idWrong, telWrong, avatar } = this.state
+        const { detailVisible, whatDo, isLook, employId,
+            employSexVal, employName, employPhone, employBirth,
+            employNowAdd, employGradeVal, name, loading,
+            data, idWrong, telWrong } = this.state
         let modalFootDom
         if (whatDo === '修改') {
             modalFootDom = <Button key="submit" type="primary" onClick={() => this.changeStaff()}>
@@ -573,7 +593,7 @@ export default class Employee extends Component {
                 <div className='emHeaderBody'>
                     <div className='emTableTop'>
                         <Input style={{ width: 150, margin: '0 20px' }}
-                            placeholder='请输入员工姓名'
+                            placeholder='请输入姓名搜索'
                             value={name}
                             onChange={e => this.setName(e)}></Input>
                         {/* <Input style={{ width: 150, margin: '0 20px' }}
@@ -591,7 +611,7 @@ export default class Employee extends Component {
                         <Table columns={columns}
                             dataSource={data}
                             style={{ textAlign: 'center' }}
-                            pagination={{ pageSize: 10 }}
+                            pagination={{ pageSize: 10, position: ['bottomLeft'] }}
                             loading={loading}
                             locale={{ emptyText: '暂无数据' }} />
                     </div>
@@ -600,7 +620,7 @@ export default class Employee extends Component {
                     visible={detailVisible}
                     title={whatDo}
                     onOk={this.handleOk}
-                    onCancel={() => this.setState({ detailVisible: false })}
+                    onCancel={() => this.setState({ detailVisible: false }, () => this.cleanInfo())}
                     footer={modalFootDom}
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '12px', fontWeight: 'bold', padding: '10px', color: '#666666' }}
@@ -612,13 +632,45 @@ export default class Employee extends Component {
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
                             <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>员工头像</span>
-                                <Upload {...props} disabled={isLook} className='avatar-uploader' showUploadList={false}>
-                                    {avatar
-                                        ? <Avatar src={avatar} alt="avatar" size={128} />
-                                        : <Button icon={<UploadOutlined />}>上传头像</Button>}
-                                </Upload>
+                                <span><span style={{ color: 'red' }}>*</span>员工姓名</span>
+                                <Input placeholder='请输入员工姓名' disabled={isLook}
+                                    value={employName}
+                                    onChange={e => this.setNo(e, 'name')}></Input>
                             </div>
+
+                            <div className='embLabel'>
+                                <span><span style={{ color: 'red' }}>*</span>手机号码</span>
+                                <Input placeholder='请输入员工手机号码' disabled={isLook}
+                                    value={employPhone}
+                                    onChange={e => this.setNo(e, 'phone')}
+                                    style={{ borderColor: telWrong ? 'red' : null }}></Input>
+                            </div>
+
+                            <div className='embLabel'>
+                                <span><span style={{ color: 'red' }}>*</span>员工等级</span>
+                                <Select style={{ width: '60%' }} disabled={isLook}
+                                    defaultValue={employGradeVal}
+                                    placeholder='请选择等级'
+                                    onChange={this.gradeChange}
+                                >
+                                    <Option value={'A'} key='1'>A</Option>
+                                    <Option value={'B'} key='2'>B</Option>
+                                    <Option value={'C'} key='3'>C</Option>
+                                    <Option value={'D'} key='4'>D</Option>
+                                    <Option value={'E'} key='5'>E</Option>
+                                </Select>
+                            </div>
+
+                            <div className='embLabel'>
+                                <span><span style={{ color: 'red' }}>*</span>现居地址</span>
+                                <Input placeholder='请输入现在居住地址' disabled={isLook}
+                                    value={employNowAdd}
+                                    onChange={e => this.setNo(e, 'now')}></Input>
+                            </div>
+
+                        </div>
+
+                        <div className='modalBodyChild'>
                             <div className='embLabel'>
                                 <span><span style={{ color: 'red' }}>*</span>身份证号</span>
                                 <Input placeholder='请输入身份证号' disabled={isLook}
@@ -626,6 +678,15 @@ export default class Employee extends Component {
                                     onChange={e => this.setNo(e, 'id')}
                                     style={{ borderColor: idWrong ? 'red' : null }}></Input>
                             </div>
+
+                            <div className='embLabel'>
+                                <span>出生日期</span>
+                                <Input
+                                    value={employBirth}
+                                    disabled={true}
+                                    style={{ width: '60%' }} />
+                            </div>
+
                             <div className='embLabel'>
                                 <span><span style={{ color: 'red' }}>*</span>性别</span>
                                 <Select style={{ width: '60%' }} disabled={isLook}
@@ -635,125 +696,8 @@ export default class Employee extends Component {
                                     <Option value={2} label='女' key={2}>女</Option>
                                 </Select>
                             </div>
-                            <div className='modalBodyChild'>
-                                <div className='embLabel'>
-                                    <span><span style={{ color: 'red' }}>*</span>员工等级</span>
-                                    <Select style={{ width: '60%' }} disabled={isLook}
-                                        defaultValue={employGradeVal}
-                                        placeholder='请选择等级'
-                                        onChange={this.gradeChange}
-                                    >
-                                        <Option value={'A'} label='A级' key='1'>A级</Option>
-                                        <Option value={'B'} label='B级' key='2'>B级</Option>
-                                        <Option value={'C'} label='C级' key='3'>C级</Option>
-                                        <Option value={'D'} label='D级' key='4'>D级</Option>
-                                        <Option value={'E'} label='E级' key='5'>E级</Option>
-                                    </Select>
-                                </div>
-                            </div>
-                            {/* <div className='embLabel'>
-                                <span>婚姻状态</span>
-                                <Select style={{ width: '60%' }} disabled={isLook}
-                                    placeholder='请选择婚姻状况' defaultValue={employMaritalVal}
-                                    onChange={this.maritalChange}>
-                                    <Option value={1} key='1'>未婚</Option>
-                                    <Option value={2} key='2'>已婚</Option>
-                                </Select>
-                            </div> */}
-                            {/* <div className='embLabel'>
-                                <span>户籍地址</span>
-                                <Input placeholder='输入户籍地址' disabled={isLook}
-                                    value={employhomeAdd}
-                                    onChange={e => this.setNo(e, 'home')}></Input>
-                            </div> */}
-                        </div>
-                        <div className='modalBodyChild'>
-                            <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>员工姓名</span>
-                                <Input placeholder='请输入员工姓名' disabled={isLook}
-                                    value={employName}
-                                    onChange={e => this.setNo(e, 'name')}></Input>
-                            </div>
-                            <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>手机号码</span>
-                                <Input placeholder='请输入员工手机号码' disabled={isLook}
-                                    value={employPhone}
-                                    onChange={e => this.setNo(e, 'phone')}
-                                    style={{ borderColor: telWrong ? 'red' : null }}></Input>
-                            </div>
-                            <div className='embLabel'>
-                                <span>出生日期</span>
-                                <Input
-                                    value={employBirth}
-                                    disabled={true}
-                                    style={{ width: '60%' }} />
-                            </div>
-                            {/* <div className='embLabel'>
-                                <span>民族</span>
-                                <Select style={{ width: '60%' }} disabled={isLook}
-                                    defaultValue={employNation}
-                                    placeholder='请选择民族'
-                                    onChange={this.nationChange}>
-                                    {nationDom}
-                                </Select>
-                            </div> */}
-                            <div className='embLabel'>
-                                <span><span style={{ color: 'red' }}>*</span>现居地址</span>
-                                <Input placeholder='请输入现在居住地址' disabled={isLook}
-                                    value={employNowAdd}
-                                    onChange={e => this.setNo(e, 'now')}></Input>
-                            </div>
                         </div>
                     </div>
-                    {/* <div className='modalItem'>
-                        <span style={{ color: '#1089EB', marginLeft: 30 }}>学历信息</span>
-                    </div>
-                    <div className='modalBody'>
-                        <div className='modalBodyChild'>
-                            <div className='embLabel'>
-                                <span>毕业院校</span>
-                                <Input placeholder='请输入毕业院校' disabled={isLook}
-                                    value={employSchool}
-                                    onChange={e => this.setNo(e, 'school')}></Input>
-                            </div>
-                            <div className='embLabel'>
-                                <span>最高学历</span>
-                                <Select style={{ width: '60%' }} disabled={isLook}
-                                    defaultValue={employHighest}
-                                    placeholder='请选择员工最高学历'
-                                    onChange={this.educateChange}>
-                                    <Option value='博士' key='1'>博士</Option>
-                                    <Option value='硕士' key='2'>硕士/研究生</Option>
-                                    <Option value='本科' key='3'>本科</Option>
-                                    <Option value='专科' key='4'>专科</Option>
-                                    <Option value='高中' key='5'>高中</Option>
-                                    <Option value='初中' key='6'>初中</Option>
-                                    <Option value='小学' key='7'>小学</Option>
-                                </Select>
-                            </div>
-                        </div>
-                        <div className='modalBodyChild'>
-                            <div className='embLabel'>
-                                <span>所学专业</span>
-                                <Input placeholder='请输入所学专业' disabled={isLook}
-                                    value={employMajor}
-                                    onChange={e => this.setNo(e, 'major')}></Input>
-                            </div>
-                            <div className='embLabel'>
-                                <span>毕业时间</span>
-                                {isLook
-                                    ? <Input value={employGraduate} style={{ width: '60%' }} disabled={isLook}></Input>
-                                    : <DatePicker
-                                        // defaultPickerValue={employGraduate}
-                                        style={{ width: '60%' }}
-                                        disabled={isLook}
-                                        placeholder={employGraduate}
-                                        onChange={(date, dateString) => this.onChange('毕业时间', date, dateString)}
-                                        locale={locale}
-                                    />}
-                            </div>
-                        </div>
-                    </div> */}
                 </Modal>
             </div>
         )

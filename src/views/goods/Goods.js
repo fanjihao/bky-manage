@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import './Goods.css'
-import { Input, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover, TreeSelect } from 'antd'
+import { Input, Button, Space, Table, Tag, Popconfirm, message, Upload, Image, Popover, TreeSelect, Select } from 'antd'
 import axios from '../../http/index'
 import Modal from 'antd/lib/modal/Modal'
 import { UploadOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons'
 
 const { TextArea } = Input
+const { Option } = Select
 
 class Goods extends Component {
     state = {
@@ -63,10 +64,14 @@ class Goods extends Component {
         goodsProModal: false,
         goodsProInfo: '',
         goodsProId: '',
-        
-        treeData:[],
-        value:1,
-        loading:true
+
+        treeData: [],
+        value: 1,
+        loading: true,
+        // 控制分期明细显示
+        isStageDetailInfo: false,
+        // 每一期分期价格
+        eachStagePrice: ''
     }
     getStageItem = () => {
         const { name, goodsTable, cateName } = this.state
@@ -85,19 +90,21 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                if(res.data.data.list) {
+                console.log('获取分期项目成功', res)
+                if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map(item => {
                         item.key = item.id
                     })
                     this.setState({
-                        loading:false,
+                        loading: false,
                         stageData: list
                     })
                 }
             })
             .catch(err => {
-                message.error('查询商品失败')
+                console.log('获取分期项目失败', err)
+                message.error('获取分期项目失败')
             })
     }
     getOnlineItem = () => {
@@ -123,21 +130,24 @@ class Goods extends Component {
             }
         })
             .then(res => {
-                if(res.data.data.list) {
+                console.log('查询线上商品成功', res)
+                if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map(item => {
                         item.key = item.id
                     })
                     this.setState({
-                        loading:false,
+                        loading: false,
                         onlineGoods: list
                     })
                 }
             })
             .catch(err => {
-                message.error('查询商品失败')
+                console.log('查询线上商品失败', err)
+                message.error('查询线上商品失败')
             })
     }
+    // 获取商品分类
     goodsFenleiList = () => {
         axios({
             url: '/api/yxStoreCategory',
@@ -149,6 +159,7 @@ class Goods extends Component {
             }
         })
             .then(res => {
+                console.log('获取商品分类成功', res)
                 let treeArr = []
                 treeArr = res.data.content.map(item => {
                     let obj = {}
@@ -173,7 +184,7 @@ class Goods extends Component {
                 this.setState({ treeData: treeArr })
             })
             .catch(err => {
-                console.log(err)
+                console.log('获取商品分类失败', err)
             })
     }
     treeChange = (value, label, extra) => {
@@ -275,7 +286,8 @@ class Goods extends Component {
             data: formData
         })
             .then(res => {
-                message.success('分期项目修改成功')
+                console.log('修改分期项目成功')
+                message.success('分期项目修改成功', res)
                 this.setState({
                     stageVisible: false,
                 }, () => {
@@ -283,7 +295,7 @@ class Goods extends Component {
                 })
             })
             .catch(err => {
-                console.log(err)
+                console.log('修改分期项目失败', err)
             })
     }
     // 添加分期
@@ -318,7 +330,7 @@ class Goods extends Component {
             data: formData
         })
             .then(res => {
-                console.log(res)
+                console.log('添加分期项目成功', res)
                 message.success('分期项目添加成功')
                 this.setState({
                     stageVisible: false,
@@ -327,7 +339,7 @@ class Goods extends Component {
                 })
             })
             .catch(err => {
-                console.log(err)
+                console.log('添加分期项目失败', err)
             })
     }
     dismount = (i, type) => {
@@ -407,7 +419,7 @@ class Goods extends Component {
                     stageAmount: i.prepaymentAmount,
                     stageRemarks: i.remarks,
                     stageNo: i.id,
-                    value:i.cateId
+                    value: i.cateId
                 })
             } else {
                 this.setState({
@@ -422,7 +434,7 @@ class Goods extends Component {
                     stageNo: '',
                     cateId: '',
                     fileList: [],
-                    value:''
+                    value: ''
                 })
             }
         })
@@ -507,7 +519,7 @@ class Goods extends Component {
                 }
                 this.setState({
                     goodsNo: i.id,
-                    value:i.cateId,
+                    value: i.cateId,
                     goodsName: i.name,
                     goodsKey1: keyArr[0],
                     goodsKey2: keyArr[1],
@@ -536,7 +548,7 @@ class Goods extends Component {
                     goodsSales: '',
                     goodsSku: '',
                     goodsFileList: [],
-                    value:''
+                    value: ''
                 })
             }
         })
@@ -684,6 +696,21 @@ class Goods extends Component {
     stageImgCancel = () => this.setState({ previewVisible: false })
     goodsImgCancel = () => this.setState({ goodsimgVisible: false })
 
+    // 分期明细
+    stageDetailInfo = () => {
+        const { stagePrice, stageNumVal, stageAmount } = this.state
+        let eachStagePrice
+        if (stageAmount !== '' && stageNumVal !== '' && stagePrice !== '') {
+            eachStagePrice = (stagePrice - stageAmount) / stageNumVal
+            this.setState({
+                eachStagePrice: Math.floor(eachStagePrice * 100) / 100,
+                isStageDetailInfo: true
+            })
+        } else {
+            this.setState({ isStageDetailInfo: false })
+        }
+    }
+
     render() {
         const { goodsIndex, goodsTable, name, stageVisible, stageName, stageKeyWord,
             stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks, stageData, promptModal,
@@ -691,8 +718,8 @@ class Goods extends Component {
             goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku,
             previewVisible, previewImage, fileList, previewTitle, loading,
             goodsimgVisible, goodsImage, goodsFileList, onlineGoods,
-            goodsProModal, goodsProInfo, cateName, treeData, 
-            emptyText } = this.state
+            goodsProModal, goodsProInfo, cateName, treeData,
+            emptyText, isStageDetailInfo, eachStagePrice } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -728,7 +755,7 @@ class Goods extends Component {
                 render: text => <>￥{text}</>,
             },
             {
-                title: '分期数上限',
+                title: '总期数',
                 key: 'stagesNumber',
                 dataIndex: 'stagesNumber',
                 render: text => <span>{text}期</span>,
@@ -742,7 +769,7 @@ class Goods extends Component {
                 ),
             },
             {
-                title: '系统状态',
+                title: '项目状态',
                 key: 'state',
                 dataIndex: 'state',
                 render: (text, record) => {
@@ -1054,44 +1081,51 @@ class Goods extends Component {
                     </div>
                     <div className='gbTableTop'>
                         <Input style={{ width: 150, margin: '0 20px' }}
-                            placeholder='请输入搜索条件'
+                            placeholder='请输入项目名搜索'
                             value={name}
-                            onChange={e => this.setName(e)}></Input>
-                            <TreeSelect
-                                style={{ width: 150, margin: '0 20px' }}
-                                value={cateName}
-                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                                treeData={treeData}
-                                allowClear
-                                placeholder="选择商品分类"
-                                treeDefaultExpandAll
-                                onChange={(value, label, extra) => this.setState({ cateName:label[0] })}
-                            >
-                            </TreeSelect>
+                            onChange={e => this.setName(e)} />
+
                         {goodsIndex === 1
-                            ? 
-                            // <Button
-                            //     style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
-                            //     type='primary'
-                            //     onClick={() => this.setState({ loading:true }, () => { this.getStageItem() })}>搜索</Button>
-                            <div onClick={() => this.setState({ loading:true }, () => { this.getStageItem() })} className='search-btn'>
+                            ? <div onClick={() => this.setState({ loading: true }, () => { this.getStageItem() })} className='search-btn'>
                                 <SearchOutlined />搜索
                             </div>
-                            : 
-                            // <Button
-                            //     style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }}
-                            //     type='primary'
-                            //     onClick={() => this.setState({ loading:true }, () => { this.getOnlineItem() })}>搜索</Button>}
-                            <div onClick={() => this.setState({ loading:true }, () => { this.getOnlineItem() })} className='search-btn'>
+                            : <div onClick={() => this.setState({ loading: true }, () => { this.getOnlineItem() })} className='search-btn'>
                                 <SearchOutlined />搜索
                             </div>}
                         {goodsIndex === 1
-                            ? <div className='add-btn' onClick={() => this.editStage('add', 0)} style={{width:120}}>
+                            ? <div className='add-btn' onClick={() => this.editStage('add', 0)} style={{ width: 120 }}>
                                 <PlusOutlined />新增分期项目
                             </div>
                             : <div className='add-btn' onClick={() => this.editOnline('add', 0)}>
                                 <PlusOutlined />新增商品
                             </div>}
+
+                        <Select
+                            style={{ width: 150 }}
+                            defaultValue="全部"
+                            onChange={e => this.setState({ cateName: e }, () => this.getStageItem())}
+                        >
+                            <Option value="">全部</Option>
+                            {
+                                treeData.map(item => (
+                                    <Option value={item.title}>{item.title}</Option>
+                                ))
+                            }
+                            {/* <Option value="美容">美容</Option>
+                            <Option value="养生">养生</Option>
+                            <Option value="减肥">减肥</Option> */}
+                        </Select>
+
+                        {/* <TreeSelect
+                            style={{ width: 150, margin: '0 20px' }}
+                            value={cateName}
+                            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                            treeData={treeData}
+                            allowClear
+                            placeholder="选择商品分类"
+                            treeDefaultExpandAll
+                            onChange={(value, label, extra) => this.setState({ cateName: label[0] })}
+                        /> */}
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         {goodsIndex === 1 ?
@@ -1138,11 +1172,9 @@ class Goods extends Component {
                                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                                 treeData={treeData}
                                 allowClear
-                                placeholder="选择商品分类"
+                                defaultValue="选择商品分类"
                                 treeDefaultExpandAll
-                                onChange={this.treeChange}
-                            >
-                            </TreeSelect>
+                                onChange={this.treeChange} />
                         </div>
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>商品名称</span>
@@ -1281,24 +1313,15 @@ class Goods extends Component {
                                 treeData={treeData}
                                 allowClear
                                 placeholder="选择商品分类"
+                                defaultValue="选择商品分类"
                                 treeDefaultExpandAll
-                                onChange={this.treeChange}
-                            >
-                            </TreeSelect>
+                                onChange={this.treeChange} />
                         </div>
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>项目名称</span>
                             <Input placeholder='请输入项目名称' style={{ width: 150 }}
                                 value={stageName}
                                 onChange={e => this.setState({ stageName: e.target.value })}></Input>
-                        </div>
-                        <div className='goodsModalItem'>
-                            <span className='gmiLabel'>关键词</span>
-                            <Input placeholder='请输入关键字' style={{ width: 150, marginRight: 10 }}
-                                value={stageKeyWord}
-                                onChange={e => this.setState({ stageKeyWord: e.target.value })}></Input>
-                            {/* <Input placeholder='限三个关键字' style={{ width: 150, marginRight: 10 }}></Input>
-                            <Input placeholder='每个5字以内' style={{ width: 150 }}></Input> */}
                         </div>
                         <div className='goodsModalImg'>
                             <span className='gmiLabel'>项目图片</span>
@@ -1320,7 +1343,7 @@ class Goods extends Component {
                                 <span className='littleLabel'>项目价格</span>
                                 <Input placeholder=''
                                     value={stagePrice}
-                                    onChange={e => this.setState({ stagePrice: e.target.value })}></Input>
+                                    onChange={e => this.setState({ stagePrice: e.target.value }, () => this.stageDetailInfo())}></Input>
                             </div>
                             <div className='littleitem'>
                                 <span className='littleLabel'>虚拟销量</span>
@@ -1331,18 +1354,30 @@ class Goods extends Component {
                         </div>
                         <div className='goodsModalItem'>
                             <div className='littleitem'>
-                                <span className='littleLabel'>分期数上限</span>
-                                <Input placeholder='请输入分期数上限'
+                                <span className='littleLabel'>总期数</span>
+                                <Input placeholder='请输入总期数'
                                     value={stageNumVal}
-                                    onChange={e => this.setState({ stageNumVal: e.target.value })}></Input>
+                                    onChange={e => this.setState({ stageNumVal: e.target.value }, () => this.stageDetailInfo())}></Input>
                             </div>
                             <div className='littleitem'>
                                 <span className='littleLabel'>预付金额</span>
                                 <Input placeholder=''
                                     value={stageAmount}
-                                    onChange={e => this.setState({ stageAmount: e.target.value })}></Input>
+                                    onChange={e => this.setState({ stageAmount: e.target.value }, () => this.stageDetailInfo())}></Input>
                             </div>
                         </div>
+
+                        {
+                            isStageDetailInfo
+                                ? <div className='goodsModalItem' style={{ marginLeft: '20%', fontSize: 16, }}>
+                                    项目价格 <span style={{ color: 'red', fontSize: 18 }}>{stagePrice}</span>,
+                                    总期数 <span style={{ color: 'red', fontSize: 18 }}>{stageNumVal}</span>,
+                                    每一期价格 <span style={{ color: 'red', fontSize: 18 }}>{eachStagePrice}</span>,
+                                    首付款 <span style={{ color: 'red', fontSize: 18 }}>{stageAmount + '+' + eachStagePrice}</span>,
+                                </div>
+                                : null
+                        }
+
                         <div style={{ width: '90%', margin: '0 auto' }} className='itemDirecte'>
                             <span className='gmiLabel'>产品详情</span>
                             <TextArea rows={6} style={{ width: '70%' }}

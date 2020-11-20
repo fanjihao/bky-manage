@@ -44,7 +44,7 @@ class Cashier extends Component {
         // 用户id
         id: null,
         // 订单类型
-        orderType: 1,
+        orderType: 0,
         // 商品名
         goodsName: '',
 
@@ -134,7 +134,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('获取订单详细信息成功', res.data.data)
+                console.log('获取订单详细信息成功', res)
                 this.setState({
                     orderId: res.data.data.orderId,
                     paid: res.data.data.paid,
@@ -230,7 +230,6 @@ class Cashier extends Component {
     // 月营收数据
     getMonthData = id => {
         const { time } = this.state
-        console.log('月', time)
         axios({
             method: 'GET',
             url: '/cash/money',
@@ -289,6 +288,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
+                console.log('查询订单数据成功',res)
                 if (res.data.data) {
                     let data = res.data.data
                     data.map(item => {
@@ -319,6 +319,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
+                console.log('查询员工信息成功',res)
                 if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map(item => item.key = item.id)
@@ -341,6 +342,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
+                console.log('获取商家项目成功',res)
                 if (res.data.data) {
                     let data = res.data.data
                     data.map(item => item.key = item.phases_id)
@@ -348,7 +350,6 @@ class Cashier extends Component {
                         projectList: data
                     })
                 }
-                console.log(res.data.data)
             })
             .catch(err => {
                 console.log(err)
@@ -446,10 +447,10 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log(res, 'asdasdssssss')
+                console.log('添加线下订单成功',res)
             })
             .catch(err => {
-                console.log(err)
+                console.log('添加线下订单失败',err)
             })
     }
     // 时间戳转换
@@ -482,7 +483,7 @@ class Cashier extends Component {
     }
     // 修改订单信息
     updateOrder = () => {
-        const { staffId, mark, orderId, classify, clientId, clientLevel, clientName, amount } = this.state
+        const { staffId, mark, orderId, classify, clientId, clientLevel, clientName, amount, tabCheck } = this.state
         console.log(clientName)
         const id = JSON.parse(localStorage.getItem('user')).id
         axios({
@@ -501,17 +502,17 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('修改成功', res)
+                console.log('修改订单信息成功', res)
                 if (res.data.status === 200) {
                     message.success('修改成功')
-                    this.getOrderData(id, 1)
+                    this.getOrderData(id, tabCheck)
                     this.setState({ visible: false, orderVisible: false })
                 } else {
                     message.error('修改失败')
                 }
             })
             .catch(err => {
-                console.log('修改失败', err)
+                console.log('修改订单信息失败', err)
                 message.error('修改失败')
             })
     }
@@ -765,7 +766,7 @@ class Cashier extends Component {
                             onChange={e => this.setState({ goodsName: e.target.value })}
                         />
                         <Select className='classSelect'
-                            placeholder='分类'
+                            placeholder='全部'
                             allowClear={true}
                             value={orderType}
                             clearIcon={<CloseCircleOutlined />}
@@ -774,6 +775,7 @@ class Cashier extends Component {
                                     this.setState({ orderType: e })
                                 }
                             }>
+                            <Option value={0}>全部订单</Option>
                             <Option value={1} label='线上订单'>线上订单</Option>
                             <Option value={2} label='线下订单'>线下订单</Option>
                         </Select>

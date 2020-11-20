@@ -118,6 +118,7 @@ class Setting extends Component {
             url: `/merchantOrder/merchantDetails?id=${id}`,
         })
             .then(res => {
+                console.log('查询商户详细信息成功',res)
                 let otherImgList = []
                 if(res.data.otherPhoto === ''){
 
@@ -131,7 +132,6 @@ class Setting extends Component {
                         otherImgList.push(obj)
                     }
                 }
-                console.log(otherImgList,res)
                 this.setState({
                     merchantDetailInfo: res.data,
                     fileList: otherImgList,
@@ -139,7 +139,7 @@ class Setting extends Component {
                 })
             })
             .catch(err => {
-                console.log('失败', err)
+                console.log('查询商户详细信息失败', err)
             })
     }
     componentDidMount() {
@@ -242,7 +242,7 @@ class Setting extends Component {
             }
         })
             .then(res => {
-                console.log(res)
+                console.log('修改商户信息成功',res)
                 if (res.data.status === 200) {
                     message.success('修改信息成功')
                     // this.setState({fileList: oldFileList})
@@ -256,6 +256,7 @@ class Setting extends Component {
                 })
             })
             .catch(err => {
+                console.log('修改商户信息失败',err)
                 message.error('修改信息失败')
             })
     }

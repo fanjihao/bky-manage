@@ -53,7 +53,7 @@ class Order extends Component {
         stateVal: '',
         loading: true
     }
-
+    // 分期项目订单
     getStoreStage() {
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
@@ -66,6 +66,7 @@ class Order extends Component {
             }
         })
             .then(res => {
+                console.log('获取分期项目订单成功', res)
                 if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map(item => {
@@ -78,7 +79,7 @@ class Order extends Component {
                 }
             })
             .catch(err => {
-                console.log(err)
+                console.log('获取分期项目订单失败', err)
                 message.error('查询失败')
             })
     }
@@ -111,6 +112,7 @@ class Order extends Component {
                 message.error('查询失败')
             })
     }
+    // 线上商品列表
     getStoreOnline = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
@@ -125,6 +127,7 @@ class Order extends Component {
             }
         })
             .then(res => {
+                console.log('获取线上商品订单成功', res)
                 if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map(item => {
@@ -137,6 +140,7 @@ class Order extends Component {
                 }
             })
             .catch(err => {
+                console.log('获取线上订单信息失败', err)
                 message.error('查询失败')
             })
     }
@@ -169,6 +173,7 @@ class Order extends Component {
     cancel = () => {
         console.log('取消删除')
     }
+    // 员工列表
     getEmploy = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
@@ -184,15 +189,17 @@ class Order extends Component {
             }
         })
             .then(res => {
+                console.log('获取员工信息成功', res)
                 this.setState({
                     data: res.data.data.list
                 })
             })
             .catch(err => {
+                console.log('获取员工信息失败', err)
             })
     }
+    // 查看订单详情
     lookOrder = (i, type) => {
-        console.log('===============', i)
         if (type === 'look') {
             this.setState({
                 islook: true,
@@ -205,7 +212,7 @@ class Order extends Component {
                 orderPayType: i.payType,
                 orderPrice: i.price,
                 orderState: i.type,
-                orderPay: i.stagesPrice + i.prepaymentAmount*(i.stagesNumber-i.surplusNum),
+                orderPay: i.stagesPrice + i.prepaymentAmount * (i.stagesNumber - i.surplusNum),
                 orderCreate: i.createTime,
                 orderRemarks: i.remarks,
                 orderOtherNum: i.surplusNum,
@@ -241,11 +248,7 @@ class Order extends Component {
     handleVisibleChange = visible => {
         this.setState({ visible })
     }
-    VisibleChange = stateVisible => {
-        this.setState({
-            stateVisible
-        })
-    }
+    // 修改分期订单信息
     stageChange = () => {
         const { orderId, orderRemarks, linkId, username } = this.state
         axios({
@@ -259,6 +262,7 @@ class Order extends Component {
             }
         })
             .then(res => {
+                console.log('修改分期订单信息成功', res)
                 message.success('修改成功')
                 this.getStoreStage()
                 this.setState({
@@ -266,10 +270,10 @@ class Order extends Component {
                 })
             })
             .catch(err => {
-                console.log(err)
+                console.log('修改分期订单信息失败', err)
             })
     }
-    //
+    // 查询线上订单
     editGoods = (i, type) => {
         axios({
             url: '/merchantOrder/storeOrderDetails',
@@ -279,7 +283,7 @@ class Order extends Component {
             }
         })
             .then(res => {
-                console.log(res)
+                console.log('查询线上订单详情成功', res)
                 this.setState({
                     goodsVisible: true,
                     goodsOrderid: res.data.orderId,
@@ -524,47 +528,24 @@ class Order extends Component {
                             <Input style={{ width: 150, margin: '0 20px' }}
                                 placeholder='请输入项目名称'
                                 value={stageName}
-                                onChange={e => this.setState({ stageName: e.target.value })}></Input>
-                            <Popover
-                                content={
-                                    <div style={{ display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                        <span className='flexitem' onClick={() => {
-                                            this.setState({ stateVal: '未处理分期' }, () => {
-                                                this.getStageState(4)
-                                            })
-                                        }}>未处理分期</span>
-                                        <span className='flexitem' onClick={() => {
-                                            this.setState({ stateVal: '分期中' }, () => {
-                                                this.getStageState(1)
-                                            })
-                                        }}>分期中</span>
-                                        <span className='flexitem' onClick={() => {
-                                            this.setState({ stateVal: '已完成分期' }, () => {
-                                                this.getStageState(2)
-                                            })
-                                        }}>已完成分期</span>
-                                        <span className='flexitem' onClick={() => {
-                                            this.setState({ stateVal: '异常分期' }, () => {
-                                                this.getStageState(3)
-                                            })
-                                        }}>异常分期</span>
-                                    </div>
-                                }
-                                trigger="hover"
-                                visible={stateVisible}
-                                onVisibleChange={this.VisibleChange}
-                            >
-                                <Input style={{ width: 150, margin: '0 20px' }}
-                                    placeholder='分期状态'
-                                    value={stateVal}
-                                    onFocus={() => this.setState({ stateVisible: true })}
-                                    onChange={e => this.setState({ stateVal: e.target.value })}></Input>
-                            </Popover>
-                            {/* <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
-                                >搜索</Button> */}
+                                onChange={e => this.setState({ stageName: e.target.value })} />
+
                             <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>
-                            <SearchOutlined />搜索
+                                <SearchOutlined />搜索
                             </div>
+
+                            <Select
+                                style={{width: 150}}
+                                defaultValue="全部"
+                                onChange={e => this.getStageState(e)}
+                             >
+                                 <Option value="">全部</Option>
+                                 <Option value="4">未处理分期</Option>
+                                 <Option value="1">分期中</Option>
+                                 <Option value="2">已完成分期</Option>
+                                 <Option value="3">异常分期</Option>
+                             </Select>
+
                         </div>
                         : <div className='gbTableTop'>
                             <Input style={{ width: 150, margin: '0 20px' }}
@@ -584,11 +565,9 @@ class Order extends Component {
                                 <Option value="已退款">已退款</Option>
                                 <Option value="已删除">已删除</Option>
                             </Select>
-                            {/* <Button style={{ margin: '0 20px 0 0', backgroundColor: '#13CE66', borderColor: '#13CE66' }} type='primary'
-                                onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>搜索</Button>
-                             */}
+                            
                             <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>
-                            <SearchOutlined />搜索
+                                <SearchOutlined />搜索
                             </div>
                         </div>}
                     <div style={{ width: '100%' }}>
@@ -632,14 +611,14 @@ class Order extends Component {
                                     style={{ textAlign: 'center' }}
                                     pagination={{ pageSize: 2 }}
                                     locale={{ emptyText: '暂无数据' }} />}
-                                trigger="hover"
+                                trigger="click"
+                                placement="bottom"
+                                onVisibleChange={visible => this.setState({ visible })}
                                 visible={visible}
                             >
-                                <Input style={{ width: 150, margin: '0 20px' }}
-                                    placeholder='关联员工'
-                                    disabled={this.state.islook}
-                                    value={linkEmploy}
-                                    onFocus={() => this.setState({ visible: true })}></Input>
+                                {linkEmploy
+                                    ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ visible: true })}>{linkEmploy}</Button>
+                                    : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>}
                             </Popover>
                         </div>
                         <div className='modalItem'>

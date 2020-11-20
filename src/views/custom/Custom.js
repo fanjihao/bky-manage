@@ -64,7 +64,7 @@ class Custom extends Component {
         })
             .then(res => {
                 console.log('查询所有客户成功', res)
-                let newData = res.data.data
+                let newData = res.data.data.reverse()
                 for (let i = 0; i < newData.length; i++) {
                     newData[i].key = i + 1
                 }
@@ -132,54 +132,83 @@ class Custom extends Component {
     addCustom = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { name, userPhone, employId, level } = this.state
-        axios({
-            method: 'POST',
-            url: '/client',
-            data: {
-                enterId: user.id,
-                name: name,
-                userPhone: userPhone,
-                staff_id: employId,
-                level: level
-            }
-        })
-            .then(res => {
-                console.log('新增客户成功', res)
-                this.setState({ loading: true, customAdd: false }, () => {
-                    this.getAllCustom()
-                    this.setState({
-                        name: null,
-                        userPhone: null,
-                        employId: null,
-                        level: null
-                    })
+        console.log(level, '客户等级')
+        if (name === null || userPhone === null) {
+            message.warning('请填写完整信息')
+        } else {
+            axios({
+                method: 'POST',
+                url: '/client',
+                data: {
+                    enterId: user.id,
+                    name: name,
+                    userPhone: userPhone,
+                    staff_id: employId,
+                    level: level
+                }
+            })
+                .then(res => {
+                    console.log('新增客户成功', res)
+                    
+                    if(res.data.status === 200){
+                        message.success('新增客户成功')
+                        this.setState({ loading: true, customAdd: false }, () => {
+                            this.getAllCustom()
+                            this.setState({
+                                name: null,
+                                userPhone: null,
+                                employId: null,
+                                level: 'E'
+                            })
+                        })
+                    }else{
+                        message.error(res.data.message)
+                    }
                 })
-            })
-            .catch(err => {
-                console.log('新增客户失败', err)
-            })
+                .catch(err => {
+                    console.log('新增客户失败', err)
+                    message.error('新增客户失败')
+                })
+        }
+
     }
     // 修改客户信息
     editCustom = () => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { name, userPhone, employId, level } = this.state
-        axios({
-            method: 'PUT',
-            url: '/client',
-            data: {
-                enterId: user.id,
-                name: name,
-                userPhone: userPhone,
-                staff_id: employId,
-                level: level
-            }
-        })
-            .then(res => {
-                console.log('修改客户信息成功', res)
+        const { name, userPhone, employId, level, customId } = this.state
+        console.log(customId)
+        if (name === null || userPhone === null) {
+            message.warning('请输入完整信息')
+        } else {
+            axios({
+                method: 'PUT',
+                url: '/client',
+                data: {
+                    enterId: user.id,
+                    name: name,
+                    userPhone: userPhone,
+                    staff_id: employId,
+                    level: level,
+                    id: customId
+                }
             })
-            .catch(err => {
-                console.log('修改客户信息失败', err)
-            })
+                .then(res => {
+                    if (res.data.status === 200) {
+                        console.log('修改客户信息成功', res)
+                        message.success(res.data.message)
+                        this.getAllCustom()
+                        this.setState({ customEdit: false })
+                    } else {
+                        console.log('修改客户信息失败', res)
+                        message.error(res.data.message)
+                    }
+                })
+                .catch(err => {
+                    console.log('修改客户信息失败', err)
+                    message.error("修改失败")
+                })
+        }
+
     }
     // 查询客户消费订单
     toExpenseDetail = customId => {
@@ -192,11 +221,7 @@ class Custom extends Component {
         })
             .then(res => {
                 console.log('查询客户消费订单成功', res)
-                if (res.data.data.length > 0) {
-                    this.setState({ expenseDetail: true, expenseDetailData: res.data.data, customId: customId })
-                } else {
-                    this.setState({ expenseDetail: true, customId: customId })
-                }
+                this.setState({ expenseDetail: true, expenseDetailData: res.data.data.reverse(), customId: customId })
             })
             .catch(err => {
                 console.log('查询客户消费订单失败', err)
@@ -219,23 +244,25 @@ class Custom extends Component {
             .then(res => {
                 console.log('添加客户消费信息成功', res)
                 if (res.data.status === 200) {
-                    message.success("添加成功")
                     this.toExpenseDetail(customId)
                     this.getAllCustom()
                     this.setState({ money: null })
+                    message.success(res.data.message)
                 } else {
-                    message.error('添加失败')
+                    this.setState({ money: null })
+                    message.error(res.data.message)
                 }
                 this.setState({ addExpense: false })
             })
             .catch(err => {
                 console.log('添加客户消费信息失败', err)
+                message.error('添加失败')
             })
     }
     // 按客户等级查询
     clientLevel = e => {
         let user = JSON.parse(localStorage.getItem('user'))
-        console.log('asdfasdfs', e)
+        console.log(e ? e : null)
         axios({
             method: 'GET',
             url: '/client',
@@ -335,7 +362,7 @@ class Custom extends Component {
                     <Button type="primary" onClick={() =>
                         this.setState({
                             customEdit: true,
-                            customId: record.clientId,
+                            customId: record.id,
                             name: record.name,
                             userPhone: record.userPhone,
                             employ: record.staff,
@@ -408,11 +435,17 @@ class Custom extends Component {
                                 name: null,
                                 userPhone: null,
                                 employ: null,
-                                level: null
+                                level: 'E'
                             })
                         }><PlusOutlined />新增客户</div>
 
-                        <Select style={{ width: 120 }} onChange={e => this.clientLevel(e)} defaultValue="客户级别">
+                        <Select
+                            style={{ width: 150 }}
+                            onChange={e => this.clientLevel(e)}
+                            defaultValue="客户级别"
+                            allowClear={true}
+                            placeholder="全部">
+                            <Option value="">全部</Option>
                             <Option value="A">客户级别A</Option>
                             <Option value="B">客户级别B</Option>
                             <Option value="C">客户级别C</Option>
@@ -421,10 +454,11 @@ class Custom extends Component {
                         </Select>
                     </div>
 
-                    <Table columns={columns}
+                    <Table
+                        columns={columns}
                         dataSource={data}
                         style={{ textAlign: 'center' }}
-                        pagination={{ pageSize: 4 }}
+                        pagination={{ pageSize: 10, position: ['bottomLeft'] }}
                         loading={loading}
                         locale={{ emptyText: '暂无数据' }} />
 
@@ -462,7 +496,7 @@ class Custom extends Component {
                         </div>
                         <div className="addCustomItem">
                             <span>客户等级:</span>
-                            <Select defaultValue="E" onChange={e => console.log(e)} style={{ width: 120 }}>
+                            <Select defaultValue={level} onChange={e => this.setState({ level: e })} style={{ width: 120 }}>
                                 <Option value="A">A</Option>
                                 <Option value="B">B</Option>
                                 <Option value="C">C</Option>
@@ -525,7 +559,7 @@ class Custom extends Component {
                         </div>
                         <div className="addCustomItem">
                             <span>客户等级:</span>
-                            <Select defaultValue={level} onChange={e => console.log(e)} style={{ width: 120 }}>
+                            <Select defaultValue={level} onChange={e => this.setState({ level: e })} style={{ width: 120 }}>
                                 <Option value="A">A</Option>
                                 <Option value="B">B</Option>
                                 <Option value="C">C</Option>

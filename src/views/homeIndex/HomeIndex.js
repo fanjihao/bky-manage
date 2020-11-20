@@ -47,11 +47,11 @@ class HomeIndex extends Component {
             url: `/statistics/userEnter?id=${id}`,
         })
             .then(res => {
-                // console.log('商户信息', res.data)
+                console.log('获取商户信息成功', res)
                 this.setState({ merchantInfo: res.data })
             })
             .catch(err => {
-                console.log('失败', err)
+                console.log('获取商户信息失败', err)
             })
     }
     // 分期项目统计图表数据
@@ -67,7 +67,7 @@ class HomeIndex extends Component {
             }
         })
             .then(res => {
-                // console.log('获取分期项目统计图表数据成功', res.data)
+                console.log('获取分期项目统计图表数据成功', res)
                 if (res.data === []) {
 
                 } else {
@@ -111,7 +111,7 @@ class HomeIndex extends Component {
             }
         })
             .then(res => {
-                // console.log('查询商户分期订单成功', res.data)
+                console.log('查询商户分期订单成功', res)
                 if (type === 1) {
                     this.setState({
                         stageOne: res.data.stageCount,
@@ -143,7 +143,7 @@ class HomeIndex extends Component {
             }
         })
             .then(res => {
-                // console.log('查询成功', res.data)
+                console.log('查询分期项目排行榜成功', res)
                 if (res.data.length === 0) {
 
                 } else {
@@ -151,7 +151,7 @@ class HomeIndex extends Component {
                 }
             })
             .catch(err => {
-                console.log('查询失败', err)
+                console.log('查询分期项目排行榜失败', err)
             })
     }
     // 线上商品统计
@@ -167,13 +167,13 @@ class HomeIndex extends Component {
             }
         })
             .then(res => {
-                // console.log('查询成功', res.data)
+                console.log('查询线上商品统计成功', res)
                 this.setState({
                     onlineData: res.data
                 })
             })
             .catch(err => {
-                console.log('查询失败', err)
+                console.log('查询线上商品统计失败', err)
             })
     }
     // 线上商品统计图表数据
@@ -189,7 +189,7 @@ class HomeIndex extends Component {
             }
         })
             .then(res => {
-                // console.log('获取分期项目统计图表数据成功', res)
+                console.log('获取分期项目统计图表数据成功', res)
                 if (res.data === []) {
 
                 } else {
@@ -229,7 +229,7 @@ class HomeIndex extends Component {
             }
         })
             .then(res => {
-                // console.log('查询成功', res)
+                console.log('查询线上商品排行榜成功', res)
                 if (res.data.length === 0) {
                     // console.log(1)
                 } else {
@@ -238,7 +238,7 @@ class HomeIndex extends Component {
                 }
             })
             .catch(err => {
-                console.log('查询失败', err)
+                console.log('查询线上商品排行榜失败', err)
             })
     }
     componentDidMount() {
@@ -257,6 +257,7 @@ class HomeIndex extends Component {
         // console.log(preDate)
 
         const id = JSON.parse(localStorage.getItem('user')).id
+        console.log('商户信息',JSON.parse(localStorage.getItem('user')))
 
         this.setState({
             startTime: preDate,
