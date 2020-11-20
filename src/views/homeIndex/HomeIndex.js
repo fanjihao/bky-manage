@@ -257,7 +257,7 @@ class HomeIndex extends Component {
         // console.log(preDate)
 
         const id = JSON.parse(localStorage.getItem('user')).id
-        console.log('商户信息',JSON.parse(localStorage.getItem('user')))
+        console.log('商户信息', JSON.parse(localStorage.getItem('user')))
 
         this.setState({
             startTime: preDate,
@@ -523,10 +523,59 @@ class HomeIndex extends Component {
                                     stageRankList === null
                                         ? <p className="noData">暂无数据</p>
                                         : stageRankList.map((item, index) => {
-                                            if (index < 4 && index >= 0) {
+                                            // if (index < 4 && index >= 0) {
+                                            //     return (
+                                            //         <div className="stagemanage-list-item" key={index}>
+                                            //             <span className="stagemanage-list-ranking">{index + 1}</span>
+                                            //             <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                            //             <div className="stagemenage-list-data">
+                                            //                 <span>{item.stageMoney}元</span>
+                                            //                 <span>{item.stageCount}单</span>
+                                            //             </div>
+                                            //             <p className="stagemanage-list-name">{item.name}</p>
+                                            //         </div>
+                                            //     )
+                                            // }
+                                            if (index === 0) {
                                                 return (
                                                     <div className="stagemanage-list-item" key={index}>
                                                         <span className="stagemanage-list-ranking">{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
+                                                    </div>
+                                                )
+                                            } else if (index === 1) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index} style={{ background: '#FDF4E5' }}>
+                                                        <span className="stagemanage-list-ranking" style={{ color: '#EB9604' }}>{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
+                                                    </div>
+                                                )
+                                            } else if (index === 2) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index} style={{ background: '#E7F6EC' }}>
+                                                        <span className="stagemanage-list-ranking" style={{ color: '#14AB46' }}>{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
+                                                    </div>
+                                                )
+                                            } else if (index === 3) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index} style={{ background: '#F4F4F4' }}>
+                                                        <span className="stagemanage-list-ranking" style={{ color: '#222222' }}>{index + 1}</span>
                                                         <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
                                                         <div className="stagemenage-list-data">
                                                             <span>{item.stageMoney}元</span>
@@ -552,11 +601,47 @@ class HomeIndex extends Component {
                                     onlineRankList === null
                                         ? <p className="noData">暂无数据</p>
                                         : onlineRankList.map((item, index) => {
-                                            if (index < 4 && index >= 0) {
+                                            if (index === 0) {
                                                 return (
                                                     <div className="stagemanage-list-item" key={index}>
                                                         <span className="stagemanage-list-ranking">{index + 1}</span>
-                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankingImg" />
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
+                                                    </div>
+                                                )
+                                            } else if (index === 1) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index} style={{ background: '#FDF4E5' }}>
+                                                        <span className="stagemanage-list-ranking" style={{ color: '#EB9604' }}>{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
+                                                    </div>
+                                                )
+                                            } else if (index === 2) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index} style={{ background: '#E7F6EC' }}>
+                                                        <span className="stagemanage-list-ranking" style={{ color: '#14AB46' }}>{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
+                                                        <div className="stagemenage-list-data">
+                                                            <span>{item.stageMoney}元</span>
+                                                            <span>{item.stageCount}单</span>
+                                                        </div>
+                                                        <p className="stagemanage-list-name">{item.name}</p>
+                                                    </div>
+                                                )
+                                            } else if (index === 3) {
+                                                return (
+                                                    <div className="stagemanage-list-item" key={index} style={{ background: '#F4F4F4' }}>
+                                                        <span className="stagemanage-list-ranking" style={{ color: '#222222' }}>{index + 1}</span>
+                                                        <img src={item.img.split(',')[0]} className="stagemanage-list-img" alt="rankImg" />
                                                         <div className="stagemenage-list-data">
                                                             <span>{item.stageMoney}元</span>
                                                             <span>{item.stageCount}单</span>

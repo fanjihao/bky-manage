@@ -64,7 +64,7 @@ class Custom extends Component {
         })
             .then(res => {
                 console.log('查询所有客户成功', res)
-                let newData = res.data.data.reverse()
+                let newData = res.data.data
                 for (let i = 0; i < newData.length; i++) {
                     newData[i].key = i + 1
                 }
@@ -221,7 +221,7 @@ class Custom extends Component {
         })
             .then(res => {
                 console.log('查询客户消费订单成功', res)
-                this.setState({ expenseDetail: true, expenseDetailData: res.data.data.reverse(), customId: customId })
+                this.setState({ expenseDetail: true, expenseDetailData: res.data.data, customId: customId })
             })
             .catch(err => {
                 console.log('查询客户消费订单失败', err)
@@ -231,7 +231,7 @@ class Custom extends Component {
     // 添加客户消费信息
     addExpense = () => {
         const { behavior, money, customId } = this.state
-        console.log(customId)
+        console.log(behavior)
         axios({
             method: 'POST',
             url: '/client/record',
@@ -602,7 +602,7 @@ class Custom extends Component {
                     okText='确定'
                     cancelText="取消"
                 >
-                    <Button type="primary" style={{ margin: 10 }} onClick={() => this.setState({ addExpense: true })}>添加</Button>
+                    <Button type="primary" style={{ margin: 10 }} onClick={() => this.setState({ addExpense: true, behavior: 1 })}>添加</Button>
                     <Table
                         columns={expenseDetailColums}
                         dataSource={expenseDetailData}
@@ -629,7 +629,10 @@ class Custom extends Component {
                             <span>客户消费行为:</span>
                             <Select defaultValue="1" style={{ width: 200 }}
                                 // onChange={e => console.log(e)}
-                                onChange={e => this.setState({ behavior: e })}
+                                onChange={e => {
+                                    console.log(e)
+                                    this.setState({ behavior: e })
+                                }}
                             >
                                 <Option value="1">充值</Option>
                                 <Option value="2">消费</Option>

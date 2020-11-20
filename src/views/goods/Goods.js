@@ -396,8 +396,6 @@ class Goods extends Component {
     }
     editStage = (type, i) => {
         this.setState({
-            stageVisible: true,
-            stageVisiInfo: type
         }, () => {
             if (type === 'edit') {
                 let imgArr = []
@@ -410,6 +408,8 @@ class Goods extends Component {
                     imgArr.push(obj)
                 }
                 this.setState({
+                    stageVisible: true,
+                    stageVisiInfo: type,
                     stageName: i.name,
                     stageKeyWord: i.keyWord,
                     fileList: imgArr,
@@ -423,6 +423,8 @@ class Goods extends Component {
                 })
             } else {
                 this.setState({
+                    stageVisible: true,
+                    stageVisiInfo: type,
                     stageFenlei: '',
                     stageName: '',
                     stageKeyWord: '',
@@ -434,7 +436,7 @@ class Goods extends Component {
                     stageNo: '',
                     cateId: '',
                     fileList: [],
-                    value: ''
+                    value: 1
                 })
             }
         })
@@ -502,8 +504,6 @@ class Goods extends Component {
     // 修改商品
     editOnline = (type, i) => {
         this.setState({
-            goodsModal: true,
-            goodsMoInfo: type
         }, () => {
             console.log(i)
             if (type === 'edit') {
@@ -518,6 +518,8 @@ class Goods extends Component {
                     imgArr.push(obj)
                 }
                 this.setState({
+                    goodsModal: true,
+                    goodsMoInfo: type,
                     goodsNo: i.id,
                     value: i.cateId,
                     goodsName: i.name,
@@ -534,6 +536,8 @@ class Goods extends Component {
                 })
             } else {
                 this.setState({
+                    goodsModal: true,
+                    goodsMoInfo: type,
                     goodsNo: '',
                     goodsClass: '',
                     goodsClassVal: '',
@@ -548,7 +552,7 @@ class Goods extends Component {
                     goodsSales: '',
                     goodsSku: '',
                     goodsFileList: [],
-                    value: ''
+                    value: 1
                 })
             }
         })
@@ -719,7 +723,7 @@ class Goods extends Component {
             previewVisible, previewImage, fileList, previewTitle, loading,
             goodsimgVisible, goodsImage, goodsFileList, onlineGoods,
             goodsProModal, goodsProInfo, cateName, treeData,
-            emptyText, isStageDetailInfo, eachStagePrice } = this.state
+            emptyText, isStageDetailInfo, eachStagePrice, value } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -1111,21 +1115,8 @@ class Goods extends Component {
                                     <Option value={item.title}>{item.title}</Option>
                                 ))
                             }
-                            {/* <Option value="美容">美容</Option>
-                            <Option value="养生">养生</Option>
-                            <Option value="减肥">减肥</Option> */}
                         </Select>
 
-                        {/* <TreeSelect
-                            style={{ width: 150, margin: '0 20px' }}
-                            value={cateName}
-                            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                            treeData={treeData}
-                            allowClear
-                            placeholder="选择商品分类"
-                            treeDefaultExpandAll
-                            onChange={(value, label, extra) => this.setState({ cateName: label[0] })}
-                        /> */}
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         {goodsIndex === 1 ?
@@ -1157,7 +1148,7 @@ class Goods extends Component {
                             [<Button key="submit" type="primary" onClick={() => this.onlineSure(goodsTable)}>
                                 确定修改
                         </Button>,
-                            <Button key="back" type="primary" onClick={() => this.sureChange()}>
+                            <Button key="back" type="primary" onClick={() => this.setState({ goodsModal: false })}>
                                 取消
                         </Button>]}
                         destroyOnClose={true}
@@ -1166,7 +1157,7 @@ class Goods extends Component {
                     >
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>商品分类</span>
-                            <TreeSelect
+                            {/* <TreeSelect
                                 style={{ width: 150 }}
                                 value={this.state.value}
                                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
@@ -1174,7 +1165,18 @@ class Goods extends Component {
                                 allowClear
                                 defaultValue="选择商品分类"
                                 treeDefaultExpandAll
-                                onChange={this.treeChange} />
+                                onChange={this.treeChange} /> */}
+                            <Select
+                                style={{ width: 150 }}
+                                defaultValue={value}
+                                onChange={e => this.setState({ value: e })}
+                            >
+                                {
+                                    treeData.map((item) => (
+                                        <Option value={item.value}>{item.title}</Option>
+                                    ))
+                                }
+                            </Select>
                         </div>
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>商品名称</span>
@@ -1182,7 +1184,7 @@ class Goods extends Component {
                                 value={goodsName}
                                 onChange={e => this.setState({ goodsName: e.target.value })}></Input>
                         </div>
-                        <div className='goodsModalItem'>
+                        {/* <div className='goodsModalItem'>
                             <span className='gmiLabel'>关键词</span>
                             <Input placeholder='请输入关键字' style={{ width: 150, marginRight: 10 }}
                                 value={goodsKey1}
@@ -1193,7 +1195,7 @@ class Goods extends Component {
                             <Input placeholder='每个5字以内' style={{ width: 150 }}
                                 value={goodsKey3}
                                 onChange={e => this.setState({ goodsKey3: e.target.value })}></Input>
-                        </div>
+                        </div> */}
                         <div className='goodsModalImg'>
                             <span className='gmiLabel'>商品图片</span>
                             <Upload {...goodsProps} className='avatar-uploader'>
@@ -1208,12 +1210,6 @@ class Goods extends Component {
                                 <Image alt="example" style={{ width: '100%' }} src={goodsImage} />
                             </Modal>
                         </div>
-                        <div className='itemDirecte'>
-                            <span className='gmiLabel'>产品详情</span>
-                            <TextArea rows={6} style={{ width: '70%' }}
-                                value={goodsRemarks}
-                                onChange={e => this.setState({ goodsRemarks: e.target.value })} />
-                        </div>
 
                         <div className='goodsModalItem'>
                             <div className='littleitem'>
@@ -1222,12 +1218,12 @@ class Goods extends Component {
                                     value={goodsPrice}
                                     onChange={e => this.setState({ goodsPrice: e.target.value })}></Input>
                             </div>
-                            <div className='littleitem'>
+                            {/* <div className='littleitem'>
                                 <span className='littleLabel'>vip价格</span>
                                 <Input placeholder='请输入vip价格'
                                     value={goodsVip}
                                     onChange={e => this.setState({ goodsVip: e.target.value })}></Input>
-                            </div>
+                            </div> */}
                             <div className='littleitem'>
                                 <span className='littleLabel'>邮费</span>
                                 <Input placeholder='不填或输入0即为包邮'
@@ -1248,6 +1244,13 @@ class Goods extends Component {
                                     value={goodsSku}
                                     onChange={e => this.setState({ goodsSku: e.target.value })}></Input>
                             </div>
+                        </div>
+                        
+                        <div className='itemDirecte'>
+                            <span className='gmiLabel'>产品详情</span>
+                            <TextArea rows={6} style={{ width: '70%' }}
+                                value={goodsRemarks}
+                                onChange={e => this.setState({ goodsRemarks: e.target.value })} />
                         </div>
                     </Modal>
                     <Modal
@@ -1306,7 +1309,7 @@ class Goods extends Component {
                     >
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>项目分类</span>
-                            <TreeSelect
+                            {/* <TreeSelect
                                 style={{ width: 150 }}
                                 value={this.state.value}
                                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
@@ -1315,7 +1318,18 @@ class Goods extends Component {
                                 placeholder="选择商品分类"
                                 defaultValue="选择商品分类"
                                 treeDefaultExpandAll
-                                onChange={this.treeChange} />
+                                onChange={this.treeChange} /> */}
+                            <Select
+                                style={{ width: 150 }}
+                                defaultValue={value}
+                                onChange={e => this.setState({ value: e })}
+                            >
+                                {
+                                    treeData.map((item) => (
+                                        <Option value={item.value}>{item.title}</Option>
+                                    ))
+                                }
+                            </Select>
                         </div>
                         <div className='goodsModalItem'>
                             <span className='gmiLabel'>项目名称</span>

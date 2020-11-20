@@ -288,7 +288,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('查询订单数据成功',res)
+                console.log('查询订单数据成功', res)
                 if (res.data.data) {
                     let data = res.data.data
                     data.map(item => {
@@ -319,7 +319,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('查询员工信息成功',res)
+                console.log('查询员工信息成功', res)
                 if (res.data.data.list) {
                     let list = res.data.data.list
                     list.map(item => item.key = item.id)
@@ -342,7 +342,7 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('获取商家项目成功',res)
+                console.log('获取商家项目成功', res)
                 if (res.data.data) {
                     let data = res.data.data
                     data.map(item => item.key = item.phases_id)
@@ -447,10 +447,10 @@ class Cashier extends Component {
             }
         })
             .then(res => {
-                console.log('添加线下订单成功',res)
+                console.log('添加线下订单成功', res)
             })
             .catch(err => {
-                console.log('添加线下订单失败',err)
+                console.log('添加线下订单失败', err)
             })
     }
     // 时间戳转换
@@ -765,7 +765,7 @@ class Cashier extends Component {
                             value={goodsName}
                             onChange={e => this.setState({ goodsName: e.target.value })}
                         />
-                        <Select className='classSelect'
+                        {/* <Select className='classSelect'
                             placeholder='全部'
                             allowClear={true}
                             value={orderType}
@@ -778,14 +778,15 @@ class Cashier extends Component {
                             <Option value={0}>全部订单</Option>
                             <Option value={1} label='线上订单'>线上订单</Option>
                             <Option value={2} label='线下订单'>线下订单</Option>
-                        </Select>
+                        </Select> */}
                         <div className='search-btn' onClick={this.search}><SearchOutlined />搜索</div>
+                        <div className='add-btn' style={{ width: 130 }} onClick={this.addProject}>
+                            <PlusOutlined />新增线下订单
+                        </div>
                         <div className='daochu-btn' onClick={() => {
                             this.exportExcel(columns, newData, newText)
                         }}><DownloadOutlined />导出</div>
-                        <div className='add-btn' style={{ width: 130 }} onClick={this.addProject}>
-                            <PlusOutlined />添加线下订单
-                        </div>
+
                     </div>
                     <div style={{ width: '100%', paddingBottom: 10 }}>
                         <Table
