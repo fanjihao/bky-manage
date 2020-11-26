@@ -43,7 +43,9 @@ class Custom extends Component {
         // 客户消费行为
         behavior: 1,
         // 客户消费金额
-        money: null
+        money: null,
+
+        selectLevel: ''
     }
     componentDidMount() {
         this.setState({ loading: true })
@@ -78,13 +80,14 @@ class Custom extends Component {
     // 搜索客户
     search = () => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { searchValue } = this.state
+        const { searchValue, selectLevel } = this.state
         axios({
             method: 'GET',
             url: '/client',
             params: {
                 parm: searchValue,
-                enterId: user.id
+                enterId: user.id,
+                clientLevel: selectLevel
             }
         })
             .then(res => {
@@ -149,8 +152,8 @@ class Custom extends Component {
             })
                 .then(res => {
                     console.log('新增客户成功', res)
-                    
-                    if(res.data.status === 200){
+
+                    if (res.data.status === 200) {
                         message.success('新增客户成功')
                         this.setState({ loading: true, customAdd: false }, () => {
                             this.getAllCustom()
@@ -161,7 +164,7 @@ class Custom extends Component {
                                 level: 'E'
                             })
                         })
-                    }else{
+                    } else {
                         message.error(res.data.message)
                     }
                 })
@@ -245,7 +248,8 @@ class Custom extends Component {
                 console.log('添加客户消费信息成功', res)
                 if (res.data.status === 200) {
                     this.toExpenseDetail(customId)
-                    this.getAllCustom()
+                    // this.getAllCustom()
+                    this.clientLevel()
                     this.setState({ money: null })
                     message.success(res.data.message)
                 } else {
@@ -260,15 +264,15 @@ class Custom extends Component {
             })
     }
     // 按客户等级查询
-    clientLevel = e => {
+    clientLevel = () => {
+        const { selectLevel } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
-        console.log(e ? e : null)
         axios({
             method: 'GET',
             url: '/client',
             params: {
                 enterId: user.id,
-                clientLevel: e
+                clientLevel: selectLevel
             }
         })
             .then(res => {
@@ -289,7 +293,7 @@ class Custom extends Component {
         const { loading, data, searchValue, customAdd,
             addPopover, employList, employ, name,
             userPhone, customEdit, expenseDetail, expenseDetailData,
-            addExpense, money, level } = this.state
+            addExpense, money, level, selectLevel } = this.state
         const columns = [
             {
                 title: '序号',
@@ -352,7 +356,11 @@ class Custom extends Component {
                 title: '消费详情',
                 key: 'expenseDetail',
                 render: (text, record) => (
-                    <Button type="primary" onClick={() => this.toExpenseDetail(record.id)}>查看</Button>
+                    <Button type="primary" onClick={() => {
+                        console.log(record)
+                        this.toExpenseDetail(record.id)
+                    }
+                    }>查看</Button>
                 ),
                 align: 'center'
             }, {
@@ -395,6 +403,12 @@ class Custom extends Component {
         ]
         const expenseDetailColums = [
             {
+                title: '时间',
+                dataIndex: 'createTime',
+                key: 'createTime',
+                render: text => <span>{text.split('T')[0] + ' '}{text.split('T')[1]}</span>,
+                align: 'center'
+            }, {
                 title: '消费行为',
                 dataIndex: 'behavior',
                 key: 'behavior',
@@ -441,7 +455,7 @@ class Custom extends Component {
 
                         <Select
                             style={{ width: 150 }}
-                            onChange={e => this.clientLevel(e)}
+                            onChange={e => this.setState({selectLevel: e},() => this.clientLevel())}
                             defaultValue="客户级别"
                             allowClear={true}
                             placeholder="全部">

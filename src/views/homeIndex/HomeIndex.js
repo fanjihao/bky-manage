@@ -68,8 +68,12 @@ class HomeIndex extends Component {
         })
             .then(res => {
                 console.log('获取分期项目统计图表数据成功', res)
-                if (res.data === []) {
-
+                if (res.data.length === 0) {
+                    this.setState({
+                        stageTimeList: [],
+                        stageNumList: [],
+                        stageTotalList: []
+                    })
                 } else {
                     let newList1 = []
                     let newList2 = []
@@ -190,8 +194,12 @@ class HomeIndex extends Component {
         })
             .then(res => {
                 console.log('获取分期项目统计图表数据成功', res)
-                if (res.data === []) {
-
+                if (res.data.length === 0) {
+                    this.setState({
+                        onlineTimeList: [],
+                        onlineNumList: [],
+                        onlineTotalList: []
+                    })
                 } else {
                     let newList1 = []
                     let newList2 = []
@@ -257,7 +265,6 @@ class HomeIndex extends Component {
         // console.log(preDate)
 
         const id = JSON.parse(localStorage.getItem('user')).id
-        console.log('商户信息', JSON.parse(localStorage.getItem('user')))
 
         this.setState({
             startTime: preDate,
@@ -319,8 +326,6 @@ class HomeIndex extends Component {
             onlineTotalList, onlineRankList } = this.state
         let personInfo = JSON.parse(localStorage.getItem('user'))
 
-        // console.log(stageNumList, stageTimeList, stageTotalList)
-
         let stageOption, onlineOption
 
         if (stageNumList.length === 0 && stageTimeList.length === 0 && stageTotalList.length === 0) {
@@ -334,7 +339,46 @@ class HomeIndex extends Component {
                         fontWeight: 'normal',
                         fontSize: 16
                     }
-                }
+                },
+                legend: {
+                    top: 30
+                },
+                grid: {
+                    left: '10%',
+                    right: '10%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                xAxis: {
+                    type: "category",
+                    data: stageTimeList,
+                    boundaryGap: true,
+                },
+                yAxis: {
+                    type: "value"
+                },
+                series: [
+                    {
+                        data: stageNumList,
+                        type: "line",
+                        smooth: true,
+                        name: '单量'
+                    },
+                    {
+                        data: stageTotalList,
+                        type: 'line',
+                        name: '交易额'
+                    }
+                ]
             }
         } else {
             stageOption = {
@@ -399,7 +443,46 @@ class HomeIndex extends Component {
                         fontWeight: 'normal',
                         fontSize: 16
                     }
-                }
+                },
+                legend: {
+                    top: 30
+                },
+                grid: {
+                    left: '10%',
+                    right: '10%',
+                    bottom: '5%',
+                    containLabel: true
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                xAxis: {
+                    type: "category",
+                    data: onlineTimeList,
+                    boundaryGap: true,
+                },
+                yAxis: {
+                    type: "value"
+                },
+                series: [
+                    {
+                        data: onlineNumList,
+                        type: "line",
+                        smooth: true,
+                        name: '单量'
+                    },
+                    {
+                        data: onlineTotalList,
+                        type: 'line',
+                        name: '交易额'
+                    }
+                ]
             }
         } else {
             onlineOption = {

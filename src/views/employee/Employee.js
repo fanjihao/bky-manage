@@ -202,7 +202,8 @@ export default class Employee extends Component {
             this.setState({
                 whatDo: '添加员工',
                 detailVisible: true,
-                isLook: false
+                isLook: false,
+                employGradeVal: 'E'
             })
         } else if (what === 'look') {
             let sex, marital
@@ -237,7 +238,7 @@ export default class Employee extends Component {
                 employGraduate: item.graduationTime, // 员工毕业时间
                 avatar: item.avatar,
                 employGrade: item.grade,
-                employGradeVal: item.grade + '级'
+                employGradeVal: item.grade
             })
         } else {
             let sex, maritalStatus
@@ -273,7 +274,7 @@ export default class Employee extends Component {
                 employGraduate: item.graduationTime, // 员工毕业时间
                 avatar: item.avatar,
                 employGrade: item.grade,
-                employGradeVal: item.grade + '级'
+                employGradeVal: item.grade
             })
         }
     }

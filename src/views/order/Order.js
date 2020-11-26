@@ -212,7 +212,7 @@ class Order extends Component {
                 orderPayType: i.payType,
                 orderPrice: i.price,
                 orderState: i.type,
-                orderPay: i.stagesPrice + i.prepaymentAmount * (i.stagesNumber - i.surplusNum),
+                orderPay: i.prepaymentAmount + i.stagesPrice * (i.stagesNumber - i.surplusNum),
                 orderCreate: i.createTime,
                 orderRemarks: i.remarks,
                 orderOtherNum: i.surplusNum,

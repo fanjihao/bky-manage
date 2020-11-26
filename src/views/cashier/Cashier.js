@@ -19,22 +19,15 @@ class Cashier extends Component {
         // 价格隐藏
         eyeTrue: true,
         allEyeTrue: true,
+        isOnlineNum: true,
+        isONlineOrder: true,
         // 是否显示模态框
         orderVisible: false,
         // 时间
         startTime: null,
         endTime: null,
-        time: null,
         // 订单表数据
         data: [],
-        // 本月实收总额
-        monthTrueNum: null,
-        // 本月实际订单数
-        monthTrueCount: null,
-        // 本月订单总额
-        monthNum: null,
-        // 本月订单数
-        monthCount: null,
         // 总销售额
         allNum: null,
         // 线上总销售额
@@ -43,8 +36,6 @@ class Cashier extends Component {
         offlineNum: null,
         // 用户id
         id: null,
-        // 订单类型
-        orderType: 0,
         // 商品名
         goodsName: '',
 
@@ -111,7 +102,19 @@ class Cashier extends Component {
         // 客户Id
         clientId: null,
         // 客户姓名
-        clientName: null
+        clientName: null,
+        // 线上实收总额
+        onLineTrueNum: 0,
+        onLIneTrueCount: 0,
+        // 线上订单总额
+        onLineOrderNum: 0,
+        onLineOrderCount: 0,
+        // 线下实收总额
+        inLineTrueNum: 0,
+        inLineTrueCount: 0,
+        // 线下订单总额
+        inLineOrderNum: 0,
+        inLineOrderCount: 0
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -223,32 +226,41 @@ class Cashier extends Component {
         }, () => {
             // 订单数据
             this.getOrderData(id, 1)
-            // 月营收数据
-            this.getMonthData(id)
+            // 营收数据
+            this.getRevenueData(id)
         })
     }
-    // 月营收数据
-    getMonthData = id => {
-        const { time } = this.state
+    // 营收数据
+    getRevenueData = id => {
+        const { startTime, endTime } = this.state
         axios({
             method: 'GET',
             url: '/cash/money',
             params: {
-                date: time,
-                enterId: id
+                enterId: id,
+                startDate: startTime,
+                endDate: endTime,
             }
         })
             .then(res => {
-                console.log('查询月营收数据成功', res)
+                console.log('查询营收数据成功', res)
                 this.setState({
-                    monthTrueNum: res.data.data.actOrderMoneyMonth,
-                    monthNum: res.data.data.orderMoneyMonth,
-                    monthTrueCount: res.data.data.actCount,
-                    monthCount: res.data.data.sumCount
+                    // 线上实收总额
+                    onLineTrueNum: res.data.data.lineUpOrderActMoney,
+                    onLIneTrueCount: res.data.data.lineUpOrderActMember,
+                    // 线上订单总额
+                    onLineOrderNum: res.data.data.lineUpOrderMoney,
+                    onLineOrderCount: res.data.data.lineUpOrderMember,
+                    // 线下实收总额
+                    inLineTrueNum: res.data.data.lineDownOrderActMoney,
+                    inLineTrueCount: res.data.data.lineDownOrderActMember,
+                    // 线下订单总额
+                    inLineOrderNum: res.data.data.lineDownOrderMoney,
+                    inLineOrderCount: res.data.data.lineDownOrderMember
                 })
             })
             .catch(err => {
-                console.log('查询月营收数据失败', err)
+                console.log('查询营收数据失败', err)
             })
     }
     // 总营收数据
@@ -265,7 +277,7 @@ class Cashier extends Component {
                 this.setState({
                     allNum: res.data.data.onMoney + res.data.data.offMoney,
                     onlineNum: res.data.data.onMoney,
-                    offMoney: res.data.data.offMoney
+                    offlineNum: res.data.data.offMoney
                 })
             })
             .catch(err => {
@@ -289,7 +301,7 @@ class Cashier extends Component {
         })
             .then(res => {
                 console.log('查询订单数据成功', res)
-                if (res.data.data) {
+                if (res.data.data.length > 0) {
                     let data = res.data.data
                     data.map(item => {
                         item.key = item.orderId
@@ -394,12 +406,11 @@ class Cashier extends Component {
             startTime: preDate,
             endTime: nowDate,
             id: id,
-            time: nowDate,
             loading: true
         }, () => {
             // console.log(id)
-            // 本月销量
-            this.getMonthData(id)
+            // 销量
+            this.getRevenueData(id)
             // 总营收数据
             this.getAllData(id)
             // 订单数据
@@ -415,9 +426,9 @@ class Cashier extends Component {
     // 搜索
     search = () => {
         this.setState({ loading: true })
-        const { orderType } = this.state
+        const { tabCheck } = this.state
         const id = JSON.parse(localStorage.getItem('user')).id
-        this.getOrderData(id, orderType + 1)
+        this.getOrderData(id, tabCheck)
     }
     // 添加线下订单
     addProject = () => {
@@ -518,31 +529,38 @@ class Cashier extends Component {
     }
     render() {
         const { tabCheck, eyeTrue, allEyeTrue, orderVisible,
-            startTime, endTime, data, monthCount,
-            monthNum, monthTrueCount, monthTrueNum, allNum,
-            onlineNum, offlineNum, id, orderType,
+            startTime, endTime, data, allNum,
+            onlineNum, offlineNum, id,
             orderId, paid, name, amount,
             stagesNum, type, classify, sales,
-            stock, stagesPrice,
-            // stagesNumber,
-            surplus,
-            payType, payPrice, addTime, mark,
-            staffName, goodsName, time, loading,
-            employList, visible, userPhone,
+            stock, stagesPrice, surplus, payType,
+            payPrice, addTime, mark, staffName,
+            goodsName, loading, employList, visible,
+            userPhone, onLineTrueNum, onLIneTrueCount, onLineOrderNum,
+            onLineOrderCount, inLineTrueNum, inLineTrueCount, inLineOrderNum,
+            inLineOrderCount,
             // 线下
-            offlineAmount, offlineUserPhone, addVisible, offlineStaff, offlineMark, projectList, projectVis,
-            projectName, projectImage, clientName,
-            customData, customVisible, clientLevel } = this.state
+            offlineAmount, offlineUserPhone, addVisible, offlineStaff,
+            offlineMark, projectList, projectVis, projectName,
+            projectImage, clientName, customData, customVisible,
+            clientLevel, isONlineOrder, isOnlineNum } = this.state
 
-        let newData
-        if (data.length > 0) {
+        let newData, newText
+
+        if (tabCheck === 1) {
+            newText = '全部收银订单表.xlsx'
+            newData = data
+        } else if (tabCheck === 2) {
+            newText = '线上收银订单表.xlsx'
             newData = data.filter(item => {
-                return item.classify === orderType
+                return item.classify === 1
             })
-        } else {
-            newData = []
+        } else if (tabCheck === 3) {
+            newText = '线下收银订单表.xlsx'
+            newData = data.filter(item => {
+                return item.classify === 2
+            })
         }
-        const newText = orderType === 1 ? '线上商品收银统计表' : '线下商品收银统计表'
         const columns = [
             {
                 title: '项目图片',
@@ -603,7 +621,8 @@ class Cashier extends Component {
                 key: 'action',
                 render: (text, record) => {
                     return <Space>
-                        <span className='look-action actions' onClick={() => this.detail('look', record)}>查看详情</span>
+                        <Button type="primary" onClick={() => this.detail('look', record)}>查看详情</Button>
+                        {/* <span className='look-action actions' onClick={() => this.detail('look', record)}>查看详情</span> */}
                         {/* <span className='edit-action actions' onClick={() => this.detail('edit', record)}>编辑</span> */}
                     </Space>
                 },
@@ -689,15 +708,26 @@ class Cashier extends Component {
                 </div>
                 <div className='cashierHeader'>
 
+                    <div style={{ marginBottom: 20 }}>
+                        <RangePicker
+                            locale={locale}
+                            className='datePicker'
+                            value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
+                            format={dateFormat}
+                            onChange={this.setTime}
+                            allowClear={false}
+                        />
+                    </div>
+
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月实收总额</span>
-                            <span style={{ float: "right", height: 32 }}>{monthTrueCount ? monthTrueCount : '0'}单</span>
+                            <span style={{ float: "left" }}>线上实收总额</span>
+                            <span style={{ float: "right", height: 32 }}>{onLIneTrueCount}单</span>
                         </div>
                         <div className='sumTotal'>
                             <div style={{ float: "left", overflow: 'hidden' }}>
                                 {eyeTrue
-                                    ? <span className='month-num'>{monthTrueNum ? monthTrueNum : '0'}</span>
+                                    ? <span className='month-num'>{onLineTrueNum}</span>
                                     : <span className='month-num'>*****</span>}
                                 <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
                             </div>
@@ -708,15 +738,16 @@ class Cashier extends Component {
                             </div>
                         </div>
                     </div>
+
                     <div className='headerTips'>
                         <div className='sumTotal' style={{ marginBottom: 20 }}>
-                            <span style={{ float: "left" }}>{time ? time.split('-')[1] : null}月订单总额</span>
-                            <span style={{ float: "right" }}>{monthCount ? monthCount : '0'}单</span>
+                            <span style={{ float: "left" }}>线上订单总额</span>
+                            <span style={{ float: "right" }}>{onLineOrderCount}单</span>
                         </div>
                         <div className='sumTotal'>
                             <div style={{ float: "left", overflow: 'hidden' }}>
                                 {allEyeTrue
-                                    ? <span className='month-num'>{monthNum ? monthNum : '0'}</span>
+                                    ? <span className='month-num'>{onLineOrderNum}</span>
                                     : <span className='month-num'>*****</span>}
                                 <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
                             </div>
@@ -727,58 +758,74 @@ class Cashier extends Component {
                             </div>
                         </div>
                     </div>
+
+                    {/* 线下 */}
+
+                    <div className='headerTips'>
+                        <div className='sumTotal' style={{ marginBottom: 20 }}>
+                            <span style={{ float: "left" }}>线下实收总额</span>
+                            <span style={{ float: "right" }}>{inLineTrueCount}单</span>
+                        </div>
+                        <div className='sumTotal'>
+                            <div style={{ float: "left", overflow: 'hidden' }}>
+                                {isOnlineNum
+                                    ? <span className='month-num'>{inLineTrueNum}</span>
+                                    : <span className='month-num'>*****</span>}
+                                <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
+                            </div>
+                            <div style={{ float: "right" }}>
+                                {isOnlineNum
+                                    ? <EyeInvisibleOutlined className='eyeIcon' onClick={() => this.setState({ isOnlineNum: !isOnlineNum })} />
+                                    : <EyeOutlined className='eyeIcon' onClick={() => this.setState({ isOnlineNum: !isOnlineNum })} />}
+                            </div>
+                        </div>
+                    </div>
+                    <div className='headerTips'>
+                        <div className='sumTotal' style={{ marginBottom: 20 }}>
+                            <span style={{ float: "left" }}>线下订单总额</span>
+                            <span style={{ float: "right" }}>{inLineOrderCount}单</span>
+                        </div>
+                        <div className='sumTotal'>
+                            <div style={{ float: "left", overflow: 'hidden' }}>
+                                {isONlineOrder
+                                    ? <span className='month-num'>{inLineOrderNum}</span>
+                                    : <span className='month-num'>*****</span>}
+                                <span style={{ float: "left", margin: '8px 10px', color: '#1089EB' }}>元</span>
+                            </div>
+                            <div style={{ float: "right" }}>
+                                {isONlineOrder
+                                    ? <EyeInvisibleOutlined className='eyeIcon' onClick={() => this.setState({ isONlineOrder: !isONlineOrder })} />
+                                    : <EyeOutlined className='eyeIcon' onClick={() => this.setState({ isONlineOrder: !isONlineOrder })} />}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className='goodsBody'>
                     <div className='goodsBodyTab'>
                         <div className={tabCheck === 1 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 1, loading: true })
-                                this.getOrderData(id, 1)
+                                this.setState({ tabCheck: 1, loading: true }, () => this.getOrderData(id, 1))
                             }}>全部订单</div>
                         <div className={tabCheck === 2 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 2, loading: true })
-                                this.getOrderData(id, 2)
+                                this.setState({ tabCheck: 2, loading: true }, () => this.getOrderData(id, 2))
                             }}>线上订单</div>
                         <div className={tabCheck === 3 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 3, loading: true })
-                                this.getOrderData(id, 3)
+                                this.setState({ tabCheck: 3, loading: true }, () => this.getOrderData(id, 3))
                             }}>线下订单</div>
                         <div className='tableTips'>
                             “线上”即app成交订单，“线下”即收银牌收银订单。线下订单提交后需操作完善订单详情。
                         </div>
                     </div>
                     <div className='gbTableTop'>
-                        <RangePicker
-                            locale={locale}
-                            className='datePicker'
-                            value={[moment(startTime, dateFormat), moment(endTime, dateFormat)]}
-                            format={dateFormat}
-                            onChange={this.setTime}
-                            allowClear={false}
-                        />
 
                         <Input placeholder='输入商品名或客户电话查询'
                             className='nameInput'
                             value={goodsName}
                             onChange={e => this.setState({ goodsName: e.target.value })}
                         />
-                        {/* <Select className='classSelect'
-                            placeholder='全部'
-                            allowClear={true}
-                            value={orderType}
-                            clearIcon={<CloseCircleOutlined />}
-                            onChange={
-                                e => {
-                                    this.setState({ orderType: e })
-                                }
-                            }>
-                            <Option value={0}>全部订单</Option>
-                            <Option value={1} label='线上订单'>线上订单</Option>
-                            <Option value={2} label='线下订单'>线下订单</Option>
-                        </Select> */}
                         <div className='search-btn' onClick={this.search}><SearchOutlined />搜索</div>
                         <div className='add-btn' style={{ width: 130 }} onClick={this.addProject}>
                             <PlusOutlined />新增线下订单

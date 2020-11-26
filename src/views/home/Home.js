@@ -72,14 +72,6 @@ class Home extends Component {
                                     <span  className='nav-span'>客户管理</span>
                                     </NavLink>
                             </Menu.Item>
-                            {/* <SubMenu key="2" title="收银管理">
-                                <Menu.Item key="21">
-                                    <NavLink to='/home/cashier'>营收管理</NavLink>
-                                </Menu.Item>
-                                <Menu.Item key="22">
-                                    <NavLink to='/home/cashier'>客户管理</NavLink>
-                                </Menu.Item>
-                            </SubMenu> */}
                             <Menu.Item key="4" icon={<ShoppingOutlined />}>
                                 <NavLink to='/home/goods'>
                                     <span  className='nav-span'>商品管理</span></NavLink>

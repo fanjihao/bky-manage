@@ -334,6 +334,7 @@ class Goods extends Component {
                 message.success('分期项目添加成功')
                 this.setState({
                     stageVisible: false,
+                    isStageDetailInfo: false
                 }, () => {
                     this.getStageItem()
                 })
@@ -420,7 +421,7 @@ class Goods extends Component {
                     stageRemarks: i.remarks,
                     stageNo: i.id,
                     value: i.cateId
-                })
+                },() => this.stageDetailInfo())
             } else {
                 this.setState({
                     stageVisible: true,
@@ -437,7 +438,7 @@ class Goods extends Component {
                     cateId: '',
                     fileList: [],
                     value: 1
-                })
+                },() => this.stageDetailInfo())
             }
         })
 
@@ -707,7 +708,7 @@ class Goods extends Component {
         if (stageAmount !== '' && stageNumVal !== '' && stagePrice !== '') {
             eachStagePrice = (stagePrice - stageAmount) / stageNumVal
             this.setState({
-                eachStagePrice: Math.floor(eachStagePrice * 100) / 100,
+                eachStagePrice: Math.round(eachStagePrice * 100) / 100,
                 isStageDetailInfo: true
             })
         } else {
@@ -811,7 +812,9 @@ class Goods extends Component {
                 render: (text, record) => {
                     if (goodsTable !== 3) {
                         return <Space size="middle">
-                            <a style={{ color: '#13CE66' }} onClick={() => this.editStage('edit', record)}>修改</a>
+                            <a style={{ color: '#13CE66' }} onClick={() => {
+                                this.editStage('edit', record)
+                            }}>修改</a>
                             <Popconfirm
                                 title="请您确认是否删除?"
                                 onConfirm={() => this.confirm(record)}
@@ -1112,7 +1115,7 @@ class Goods extends Component {
                             <Option value="">全部</Option>
                             {
                                 treeData.map(item => (
-                                    <Option value={item.title}>{item.title}</Option>
+                                    <Option value={item.title} key={item.id}>{item.title}</Option>
                                 ))
                             }
                         </Select>
@@ -1293,7 +1296,7 @@ class Goods extends Component {
                         visible={stageVisible}
                         title={stageVisiInfo === 'add' ? "新增分期项目" : '修改分期项目'}
                         onOk={() => this.setState({ stageVisible: false })}
-                        onCancel={() => this.setState({ stageVisible: false })}
+                        onCancel={() => this.setState({ stageVisible: false, isStageDetailInfo: false })}
                         footer={[
                             stageVisiInfo === 'add' ?
                                 <Button key="submit" type="primary" onClick={() => this.okShelves()}>
@@ -1387,7 +1390,7 @@ class Goods extends Component {
                                     项目价格 <span style={{ color: 'red', fontSize: 18 }}>{stagePrice}</span>,
                                     总期数 <span style={{ color: 'red', fontSize: 18 }}>{stageNumVal}</span>,
                                     每一期价格 <span style={{ color: 'red', fontSize: 18 }}>{eachStagePrice}</span>,
-                                    首付款 <span style={{ color: 'red', fontSize: 18 }}>{stageAmount + '+' + eachStagePrice}</span>,
+                                    首次付款 <span style={{ color: 'red', fontSize: 18 }}>{stageAmount + '+' + eachStagePrice}</span>,
                                 </div>
                                 : null
                         }

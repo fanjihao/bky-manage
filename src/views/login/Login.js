@@ -30,15 +30,19 @@ class Login extends React.Component {
                 codeShow: true
             }, () => {
                 axios({
-                    url: '/api/appLogin/register/verify',
+                    url: `/merchantLogin/register/verify`,
                     method: 'POST',
-                    data: 'phone=' + this.state.userphone,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+                    data: {
+                        phone: this.state.userphone
                     }
                 })
                     .then(res => {
-                        message.success('验证码发送成功')
+                        console.log(res)
+                        if(res.data.status === 200){
+                            message.success(res.data.message)
+                        }else{
+                            message.error(res.data.message)
+                        }
                     })
                     .catch(err => {
                         message.success('验证码发送失败')
@@ -77,7 +81,7 @@ class Login extends React.Component {
                 }
             })
                 .then(res => {
-                    // console.log(res)
+                    console.log(res)
                     if (res.data.status === 200) {
                         localStorage.setItem('token', res.data.token)
                         localStorage.setItem('user', JSON.stringify(res.data.data))
