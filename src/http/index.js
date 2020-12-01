@@ -2,9 +2,9 @@ import axios from "axios";
 import { Modal } from 'antd'
 
 let config = {
-    baseURL: "http://47.108.174.202:9010",
+    // baseURL: "http://47.108.174.202:9010",
     // baseURL: "http://192.168.3.98:9010",
-    // baseURL: "http://192.168.3.135:9010",
+    baseURL: "http://192.168.3.135:9010",
     timeout: 60 * 1000, // Timeout
 };
 
@@ -22,8 +22,7 @@ _axios.interceptors.request.use(
         if (token) {
             // 设置 token ，一般是在 headers 里加入 Authorization，并加上 Bearer 标注
             // 最好通过此种形式设置 request.headers['Authorization']
-            config.headers['token'] = token; // 基于 nodejs
-            //   权限设置也需要在请求头里携带信息
+            config.headers['token'] = token; // 基于 nodejs 
         }
         // console.log('请求头', config)
         return config;

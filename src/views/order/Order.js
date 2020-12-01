@@ -245,9 +245,6 @@ class Order extends Component {
             })
         }
     }
-    handleVisibleChange = visible => {
-        this.setState({ visible })
-    }
     // 修改分期订单信息
     stageChange = () => {
         const { orderId, orderRemarks, linkId, username } = this.state

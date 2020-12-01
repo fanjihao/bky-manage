@@ -3,7 +3,7 @@ import './home.css'
 import { Layout, Menu } from 'antd'
 import {
     HomeOutlined, ShoppingOutlined, AccountBookOutlined, SettingOutlined,
-    TeamOutlined, TransactionOutlined, UserAddOutlined
+    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined
 } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'
 import HomeIndex from '../homeIndex/HomeIndex'
@@ -13,6 +13,7 @@ import Employee from '../employee/Employee'
 import Setting from '../setting/Setting'
 import Cashier from '../cashier/Cashier'
 import Custom from '../custom/Custom'
+import Spell from '../spell/Spell'
 import { connect } from 'react-redux'
 
 const { Content, Sider } = Layout
@@ -76,15 +77,19 @@ class Home extends Component {
                                 <NavLink to='/home/goods'>
                                     <span  className='nav-span'>商品管理</span></NavLink>
                             </Menu.Item>
-                            <Menu.Item key="5" icon={<AccountBookOutlined />}>
+                            <Menu.Item key="5" icon={<ShopOutlined />}>
+                                <NavLink to='/home/spell'>
+                                    <span  className='nav-span'>拼团管理</span></NavLink>
+                            </Menu.Item>
+                            <Menu.Item key="6" icon={<AccountBookOutlined />}>
                                 <NavLink to='/home/order'>
                                     <span  className='nav-span'>订单管理</span></NavLink>
                             </Menu.Item>
-                            <Menu.Item key="6" icon={<TeamOutlined />}>
+                            <Menu.Item key="7" icon={<TeamOutlined />}>
                                 <NavLink to='/home/employee'>
                                     <span  className='nav-span'>员工管理</span></NavLink>
                             </Menu.Item>
-                            <Menu.Item key="7" icon={<SettingOutlined />}>
+                            <Menu.Item key="8" icon={<SettingOutlined />}>
                                 <NavLink to='/home/setting'>
                                     <span  className='nav-span'>设置</span></NavLink>
                             </Menu.Item>
@@ -111,6 +116,7 @@ class Home extends Component {
                                 <Route path="/home/employee" component={Employee} />
                                 <Route path="/home/setting" component={Setting} />
                                 <Route path="/home/custom" component={Custom} />
+                                <Route path="/home/spell" component={Spell} />
                             </div>
                         </Content>
                     </Layout>

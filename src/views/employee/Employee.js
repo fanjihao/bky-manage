@@ -37,8 +37,11 @@ export default class Employee extends Component {
         phone: '',
         data: [],
         avatar: '',
-        loading: true
+        loading: true,
+        // 员工底薪
+        employSalary: 0
     }
+    // 或i去员工列表
     getEmploy = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { name, phone } = this.state
@@ -86,8 +89,10 @@ export default class Employee extends Component {
         })
     }
     publicData = (type) => {
-        const { employNo, employId, employSex, employMarital, employhomeAdd, employName, employPhone, employBirth,
-            employNation, employNowAdd, employSchool, employHighest, employMajor, employGraduate, avatar, employGrade } = this.state
+        const { employNo, employId, employSex, employMarital, employhomeAdd,
+            employName, employPhone, employBirth, employNation, employNowAdd,
+            employSchool, employHighest, employMajor, employGraduate, avatar,
+            employGrade, employSalary } = this.state
 
         let user = JSON.parse(localStorage.getItem('user'))
         let formData = new FormData()
@@ -107,6 +112,7 @@ export default class Employee extends Component {
         formData.append("avatar", avatar)
         formData.append("graduationTime", employGraduate)
         formData.append("grade", employGrade)
+        formData.append('salary', Number(employSalary))
         if (type === 'edit') {
             formData.append("id", employNo)
         }
@@ -130,9 +136,10 @@ export default class Employee extends Component {
             employSexVal: ''
         })
     }
+    // 添加员工
     addEmploy = () => {
         let formData = this.publicData()
-        const { employId, employSex, employName, employPhone, employNowAdd, avatar, employGrade } = this.state
+        const { employId, employSex, employName, employPhone, employNowAdd, employGrade } = this.state
         if (employSex === '' || employName === '' || employPhone === '' || employNowAdd === ''
             || employGrade === '' || employId === '') {
             notification.open({
@@ -197,6 +204,7 @@ export default class Employee extends Component {
     confirm = (re) => {
         console.log('确认删除', re)
     }
+    // 员工详情
     employDetail = (what, item) => {
         if (what === 'add') {
             this.setState({
@@ -238,7 +246,8 @@ export default class Employee extends Component {
                 employGraduate: item.graduationTime, // 员工毕业时间
                 avatar: item.avatar,
                 employGrade: item.grade,
-                employGradeVal: item.grade
+                employGradeVal: item.grade,
+                employSalary: item.salary
             })
         } else {
             let sex, maritalStatus
@@ -274,7 +283,8 @@ export default class Employee extends Component {
                 employGraduate: item.graduationTime, // 员工毕业时间
                 avatar: item.avatar,
                 employGrade: item.grade,
-                employGradeVal: item.grade
+                employGradeVal: item.grade,
+                employSalary: item.salary
             })
         }
     }
@@ -300,9 +310,10 @@ export default class Employee extends Component {
             employHighest: val
         })
     }
+    // 修改员工信息
     changeStaff = () => {
         let data = this.publicData('edit')
-        const { employId, employSex, employName, employPhone, employNowAdd, avatar, employGrade } = this.state
+        const { employId, employSex, employName, employPhone, employNowAdd, avatar, employGrade, employSalary } = this.state
         if (employSex === '' || employName === '' || employPhone === '' || employNowAdd === ''
             || employGrade === '' || employId === '') {
             notification.open({
@@ -342,6 +353,7 @@ export default class Employee extends Component {
                 })
         }
     }
+    // 删除员工
     restore = (i) => {
         axios({
             url: '/merchantOrder/removeStaff',
@@ -548,7 +560,7 @@ export default class Employee extends Component {
         const { detailVisible, whatDo, isLook, employId,
             employSexVal, employName, employPhone, employBirth,
             employNowAdd, employGradeVal, name, loading,
-            data, idWrong, telWrong } = this.state
+            data, idWrong, telWrong, employSalary } = this.state
         let modalFootDom
         if (whatDo === '修改') {
             modalFootDom = <Button key="submit" type="primary" onClick={() => this.changeStaff()}>
@@ -696,6 +708,16 @@ export default class Employee extends Component {
                                     <Option value={1} label='男' key={1}>男</Option>
                                     <Option value={2} label='女' key={2}>女</Option>
                                 </Select>
+                            </div>
+
+                            <div className='embLabel'>
+                                <span>员工底薪</span>
+                                <Input
+                                    disabled={isLook}
+                                    value={employSalary}
+                                    style={{ width: '60%' }}
+                                    onChange={e => this.setState({ employSalary: e.target.value })}
+                                />
                             </div>
                         </div>
                     </div>

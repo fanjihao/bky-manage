@@ -1,0 +1,42 @@
+.spell-searchInput{
+    width: 200px;
+    margin: 20px;
+}
+.spell-searchBtn{
+    display: inline-block;
+}
+.spellListSpanA{
+    display: inline-block;
+    width: 60px;
+    height: 25px;
+    line-height: 25px;
+    background-color: #E8F4FF;
+    color: #1890FF;
+    text-align: center;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.spellListSpanB{
+    display: inline-block;
+    width: 60px;
+    height: 25px;
+    line-height: 25px;
+    background-color: #F4F4F5;
+    color: #909399;
+    text-align: center;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.spell-refresh{
+    display: inline-block;
+    width: 75px;
+    height: 35px;
+    border-radius: 3px;
+    text-align: center;
+    line-height: 35px;
+    background-color: #FF6D6D;
+    color: white;
+    cursor: pointer;
+}
