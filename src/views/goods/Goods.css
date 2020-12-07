@@ -107,6 +107,7 @@
     display: inline-block;
     text-align: right;
     margin-right: 10px;
+    vertical-align: top;
 }
 .littleitem{
     width: 33%;
