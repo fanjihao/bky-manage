@@ -294,9 +294,12 @@ export default class Subscribe extends Component {
                         </div>
                     </div>
 
-                    <div className='goodsModalItem'>
+                    {/* <div className='subscribeService'>
                         <span className='gmiLabel'>预约服务时间</span>
-                    </div>
+                        <div className='subscribeTime'>
+
+                        </div>
+                    </div> */}
                     
                     {/* <div style={{ margin: '10px 39px' }}>
                         <span className='integralSpan'>积分抵扣</span>
