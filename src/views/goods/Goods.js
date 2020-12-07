@@ -136,7 +136,11 @@ class Goods extends Component {
         // 拼团服务开始时间
         serviceStartTime: '',
         // 拼团服务结束时间
-        serviceEndTime: ''
+        serviceEndTime: '',
+        // 原价
+        originalPrice: '',
+        // 拼团折扣
+        spellDiscount: ''
     }
     // 获取分期项目列表
     getStageItem = () => {
@@ -830,8 +834,9 @@ class Goods extends Component {
             spellImage: data.image,
             spellStock: data.stock,
             spellSales: data.ficti,
-            spellPrice: data.price,
+            // spellPrice: data.price,
             spellProductId: data.id,
+            originalPrice: data.price,
             isSpellGroup: true
         })
     }
@@ -840,40 +845,48 @@ class Goods extends Component {
         const { spellName, spellTime, spellImage, spellPrice,
             spellPeople, spellSales, spellStock, spellPostage,
             startDate, startTime, endTime, endDate, spellDescription,
-            spellIsShow, spellProductId } = this.state
+            spellIsShow, spellProductId, spellDiscount } = this.state
         let merId = JSON.parse(localStorage.getItem('user')).id
-        axios({
-            method: 'PUT',
-            url: '/api/yxStoreCombination',
-            data: {
-                title: spellName,
-                effectiveTime: spellTime,
-                startTimeDate: startDate + ' ' + startTime,
-                endTimeDate: endDate + ' ' + endTime,
-                image: spellImage,
-                price: spellPrice,
-                people: spellPeople,
-                sales: spellSales,
-                stock: spellStock,
-                postage: spellPostage,
-                isShow: spellIsShow,
-                description: spellDescription,
-                productId: spellProductId,
-                merId: merId,
-                isDel: 0,
-                combination: 1,
-                isHost: 0
-            }
-        })
-            .then(res => {
-                console.log('新增拼团成功', res)
-                this.getOnlineItem()
-                this.setState({ isSpellGroup: false })
-                message.success('新增拼团商品成功')
+        if (startDate === '' || startTime === '' || endDate === '' || endTime === ''
+            || spellDescription === '' || spellDiscount === '' || spellName === ''
+            || spellImage === '' || spellPeople === '' || spellSales === ''
+            || spellStock === '' || spellPostage === '') {
+            message.warning('请确认信息填写完整！')
+        } else {
+            axios({
+                method: 'PUT',
+                url: '/api/yxStoreCombination',
+                data: {
+                    title: spellName,
+                    effectiveTime: spellTime,
+                    startTimeDate: startDate + ' ' + startTime,
+                    endTimeDate: endDate + ' ' + endTime,
+                    image: spellImage,
+                    price: spellPrice,
+                    people: spellPeople,
+                    sales: spellSales,
+                    stock: spellStock,
+                    postage: spellPostage,
+                    isShow: spellIsShow,
+                    description: spellDescription,
+                    productId: spellProductId,
+                    merId: merId,
+                    isDel: 0,
+                    combination: 1,
+                    isHost: 0,
+                    discount: spellDiscount
+                }
             })
-            .catch(err => {
-                console.log('新增拼团失败', err)
-            })
+                .then(res => {
+                    console.log('新增拼团成功', res)
+                    this.getOnlineItem()
+                    this.setState({ isSpellGroup: false })
+                    message.success('新增拼团商品成功')
+                })
+                .catch(err => {
+                    console.log('新增拼团失败', err)
+                })
+        }
     }
     // 上传拼团照片
     uploadSpellImage = info => {
@@ -959,13 +972,22 @@ class Goods extends Component {
                     this.setState({ royaltyRate: '' })
                 }
             }
-            console.log(this.state.royaltyRate)
         })
     }
 
     // 拼团商品服务时间
     service = value => {
         console.log(value)
+    }
+
+    // 设置拼团折扣
+    setDiscount = e => {
+        const { originalPrice } = this.state
+        const discount = e.target.value
+        this.setState({
+            spellDiscount: discount,
+            spellPrice: originalPrice * discount
+        })
     }
     render() {
         const { goodsIndex, goodsTable, name, stageVisible, stageName,
@@ -979,7 +1001,7 @@ class Goods extends Component {
             spellName, spellTime, spellImage, spellPrice,
             spellPeople, spellSales, spellStock, spellPostage,
             spellIsShow, spellDescription, integral, commission, royaltyRate,
-            serviceEndTime, serviceStartTime } = this.state
+            serviceEndTime, serviceStartTime, originalPrice, spellDiscount } = this.state
         const columns = [
             {
                 title: '项目编号',
@@ -1756,11 +1778,45 @@ class Goods extends Component {
 
                             <div className="spellItem">
                                 <div className="timeItem">
-                                    <span className="smallSpan">拼团价</span>
+                                    <span className="smallSpan">原价</span>
+                                    <Input
+                                        disabled={true}
+                                        className="smallInput"
+                                        value={originalPrice}
+                                    // onChange={e => this.setState({ spellPrice: e.target.value })}
+                                    />
+                                </div>
+                                <div className="timeItem">
+                                    <span className="smallSpan">拼团折扣</span>
                                     <Input
                                         className="smallInput"
+                                        placeholder="请输入两位小数，例如0.85"
+                                        value={spellDiscount}
+                                        onChange={e => this.setDiscount(e)}
+                                        onBlur={() => {
+                                            if (this.state.spellDiscount) {
+                                                if (!/^\d+(\.\d{0,2})?$/.test(this.state.spellDiscount)) {
+                                                    message.warning('折扣请正确输入两位小数')
+                                                    this.setState({
+                                                        spellDiscount: '',
+                                                        spellPrice: ''
+                                                    })
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="spellItem">
+                                <div className="timeItem">
+                                    <span className="smallSpan">拼团价</span>
+                                    <Input
+                                        disabled={true}
+                                        className="smallInput"
+                                        placeholder="请输入拼团折扣"
                                         value={spellPrice}
-                                        onChange={e => this.setState({ spellPrice: e.target.value })}
+                                    // onChange={e => this.setState({ spellPrice: e.target.value })}
                                     />
                                 </div>
                                 <div className="timeItem">

@@ -1,10 +1,10 @@
 import axios from "axios";
-import { Modal } from 'antd'
+import { message, Modal } from 'antd'
 
 let config = {
-    // baseURL: "http://47.108.174.202:9010",
+    baseURL: "http://47.108.174.202:9010",
     // baseURL: "http://192.168.3.98:9010",
-    baseURL: "http://192.168.3.135:9010",
+    // baseURL: "http://192.168.3.135:9010",
     timeout: 60 * 1000, // Timeout
 };
 
@@ -72,6 +72,9 @@ _axios.interceptors.response.use(
                 content: '服务器错误,请稍后再试!'
             })
             return Promise.reject('服务器出错：', error.response.data);
+        }else if (error.response.status === 420) {
+            message.error(error.response.data)
+            console.log(error.response,'420')
         }
         // Do something with response error
         return Promise.reject(error);

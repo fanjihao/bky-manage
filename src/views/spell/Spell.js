@@ -53,19 +53,26 @@ export default class Spell extends Component {
         visible: false,
         title: '',
         // 拼团ID
-        ID: ''
+        ID: '',
+        // 原价
+        originalPrice: '',
+        // 拼团折扣
+        spellDiscount: ''
     }
     // 查询拼团列表
     getSpellList = () => {
         const { searchVal } = this.state
+        const id = JSON.parse(localStorage.getItem('user')).id
+        console.log(id)
         this.setState({ loading: true })
         axios({
             method: 'GET',
             url: '/api/yxStoreCombination',
             params: {
-                page: 0,
-                size: 10,
-                title: searchVal
+                // page: 0,
+                // size: 10,
+                title: searchVal,
+                merId: id
             }
         })
             .then(res => {
@@ -115,7 +122,11 @@ export default class Spell extends Component {
             // 拼团商品ID
             spellProductId: data.productId,
             isSpellGroup: true,
-            ID: data.id
+            ID: data.id,
+            // 原价
+            originalPrice: data.originPrice,
+            // 拼团折扣
+            spellDiscount: data.discount
         })
     }
     // 上传拼团照片
@@ -186,41 +197,50 @@ export default class Spell extends Component {
         const { spellName, spellTime, spellImage, spellPrice,
             spellPeople, spellSales, spellStock, spellPostage,
             startDate, startTime, endTime, endDate, spellDescription,
-            spellIsShow, spellProductId, ID } = this.state
+            spellIsShow, spellProductId, ID, spellDiscount } = this.state
         let merId = JSON.parse(localStorage.getItem('user')).id
-        axios({
-            method: 'PUT',
-            url: '/api/yxStoreCombination',
-            data: {
-                title: spellName,
-                effectiveTime: spellTime,
-                startTimeDate: startDate + ' ' + startTime,
-                endTimeDate: endDate + ' ' + endTime,
-                image: spellImage,
-                price: spellPrice,
-                people: spellPeople,
-                sales: spellSales,
-                stock: spellStock,
-                postage: spellPostage,
-                isShow: spellIsShow,
-                description: spellDescription,
-                productId: spellProductId,
-                merId: merId,
-                isDel: 0,
-                combination: 1,
-                isHost: 0,
-                id: ID
-            }
-        })
-            .then(res => {
-                console.log('修改拼团成功', res)
-                this.getSpellList()
-                this.setState({ isSpellGroup: false })
-                message.success('修改拼团商品成功')
+        if (startDate === '' || startTime === '' || endDate === '' || endTime === ''
+            || spellDescription === '' || spellDiscount === '' || spellName === ''
+            || spellImage === '' || spellPeople === '' || spellSales === ''
+            || spellStock === '' || spellPostage === '') {
+                message.warning('请确认信息填写完整！')
+        } else {
+            axios({
+                method: 'PUT',
+                url: '/api/yxStoreCombination',
+                data: {
+                    title: spellName,
+                    effectiveTime: spellTime,
+                    startTimeDate: startDate + ' ' + startTime,
+                    endTimeDate: endDate + ' ' + endTime,
+                    image: spellImage,
+                    price: spellPrice,
+                    people: spellPeople,
+                    sales: spellSales,
+                    stock: spellStock,
+                    postage: spellPostage,
+                    isShow: spellIsShow,
+                    description: spellDescription,
+                    productId: spellProductId,
+                    merId: merId,
+                    isDel: 0,
+                    combination: 1,
+                    isHost: 0,
+                    id: ID,
+                    discount: spellDiscount
+                }
             })
-            .catch(err => {
-                console.log('修改拼团失败', err)
-            })
+                .then(res => {
+                    console.log('修改拼团成功', res)
+                    this.getSpellList()
+                    this.setState({ isSpellGroup: false })
+                    message.success('修改拼团商品成功')
+                })
+                .catch(err => {
+                    console.log('修改拼团失败', err)
+                })
+        }
+
     }
     // 删除拼团商品
     delSpellGroup = data => {
@@ -254,12 +274,22 @@ export default class Spell extends Component {
                 console.log('上下架失败', err)
             })
     }
+    // 设置拼团折扣
+    setDiscount = e => {
+        const { originalPrice } = this.state
+        const discount = e.target.value
+        this.setState({
+            spellDiscount: discount,
+            spellPrice: originalPrice * discount
+        })
+    }
     render() {
         const { spellList, emptyText, isSpellGroup, spellName,
             spellTime, spellImage, spellPrice, spellPeople,
             spellSales, spellStock, spellPostage, spellIsShow,
             spellDescription, startDate, startTime, endDate,
-            endTime, loading, searchVal, visible, title } = this.state
+            endTime, loading, searchVal, visible, title,
+            spellDiscount, originalPrice } = this.state
         const columns = [
             {
                 title: 'id',
@@ -267,13 +297,15 @@ export default class Spell extends Component {
                 dataIndex: 'id',
                 align: 'center',
                 width: 50
-            }, {
-                title: '商品ID',
-                key: 'productId',
-                dataIndex: 'productId',
-                align: 'center',
-                width: 100
-            }, {
+            },
+            // {
+            //     title: '商品ID',
+            //     key: 'productId',
+            //     dataIndex: 'productId',
+            //     align: 'center',
+            //     width: 100
+            // }, 
+            {
                 title: '产品图',
                 key: 'image',
                 dataIndex: 'image',
@@ -281,7 +313,7 @@ export default class Spell extends Component {
                     <Image src={text} width={50} />
                 ),
                 align: 'center',
-                width: 50
+                width: 100
             }, {
                 title: '拼团名称',
                 key: 'title',
@@ -299,13 +331,13 @@ export default class Spell extends Component {
                 key: 'price',
                 dataIndex: 'price',
                 align: 'center',
-                width: 80
+                width: 100
             }, {
                 title: '库存',
                 key: 'stock',
                 dataIndex: 'stock',
                 align: 'center',
-                width: 50
+                width: 80
             }, {
                 title: '参与人数',
                 key: 'countPeopleAll',
@@ -368,6 +400,7 @@ export default class Spell extends Component {
                 align: 'center'
             },
         ]
+        console.log(startDate)
 
         const uploadButtonA = (
             <div>
@@ -487,11 +520,32 @@ export default class Spell extends Component {
 
                         <div className="spellItem">
                             <div className="timeItem">
-                                <span className="smallSpan">拼团价</span>
+                                <span className="smallSpan">原价</span>
+                                <Input
+                                    disabled={true}
+                                    className="smallInput"
+                                    value={originalPrice}
+                                // onChange={e => this.setState({ spellPrice: e.target.value })}
+                                />
+                            </div>
+                            <div className="timeItem">
+                                <span className="smallSpan">拼团折扣</span>
                                 <Input
                                     className="smallInput"
+                                    value={spellDiscount}
+                                    onChange={e => this.setDiscount(e)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="spellItem">
+                            <div className="timeItem">
+                                <span className="smallSpan">拼团价</span>
+                                <Input
+                                    disabled={true}
+                                    className="smallInput"
                                     value={spellPrice}
-                                    onChange={e => this.setState({ spellPrice: e.target.value })}
+                                // onChange={e => this.setState({ spellPrice: e.target.value })}
                                 />
                             </div>
                             <div className="timeItem">

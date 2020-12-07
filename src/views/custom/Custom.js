@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import '../custom/Custom.css'
-import { Button, Input, Table, Modal, Popover, Select, message } from 'antd'
+import { Button, Input, Table, Modal, Popover, Select, message, DatePicker } from 'antd'
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons'
 import axios from '../../http'
+import locale from 'antd/lib/date-picker/locale/zh_CN'
+import moment from 'moment'
 
 const { Option } = Select;
 
@@ -30,6 +32,8 @@ class Custom extends Component {
         userPhone: null,
         // 客户等级
         level: 'E',
+        // 客户生日
+        birth: null,
         // 修改客户信息弹框
         customEdit: false,
         // 客户消费订单详情
@@ -134,7 +138,7 @@ class Custom extends Component {
     // 新增客户
     addCustom = () => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { name, userPhone, employId, level } = this.state
+        const { name, userPhone, employId, level, birth } = this.state
         console.log(level, '客户等级')
         if (name === null || userPhone === null) {
             message.warning('请填写完整信息')
@@ -147,7 +151,8 @@ class Custom extends Component {
                     name: name,
                     userPhone: userPhone,
                     staff_id: employId,
-                    level: level
+                    level: level,
+                    birthday: birth
                 }
             })
                 .then(res => {
@@ -178,7 +183,7 @@ class Custom extends Component {
     // 修改客户信息
     editCustom = () => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { name, userPhone, employId, level, customId } = this.state
+        const { name, userPhone, employId, level, customId, birth } = this.state
         console.log(customId)
         if (name === null || userPhone === null) {
             message.warning('请输入完整信息')
@@ -192,7 +197,8 @@ class Custom extends Component {
                     userPhone: userPhone,
                     staff_id: employId,
                     level: level,
-                    id: customId
+                    id: customId,
+                    birthday: birth
                 }
             })
                 .then(res => {
@@ -288,12 +294,19 @@ class Custom extends Component {
                 console.log('搜索失败', err)
             })
     }
+    // 客户生日
+    getBirth = e => {
+        console.log(e)
+        const birth = e._d.getFullYear() + '-' + (e._d.getMonth() + 1) + '-' + e._d.getDate()
+        console.log(birth)
+        this.setState({ birth: birth })
+    }
 
     render = () => {
         const { loading, data, searchValue, customAdd,
             addPopover, employList, employ, name,
             userPhone, customEdit, expenseDetail, expenseDetailData,
-            addExpense, money, level, selectLevel } = this.state
+            addExpense, money, level, selectLevel, birth } = this.state
         const columns = [
             {
                 title: '序号',
@@ -374,7 +387,8 @@ class Custom extends Component {
                             name: record.name,
                             userPhone: record.userPhone,
                             employ: record.staff,
-                            level: record.level
+                            level: record.level,
+                            birth: record.birthday
                         })
                     }>修改</Button>
                 ),
@@ -449,13 +463,14 @@ class Custom extends Component {
                                 name: null,
                                 userPhone: null,
                                 employ: null,
-                                level: 'E'
+                                level: 'E',
+                                birth: null
                             })
                         }><PlusOutlined />新增客户</div>
 
                         <Select
                             style={{ width: 150 }}
-                            onChange={e => this.setState({selectLevel: e},() => this.clientLevel())}
+                            onChange={e => this.setState({ selectLevel: e }, () => this.clientLevel())}
                             defaultValue="客户级别"
                             allowClear={true}
                             placeholder="全部">
@@ -506,6 +521,15 @@ class Custom extends Component {
                                 style={{ width: 200 }}
                                 value={userPhone}
                                 onChange={e => this.setState({ userPhone: e.target.value })}
+                            />
+                        </div>
+                        <div className="addCustomItem">
+                            <span>客户生日:</span>
+                            <DatePicker
+                                locale={locale}
+                                style={{ width: 120 }}
+                                allowClear={false}
+                                onChange={this.getBirth}
                             />
                         </div>
                         <div className="addCustomItem">
@@ -569,6 +593,15 @@ class Custom extends Component {
                                 style={{ width: 200 }}
                                 value={userPhone}
                                 onChange={e => this.setState({ userPhone: e.target.value })}
+                            />
+                        </div>
+                        <div className="addCustomItem">
+                            <span>客户生日:</span>
+                            <DatePicker
+                                locale={locale}
+                                allowClear={false}
+                                onChange={this.getBirth}
+                                value={birth ? moment(birth,'YYYY-MM-DD') : birth}
                             />
                         </div>
                         <div className="addCustomItem">
