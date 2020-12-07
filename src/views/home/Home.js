@@ -3,7 +3,7 @@ import './home.css'
 import { Layout, Menu } from 'antd'
 import {
     HomeOutlined, ShoppingOutlined, AccountBookOutlined, SettingOutlined,
-    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined,CommentOutlined
+    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined, CommentOutlined, MenuUnfoldOutlined, MenuFoldOutlined
 } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'
 import HomeIndex from '../homeIndex/HomeIndex'
@@ -16,15 +16,21 @@ import Custom from '../custom/Custom'
 import Spell from '../spell/Spell'
 import Subscribe from '../subscribe/Subscribe'
 import { connect } from 'react-redux'
+import BookingManage from "../subscribe/BookingManage"
 
 const { Content, Sider } = Layout
 const { SubMenu } = Menu
 
 class Home extends Component {
     state = {
-        merchantName: null
+        merchantName: null,
+        collapsed: false
     }
-
+    toggle = () => {
+        this.setState({
+            collapsed: !this.state.collapsed,
+        })
+    }
     // 退出登录
     loginOut = () => {
         this.props.history.push({
@@ -52,51 +58,58 @@ class Home extends Component {
                             background: 'white',
                             fontWeight: 700
                         }}
+                        trigger={null} collapsible collapsed={this.state.collapsed}
                         width={250}
                     >
                         <div className="header">
                             <img src={require('../../assets/imgs/logo.png')} className="header-image" alt="图标"></img>
                             <h2>博客云商家版</h2>
                         </div>
-                        <Menu theme="light" mode="inline" defaultSelectedKeys={['home']} style={{textAlign: 'center'}}>
+                        <Menu theme="light" mode="inline" defaultSelectedKeys={['home']}>
                             <Menu.Item key="home" icon={<HomeOutlined />}>
                                 <NavLink to='/home/homeindex'>
                                     <span className='nav-span'>首页</span>
                                 </NavLink>
                             </Menu.Item>
-                            <Menu.Item key="cashier" icon={<TransactionOutlined />}>
-                                <NavLink to='/home/cashier'>
-                                    <span  className='nav-span'>收银管理</span>
-                                </NavLink>
-                            </Menu.Item>
-                            <Menu.Item key="custom" icon={<UserAddOutlined />}>
-                                <NavLink to='/home/custom'>
-                                    <span  className='nav-span'>客户管理</span>
-                                    </NavLink>
-                            </Menu.Item>
-                            <Menu.Item key="goods" icon={<ShoppingOutlined />}>
-                                <NavLink to='/home/goods'>
-                                    <span  className='nav-span'>商品管理</span></NavLink>
+                            <SubMenu key="6" icon={<ShoppingOutlined />} title="服务/商品">
+                                <Menu.Item key="goods" icon={<ShoppingOutlined />}>
+                                    <NavLink to='/home/goods'>
+                                        <span className='nav-span'>分期/线上</span></NavLink>
+                                </Menu.Item>
+                                <Menu.Item key="subscribe" icon={<CommentOutlined />}>
+                                    <NavLink to='/home/subscribe'>
+                                        <span className='nav-span'>线下服务</span></NavLink>
+                                </Menu.Item>
+                            </SubMenu>
+                            <Menu.Item key="bookingmanage" icon={<CommentOutlined />}>
+                                <NavLink to='/home/bookingmanage'>
+                                    <span className='nav-span'>预约管理</span></NavLink>
                             </Menu.Item>
                             <Menu.Item key="spell" icon={<ShopOutlined />}>
                                 <NavLink to='/home/spell'>
-                                    <span  className='nav-span'>拼团管理</span></NavLink>
+                                    <span className='nav-span'>拼团管理</span></NavLink>
                             </Menu.Item>
-                            <Menu.Item key="subscribe" icon={<CommentOutlined />}>
-                                <NavLink to='/home/subscribe'>
-                                    <span  className='nav-span'>预约服务</span></NavLink>
+                            <Menu.Item key="cashier" icon={<TransactionOutlined />}>
+                                <NavLink to='/home/cashier'>
+                                    <span className='nav-span'>收银管理</span>
+                                </NavLink>
                             </Menu.Item>
                             <Menu.Item key="order" icon={<AccountBookOutlined />}>
                                 <NavLink to='/home/order'>
-                                    <span  className='nav-span'>订单管理</span></NavLink>
+                                    <span className='nav-span'>订单管理</span></NavLink>
                             </Menu.Item>
                             <Menu.Item key="employee" icon={<TeamOutlined />}>
                                 <NavLink to='/home/employee'>
-                                    <span  className='nav-span'>员工管理</span></NavLink>
+                                    <span className='nav-span'>员工管理</span></NavLink>
+                            </Menu.Item>
+                            <Menu.Item key="custom" icon={<UserAddOutlined />}>
+                                <NavLink to='/home/custom'>
+                                    <span className='nav-span'>客户管理</span>
+                                </NavLink>
                             </Menu.Item>
                             <Menu.Item key="setting" icon={<SettingOutlined />}>
                                 <NavLink to='/home/setting'>
-                                    <span  className='nav-span'>设置</span></NavLink>
+                                    <span className='nav-span'>设置</span></NavLink>
                             </Menu.Item>
                         </Menu>
 
@@ -123,10 +136,11 @@ class Home extends Component {
                                 <Route path="/home/custom" component={Custom} />
                                 <Route path="/home/spell" component={Spell} />
                                 <Route path="/home/subscribe" component={Subscribe} />
+                                <Route path="/home/bookingmanage" component={BookingManage} />
                             </div>
                         </Content>
                     </Layout>
-                </Layout>,
+                </Layout>
             </div>
         )
     }

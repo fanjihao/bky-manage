@@ -2,6 +2,9 @@
 .header {
     text-align: center;
 }
+.logo{
+    text-align: center;
+}
 .header-image {
     margin: 10px;
     width: 36px;
@@ -20,6 +23,9 @@
 .welcome{
     line-height: 40px;
     margin: 0;
+}
+.logo-title{
+    color: white;
 }
 .out{
     color: #1089EB;
