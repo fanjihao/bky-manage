@@ -3,11 +3,13 @@ import './home.css'
 import { Layout, Menu } from 'antd'
 import {
     HomeOutlined, ShoppingOutlined, AccountBookOutlined, SettingOutlined,
-    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined, CommentOutlined, MenuUnfoldOutlined, MenuFoldOutlined
+    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined, 
+    CommentOutlined, MenuUnfoldOutlined, MenuFoldOutlined, ScheduleOutlined
 } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'
 import HomeIndex from '../homeIndex/HomeIndex'
 import Goods from '../goods/Goods'
+import Installment from '../goods/Installment'
 import Order from '../order/Order'
 import Employee from '../employee/Employee'
 import Setting from '../setting/Setting'
@@ -71,15 +73,19 @@ class Home extends Component {
                                     <span className='nav-span'>首页</span>
                                 </NavLink>
                             </Menu.Item>
-                            <SubMenu key="6" icon={<ShoppingOutlined />} title="服务/商品">
+                            <SubMenu key="6" icon={<ShoppingOutlined />} title="商品">
                                 <Menu.Item key="goods" icon={<ShoppingOutlined />}>
                                     <NavLink to='/home/goods'>
-                                        <span className='nav-span'>分期/线上</span></NavLink>
+                                        <span className='nav-span'>线上项目</span></NavLink>
                                 </Menu.Item>
-                                <Menu.Item key="subscribe" icon={<CommentOutlined />}>
+                                <Menu.Item key="installment" icon={<ShoppingOutlined />}>
+                                    <NavLink to='/home/installment'>
+                                        <span className='nav-span'>分期项目</span></NavLink>
+                                </Menu.Item>
+                                {/* <Menu.Item key="subscribe" icon={<CommentOutlined />}>
                                     <NavLink to='/home/subscribe'>
-                                        <span className='nav-span'>线下服务</span></NavLink>
-                                </Menu.Item>
+                                        <span className='nav-span'>服务项目</span></NavLink>
+                                </Menu.Item> */}
                             </SubMenu>
                             <Menu.Item key="bookingmanage" icon={<CommentOutlined />}>
                                 <NavLink to='/home/bookingmanage'>
@@ -128,8 +134,10 @@ class Home extends Component {
                             <div className="site-layout-background">
                                 <Redirect from="/home" to="/home/homeindex" />
                                 <Route path="/home/homeindex" component={HomeIndex} />
-                                <Route path="/home/cashier" component={Cashier} />
                                 <Route path="/home/goods" component={Goods} />
+                                <Route path="/home/installment" component={Installment} />
+
+                                <Route path="/home/cashier" component={Cashier} />
                                 <Route path="/home/order" component={Order} />
                                 <Route path="/home/employee" component={Employee} />
                                 <Route path="/home/setting" component={Setting} />

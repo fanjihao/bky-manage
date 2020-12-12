@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
 import '../goods/Goods.css'
 import './Order.css'
-import { Input, Select, Button, Space, Table, Tag, Modal, message, Image, Popover } from 'antd'
+import {
+    Input, Select, Button, Space, Table, Tag,
+    Modal, message, Image, Popover, Popconfirm
+} from 'antd'
 import axios from '../../http/index'
 import { SearchOutlined } from '@ant-design/icons'
 
@@ -312,7 +315,7 @@ class Order extends Component {
                 key: 'photo',
                 render: text => {
                     let src = text.split(',')[0]
-                    return <Image className='tableGoodsImg' alt={src} src={src}></Image>
+                    return <img className='tableGoodsImg' alt={src} src={src} />
                 },
             },
             {
@@ -389,12 +392,12 @@ class Order extends Component {
                 render: (text, record) => {
                     if (record.type === 2) {
                         return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder(record, 'look')}>查看订单</a>
+                            <Button type="primary" style={{width: 120}} onClick={() => this.lookOrder(record, 'look')}>查看订单</Button>
                         </Space>)
                     } else {
                         return (<Space size="middle">
-                            <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder(record, 'look')}>查看订单</a>
-                            <a style={{ color: '#13CE66' }} onClick={() => this.lookOrder(record, 'edit')}>修改</a>
+                            {/* <a style={{ color: '#1089EB' }} onClick={() => this.lookOrder(record, 'look')}>查看订单</a> */}
+                            <Button type="primary" onClick={() => this.lookOrder(record, 'edit')}>编辑</Button>
                         </Space>)
                     }
                 }
@@ -438,7 +441,7 @@ class Order extends Component {
                 render: src => {
                     let arr = src.split(',')
                     return (
-                        <Image className='tableGoodsImg' src={arr[0]}></Image>
+                        <img className='tableGoodsImg' src={arr[0]} />
                     )
                 }
             },
@@ -487,7 +490,7 @@ class Order extends Component {
                 key: 'action',
                 render: (text, record) =>
                     <Space size="middle">
-                        <a style={{ color: '#1089EB' }} onClick={() => this.editGoods(record)}>查看详情</a>
+                        <Button type="primary" style={{width: 120}} onClick={() => this.editGoods(record)}>编辑</Button>
                     </Space>
             },
         ]
@@ -509,48 +512,58 @@ class Order extends Component {
             stateDom = <span>未处理分期</span>
         }
         return (
-            <div className='goods'>
-                <div className='goodsHeaderTop'>
+            <div className='order'>
+                <div className='goods-header'>
                     <span>订单管理</span>
                 </div>
-                <div className='goodsHeaderBody'>
-                    <div className={goodsIndex === 1 ? 'goodsActive' : 'ghBodyBtn'}
-                        onClick={() => this.checkList(1)}>门店分期项目</div>
-                    <div className={goodsIndex === 2 ? 'goodsActive' : 'ghBodyBtn'}
-                        onClick={() => this.checkList(2)}>线上商品</div>
+                <div style={{ margin: 20, marginBottom: 0 }}>
+                    <span
+                        className={goodsIndex === 1 ? 'goods-check-type' : 'goods-not-check-type'}
+                        onClick={() => this.checkList(1)}
+                    >分期项目</span>
+                    <span
+                        className={goodsIndex === 2 ? 'goods-check-type' : 'goods-not-check-type'}
+                        onClick={() => this.checkList(2)}
+                    >线上项目</span>
                 </div>
-                <div className='goodsBody'>
+                <div className='goodsBody' style={{ marginTop: 20 }}>
                     {goodsIndex === 1
-                        ? <div className='gbTableTop'>
-                            <Input style={{ width: 150, margin: '0 20px' }}
+                        ? <div className='goods-search'>
+                            <Input
+                                className="goods-search-input"
                                 placeholder='请输入项目名称'
                                 value={stageName}
                                 onChange={e => this.setState({ stageName: e.target.value })} />
 
-                            <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>
-                                <SearchOutlined />搜索
+                            <div
+                                className='goods-search-btn'
+                                onClick={() => this.setState({ loading: true }, () => this.getStageState())}>
+                                搜索
                             </div>
 
                             <Select
-                                style={{width: 150}}
+                                style={{ width: 150 }}
                                 defaultValue="全部"
                                 onChange={e => this.getStageState(e)}
-                             >
-                                 <Option value="">全部</Option>
-                                 <Option value="4">未处理分期</Option>
-                                 <Option value="1">分期中</Option>
-                                 <Option value="2">已完成分期</Option>
-                                 <Option value="3">异常分期</Option>
-                             </Select>
+                            >
+                                <Option value="">全部</Option>
+                                <Option value="4">未处理分期</Option>
+                                <Option value="1">分期中</Option>
+                                <Option value="2">已完成分期</Option>
+                                <Option value="3">异常分期</Option>
+                            </Select>
 
                         </div>
-                        : <div className='gbTableTop'>
-                            <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='搜索商品名'></Input>
-                            <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='搜索用户名'></Input>
-                            <Input style={{ width: 150, margin: '0 20px' }}
-                                placeholder='搜索用户手机号'></Input>
+                        : <div className='goods-search'>
+                            <Input
+                                className="goods-search-input"
+                                placeholder='搜索商品名' />
+                            <Input
+                                className="goods-search-input"
+                                placeholder='搜索用户名' />
+                            <Input
+                                className="goods-search-input"
+                                placeholder='搜索用户手机号' />
                             <Select style={{ width: 150, margin: '0 20px 0 0' }}
                                 placeholder='订单状态'>
                                 <Option value="未支付">未支付</Option>
@@ -562,9 +575,11 @@ class Order extends Component {
                                 <Option value="已退款">已退款</Option>
                                 <Option value="已删除">已删除</Option>
                             </Select>
-                            
-                            <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getStageState() })}>
-                                <SearchOutlined />搜索
+
+                            <div
+                                className='goods-search-btn'
+                                onClick={() => this.setState({ loading: true }, () => this.getStageState())}>
+                                搜索
                             </div>
                         </div>}
                     <div style={{ width: '100%' }}>

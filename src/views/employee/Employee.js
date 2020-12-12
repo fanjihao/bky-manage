@@ -31,7 +31,7 @@ export default class Employee extends Component {
         employHighest: '', // 员工最高学历
         employMajor: '', // 员工所学专业
         employGraduate: '', // 员工毕业时间
-        employGrade: '', // 员工等级
+        employGrade: 'E', // 员工等级
         employGradeVal: 'E', // 员工等级
         name: '',
         phone: '',
@@ -113,6 +113,7 @@ export default class Employee extends Component {
         formData.append("graduationTime", employGraduate)
         formData.append("grade", employGrade)
         formData.append('salary', Number(employSalary))
+        formData.append('enterId', user.id)
         if (type === 'edit') {
             formData.append("id", employNo)
         }
@@ -130,7 +131,7 @@ export default class Employee extends Component {
             employPhone: '', // 员工电话
             employBirth: '', // 员工生日
             employNowAdd: '', // 员工现居地址
-            employGrade: '', // 员工等级
+            employGrade: 'E', // 员工等级
             employGradeVal: '', // 员工等级
             avatar: '',
             employSexVal: ''
@@ -458,15 +459,15 @@ export default class Employee extends Component {
                 title: '员工工号',
                 dataIndex: 'id',
                 key: 'id',
-                render: (text, record) => <span>{text}</span>
-                ,
+                render: (text, record) => <span>{text}</span>,
+                align: 'center'
             },
             {
                 title: '员工姓名',
                 dataIndex: 'staffName',
                 key: 'staffName',
-                render: (text, record) => <span>{text}</span>
-                ,
+                render: (text, record) => <span>{text}</span>,
+                align: 'center'
             },
             // {
             //     title: '员工头像',
@@ -486,22 +487,23 @@ export default class Employee extends Component {
                     return (
                         <span>{src + '级'}</span>
                     )
-                }
+                },
+                align: 'center'
             },
             {
                 title: '手机号',
                 dataIndex: 'phone',
                 key: 'phone',
-                render: (text, record) => <span>{text.substr(0, 3) + '****' + text.substr(7)}</span>
-                ,
+                render: (text, record) => <span>{text.substr(0, 3) + '****' + text.substr(7)}</span>,
+                align: 'center'
             },
             {
                 title: '身份证号码',
                 dataIndex: 'idCard',
                 key: 'idCard',
                 render: (text, record) =>
-                    <span>{text.substr(0, 6) + '********'}</span>
-                ,
+                    <span>{text.substr(0, 6) + '********'}</span>,
+                align: 'center'
             },
             {
                 title: '性别',
@@ -510,8 +512,8 @@ export default class Employee extends Component {
                 render: (text, record) =>
                     text === 1
                         ? <span>男</span>
-                        : <span>女</span>
-                ,
+                        : <span>女</span>,
+                align: 'center'
             },
             // {
             //     title: '婚姻状态',
@@ -530,8 +532,8 @@ export default class Employee extends Component {
                 render: (text, record) =>
                     record.state === '停用'
                         ? <span style={{ color: '#999' }}>{text}</span>
-                        : <span>{text}</span>
-                ,
+                        : <span>{text}</span>,
+                align: 'center'
             },
             {
                 title: '操作',
@@ -539,8 +541,8 @@ export default class Employee extends Component {
                 render: (text, record) => {
                     return (
                         <Space>
-                            <a style={{ color: '#13CE66' }} onClick={() => this.employDetail('look', record)}>查看详细</a>
-                            <a style={{ color: '#13CE66' }} onClick={() => this.employDetail('edit', record)}>编辑</a>
+                            {/* <a style={{ color: '#13CE66' }} onClick={() => this.employDetail('look', record)}>查看详细</a> */}
+                            <Button type="primary" onClick={() => this.employDetail('edit', record)}>编辑</Button>
                             <Popconfirm
                                 title="请您确认是否删除该员工?"
                                 onConfirm={() => this.restore(record.id)}
@@ -548,13 +550,12 @@ export default class Employee extends Component {
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF4949' }}
-                                    onClick={() => console.log('我点了', record)}>删除</a>
+                                <Button type="primary" danger>删除</Button>
                             </Popconfirm>
                         </Space>
                     )
-                }
-
+                },
+                align: 'center'
             },
         ]
         const { detailVisible, whatDo, isLook, employId,
@@ -613,7 +614,14 @@ export default class Employee extends Component {
                             placeholder='请输入手机号码'
                             value={phone}
                             onChange={e => this.setPhone(e)}></Input> */}
-                        <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { this.getEmploy() })}>
+                        <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { 
+                            if(name === ''){
+                                message.warning('请先输入搜索内容!')
+                                this.setState({loading: false})
+                            }else{
+                                this.getEmploy()
+                            }
+                         })}>
                             <SearchOutlined />搜索
                         </div>
                         <div className='add-btn' onClick={() => this.employDetail('add', 0)}>

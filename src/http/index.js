@@ -72,9 +72,9 @@ _axios.interceptors.response.use(
                 content: '服务器错误,请稍后再试!'
             })
             return Promise.reject('服务器出错：', error.response.data);
-        }else if (error.response.status === 420) {
+        } else if (error.response.status === 420) {
             message.error(error.response.data)
-            console.log(error.response,'420')
+            console.log(error.response, '420')
         }
         // Do something with response error
         return Promise.reject(error);

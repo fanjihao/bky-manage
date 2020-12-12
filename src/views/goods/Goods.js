@@ -1,102 +1,110 @@
+// 线上商品
 import React, { Component } from 'react'
-import './Goods.css'
 import {
-    Input, Button, Space, Table, Tag,
-    Popconfirm, message, Upload, Image,
-    Popover, Select, DatePicker, TimePicker,
-    Radio
+    Input, Select, Table, Modal, Radio, Upload, message, InputNumber,
+    Image, Popover, Tag, Switch, Space, Popconfirm, DatePicker,
+    TimePicker,
+    Button
 } from 'antd'
-import axios from '../../http/index'
-import Modal from 'antd/lib/modal/Modal'
-import { SearchOutlined, PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined } from '@ant-design/icons'
+import axios from '../../http'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
-import moment from 'moment'
 
-const { TextArea } = Input
 const { Option } = Select
-const { RangePicker } = DatePicker
+const { TextArea } = Input
 
-// 预览相关
-function getBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-class Goods extends Component {
+export default class Goods extends Component {
     state = {
-        // 表格无数据时显示
-        emptyText: '暂无数据',
-        goodsIndex: 1,
+        // 项目状态
         goodsTable: 1,
-        name: '',
-        visible: false,
-        cateName: '',
-        // 分期项目
-        stageVisible: false,
-        stageFenlei: '',
-        stageName: '',
-        stageKeyWord: '',
-        stageImg: '',
-        stagePrice: '',
-        stageSales: 0,
-        stageNumVal: '',
-        stageAmount: '',
-        stageRemarks: '',
-        fenleiList: [],
-        stageData: [],
-        promptModal: false,
-        promptInfo: '',
-        sureChange: '',
-        stageVisiInfo: '',
-        stageNo: '',
-        cateId: '',
-        royaltyRate: 0,
-        // 预览
-        previewVisible: false,
-        previewImage: '',
-        previewTitle: '',
-        fileList: [],
-        goodsimgVisible: false,
-        goodsImage: '',
-        goodsFileList: [],
-        // 线上商品
-        onlineGoods: [],
-        goodsModal: false,
-        goodsMoInfo: '',
-        goodsNo: '',
-        goodsClass: '',
-        goodsClassVal: '',
-        // 线上商品名
+        // 搜索框内容
+        searchVal: '',
+        // 向上项目列表
+        onlineList: [],
+        loading: false,
+        emptyText: '暂无数据',
+        classify: '',
+        classList: [],
+        // 商品图片
+        goodsImage: null,
+        // 项目名
         goodsName: '',
-        goodsKey1: '',
-        goodsKey2: '',
-        goodsKey3: '',
-        // 产品详情
-        goodsRemarks: '',
-        // 价格
+        // 项目价格
         goodsPrice: '',
-        goodsVip: '',
-        // 邮费
-        goodsPostage: 0,
-        // 销量
-        goodsSales: 0,
-        goodsSku: '',
-        goodsProModal: false,
-        goodsProInfo: '',
-        goodsProId: '',
-
-        treeData: [],
-        // 线上商品分类
-        value: 1,
-        loading: true,
-        // 控制分期明细显示
-        isStageDetailInfo: false,
-        // 每一期分期价格
-        eachStagePrice: '',
+        // 虚拟销量
+        goodsSales: '',
+        // 员工提成
+        goodsRoyaltyRate: '',
+        // 项目详情
+        goodsRemarks: '',
+        // 
+        goodsVisble: false,
+        goodsTitle: '',
+        actionType: '',
+        // 项目类型 0服务类 1商品类
+        goodsType: 0,
+        // 初始商品分类
+        initClass: '',
+        // 积分抵扣
+        integral: 1,
+        // 可抵积分
+        intNum: 0,
+        // 服务卡项类型
+        cardType: 0,
+        astrict: 1,
+        // 项目库存
+        goodsStock: '',
+        // 项目邮费
+        goodsPostage: '',
+        // 服务时长
+        serviceTime: '30分钟',
+        // 服务时间段
+        checkTimeArr: [],
+        // 服务人数
+        servicePlepeo: 1,
+        // 初始可预约时间
+        timeArr: [
+            { id: 5, value: '8:00-8:30' },
+            { id: 6, value: '8:30-9:00' },
+            { id: 7, value: '9:00-9:30' },
+            { id: 8, value: '9:30-10:00' },
+            { id: 9, value: '10:00-10:30' },
+            { id: 10, value: '10:30-11:00' },
+            { id: 11, value: '11:00-11:30' },
+            { id: 12, value: '11:30-12:00' },
+            { id: 13, value: '13:00-13:30' },
+            { id: 14, value: '13:30-14:00' },
+            { id: 15, value: '14:00-14:30' },
+            { id: 16, value: '14:30-15:00' },
+            { id: 17, value: '15:00-15:30' },
+            { id: 18, value: '15:30-16:00' },
+            { id: 19, value: '16:00-16:30' },
+            { id: 20, value: '16:30-17:00' },
+            { id: 21, value: '17:00-17:30' },
+            { id: 22, value: '17:30-18:00' },
+            { id: 23, value: '18:00-18:30' },
+            { id: 24, value: '18:30-19:00' },
+            { id: 25, value: '19:00-19:30' },
+            { id: 26, value: '19:30-20:00' },
+            { id: 27, value: '20:00-20:30' },
+            { id: 28, value: '20:30-21:00' },
+            { id: 29, value: '21:00-21:30' },
+            { id: 30, value: '21:30-22:00' },
+        ],
+        // 预约状态
+        enableSub: 0,
+        // 项目类型
+        proType: 0,
+        // 服务类型
+        serviceType: 1,
+        // 服务商品列表
+        serviceList: [],
+        // 服务商品ID
+        serviceId: '',
+        // 服务商品页数
+        servicePage: 1,
+        // 普通商品ID
+        onlineId: '',
         // 开启拼团模态框
         isSpellGroup: false,
         // 拼团名称
@@ -140,752 +148,624 @@ class Goods extends Component {
         // 原价
         originalPrice: '',
         // 拼团折扣
-        spellDiscount: ''
+        spellDiscount: '',
+        // 可抵积分
+        intNum: 0
     }
-    // 获取分期项目列表
-    getStageItem = () => {
-        const { name, goodsTable, cateName } = this.state
-        let user = JSON.parse(localStorage.getItem('user'))
+    componentDidMount() {
+        this.getGoodsClass()
+        this.getGoods()
+    }
+    // 商品分类
+    getGoodsClass = () => {
         axios({
-            url: '/statistics/phasedProject',
-            method: 'GET',
-            params: {
-                cateName: cateName, // 分类名称
-                enterId: user.id, // 商户id
-                limit: 10, // 每页数量
-                name: name, // 项目名称
-                offset: 1, // 页码
-                order: '', // 排序方式
-                type: goodsTable,
-            }
+            url: '/api/yxStoreCategory',
+            method: 'GET'
         })
             .then(res => {
-                console.log('获取分期项目成功', res)
-                if (res.data.data.list) {
-                    let list = res.data.data.list
-                    list.map(item => {
-                        item.key = item.id
-                    })
-                    this.setState({
-                        loading: false,
-                        stageData: list
-                    })
-                }
+                console.log('获取商品分类成功', res)
+                this.setState({
+                    classList: res.data.content,
+                    initClass: res.data.content[0].id
+                })
             })
             .catch(err => {
-                console.log('获取分期项目失败', err)
-                message.error('获取分期项目失败')
+                console.log('获取商品分类失败', err)
+                message.error('服务器出错')
             })
     }
-    // 获取线上商品列表
-    getOnlineItem = () => {
-        const { name, goodsTable, cateName } = this.state
-        let user = JSON.parse(localStorage.getItem('user'))
-        let type
-        if (goodsTable === 2) {
-            type = 0
-        } else {
-            type = 1
-        }
+    // 获取商品类商品列表
+    getOnlineList = () => {
+        this.setState({ loading: true })
+        let id = JSON.parse(localStorage.getItem('user')).id
+        const { searchVal, classify, goodsTable, servicePage } = this.state
         axios({
             url: '/statistics/onlineProducts',
             method: 'GET',
             params: {
-                cateName: cateName, // 分类名称
-                enterId: user.id, // 商户id
-                limit: 10, // 每页数量
-                name: name, // 项目名称
-                offset: 1, // 页码
-                order: '', // 排序方式
-                type,
+                cateName: classify,
+                enterId: id,
+                name: searchVal,
+                type: goodsTable,
+                limit: 10,
+                offset: servicePage
             }
         })
             .then(res => {
                 console.log('查询线上商品成功', res)
-                if (res.data.data.list) {
-                    let list = res.data.data.list
-                    list.map(item => {
-                        item.key = item.id
-                    })
+                if (res.data.status === 200) {
                     this.setState({
                         loading: false,
-                        onlineGoods: list
+                        onlineList: res.data.data.list
                     })
+                } else {
+                    message.error(res.data.message)
                 }
             })
             .catch(err => {
                 console.log('查询线上商品失败', err)
-                message.error('查询线上商品失败')
+                message.error('服务器出错')
             })
     }
-    // 获取商品分类
-    goodsFenleiList = () => {
+    // 服务类商品列表
+    getService = () => {
+        this.setState({ loading: true })
+        const { searchVal, goodsTable, classify } = this.state
+        let user = JSON.parse(localStorage.getItem('user'))
         axios({
-            url: '/api/yxStoreCategory',
             method: 'GET',
+            url: '/statistics/service',
             params: {
-                page: 0,
-                size: 1000,
-                sort: 'id,desc'
+                enterId: user.id,
+                type: goodsTable,
+                name: searchVal,
+                cateName: classify
             }
         })
             .then(res => {
-                console.log('获取商品分类成功', res)
-                let treeArr = []
-                treeArr = res.data.content.map(item => {
-                    let obj = {}
-                    obj = {
-                        title: item.label,
-                        value: item.id,
-                        children: []
-                    }
-                    if (item.children) {
-                        for (let i = 0; i < item.children.length; i++) {
-                            let childObj = {}
-                            childObj = {
-                                title: item.children[i].label,
-                                value: item.children[i].id,
-                                pid: item.id
-                            }
-                            obj.children.push(childObj)
-                        }
-                    }
-                    return obj
-                })
-                this.setState({ treeData: treeArr })
+                console.log('查询服务商品成功', res)
+                if (res.data.status === 200) {
+                    this.setState({
+                        serviceList: res.data.data,
+                        loading: false
+                    })
+                } else {
+                    message.error(res.data.message)
+                }
             })
             .catch(err => {
-                console.log('获取商品分类失败', err)
+                console.log('查询服务商品失败', err)
+                message.error('服务器出错')
             })
     }
-    treeChange = (value, label, extra) => {
-        console.log(value, label, extra)
-        this.setState({ value })
+    // 上传项目图片
+    uploadGoodsImage = info => {
+        const res = info.fileList[0].response
+        if (res) {
+            this.setState({
+                goodsImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
+            })
+        }
     }
-    componentDidMount() {
-        this.getStageItem()
-        this.goodsFenleiList()
-    }
-    setName = e => {
+    // 打开新增模态框
+    addGoods = () => {
+        let initClass = this.state.initClass
         this.setState({
-            name: e.target.value
+            goodsClass: initClass,
+            goodsName: '',
+            goodsImage: null,
+            integral: 1,
+            intNum: 0,
+            goodsPrice: '',
+            goodsSales: '',
+            goodsRoyaltyRate: '',
+            goodsRemarks: '',
+            cardType: 0,
+            astrict: 1,
+            goodsStock: '',
+            goodsPostage: '',
+            servicePlepeo: 1,
+            serviceTime: '30分钟',
+            timeArr: [
+                { id: 5, value: '8:00-8:30' },
+                { id: 6, value: '8:30-9:00' },
+                { id: 7, value: '9:00-9:30' },
+                { id: 8, value: '9:30-10:00' },
+                { id: 9, value: '10:00-10:30' },
+                { id: 10, value: '10:30-11:00' },
+                { id: 11, value: '11:00-11:30' },
+                { id: 12, value: '11:30-12:00' },
+                { id: 13, value: '13:00-13:30' },
+                { id: 14, value: '13:30-14:00' },
+                { id: 15, value: '14:00-14:30' },
+                { id: 16, value: '14:30-15:00' },
+                { id: 17, value: '15:00-15:30' },
+                { id: 18, value: '15:30-16:00' },
+                { id: 19, value: '16:00-16:30' },
+                { id: 20, value: '16:30-17:00' },
+                { id: 21, value: '17:00-17:30' },
+                { id: 22, value: '17:30-18:00' },
+                { id: 23, value: '18:00-18:30' },
+                { id: 24, value: '18:30-19:00' },
+                { id: 25, value: '19:00-19:30' },
+                { id: 26, value: '19:30-20:00' },
+                { id: 27, value: '20:00-20:30' },
+                { id: 28, value: '20:30-21:00' },
+                { id: 29, value: '21:00-21:30' },
+                { id: 30, value: '21:30-22:00' },
+            ],
+            goodsVisble: true,
+            actionType: 'add',
+            goodsTitle: '新增项目',
+            serviceType: 1
         })
     }
-    chooseType = (i) => {
-        this.setState({
-            goodsTable: i
-        }, () => {
-            if (this.state.goodsIndex === 1) {
-                this.getStageItem()
-            } else if (i === 3 && this.state.goodsIndex === 2) {
-                this.getRecycle()
+    // 新增、编辑项目
+    goodsAction = actionType => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        const { goodsType, astrict, goodsName, goodsImage, intNum,
+            goodsPrice, goodsSales, goodsRoyaltyRate, goodsRemarks,
+            goodsStock, goodsPostage, servicePlepeo, serviceTime,
+            checkTimeArr, cardType, goodsClass, integral, enableSub,
+            serviceType, serviceId, onlineId } = this.state
+        if (goodsType === 0) {
+            if (goodsName === '' || goodsImage === null ||
+                goodsPrice === '' || goodsSales === '' ||
+                goodsRoyaltyRate === '' || goodsRemarks === '' ||
+                astrict === '' || checkTimeArr.length === 0) {
+                message.warning('请确定内容填写完整！')
             } else {
-                this.getOnlineItem()
+                let appointJSON = {}
+                checkTimeArr.map(item => {
+                    appointJSON[item] = servicePlepeo
+                })
+                if (actionType === 'add') {
+                    axios({
+                        method: 'POST',
+                        url: '/statistics/service',
+                        data: {
+                            merId: user.id,
+                            cateId: goodsClass,
+                            storeName: goodsName,
+                            otPrice: goodsPrice,
+                            image: goodsImage,
+                            ficti: goodsSales,
+                            storeInfo: goodsRemarks,
+                            isNew: 0,
+                            isBest: 0,
+                            isBennefit: 0,
+                            useScore: integral,
+                            giveIntegral: intNum,
+                            appointmentMap: appointJSON,
+                            timeQuantum: serviceTime,
+                            enableSub: enableSub,
+                            isService: serviceType,
+                            astrict: astrict,
+                            classify: cardType,
+                            royaltyRate: goodsRoyaltyRate,
+                            storeId: user.systemStoreId
+                        }
+                    })
+                        .then(res => {
+                            console.log('新增服务商品成功', res)
+                            if (res.data.status === 200) {
+                                console.log('新增服务商品成功', res)
+                                this.getService()
+                                this.setState({ goodsVisble: false })
+                            } else {
+                                message.error(res.data.message)
+                            }
+                        })
+                        .catch(err => {
+                            console.log('新增服务商品失败', err)
+                            message.error('服务器出错')
+                        })
+                } else if (actionType === 'edit') {
+                    axios({
+                        method: 'PUT',
+                        url: '/statistics/service',
+                        data: {
+                            merId: user.id,
+                            cateId: goodsClass,
+                            storeName: goodsName,
+                            otPrice: goodsPrice,
+                            image: goodsImage,
+                            ficti: goodsSales,
+                            storeInfo: goodsRemarks,
+                            isNew: 0,
+                            isBest: 0,
+                            isBenefit: 0,
+                            useScore: integral,
+                            giveIntegral: intNum,
+                            appointmentMap: appointJSON,
+                            timeQuantum: serviceTime,
+                            enableSub: enableSub,
+                            isService: serviceType,
+                            astrict: astrict,
+                            classify: cardType,
+                            royaltyRate: goodsRoyaltyRate,
+                            id: serviceId,
+                            storeId: user.systemStoreId
+                        }
+                    })
+                        .then(res => {
+                            console.log('修改服务商品成功', res)
+                            if (res.data.status === 200) {
+                                console.log('修改服务商品成功', res)
+                                this.getService()
+                                this.setState({ goodsVisble: false })
+                            } else {
+                                message.error(res.data.message)
+                            }
+                        })
+                        .catch(err => {
+                            console.log('修改服务商品失败', err)
+                            message.error('服务器出错')
+                        })
+                }
             }
-        })
+        } else if (goodsType === 1) {
+            if (goodsName === '' || goodsImage === null || goodsStock === '' ||
+                goodsPrice === '' || goodsSales === '' ||
+                goodsRoyaltyRate === '' || goodsRemarks === '' || goodsPostage === '') {
+                message.warning('请确定内容填写完整！')
+            } else {
+                if (actionType === 'add') {
+                    axios({
+                        url: '/statistics/addProducts',
+                        method: 'POST',
+                        data: {
+                            merId: user.id,
+                            cateId: goodsClass,
+                            name: goodsName,
+                            otPrice: goodsPrice,
+                            image: goodsImage,
+                            ficti: goodsSales,
+                            stock: goodsStock,
+                            storeInfo: goodsRemarks,
+                            postage: goodsPostage,
+                            isNew: 0,
+                            isBest: 0,
+                            isBenefit: 0,
+                            useScore: integral,
+                            royaltyRate: goodsRoyaltyRate,
+                            giveIntegral: intNum,
+                            storeId: user.systemStoreId
+                        }
+                    })
+                        .then(res => {
+                            console.log('新增线上商品成功', res)
+                            if (res.data.status === 200) {
+                                this.getOnlineList()
+                                this.setState({ goodsVisble: false })
+                            } else {
+                                message.error(res.data.message)
+                            }
+                        })
+                        .catch(err => {
+                            console.log('添加失败', err)
+                            message.error('服务器出错')
+                        })
+                } else if (actionType === 'edit') {
+                    axios({
+                        url: '/statistics/updateOnlineProducts',
+                        method: 'POST',
+                        data: {
+                            merId: user.id,
+                            cateId: goodsClass,
+                            name: goodsName,
+                            otPrice: goodsPrice,
+                            image: goodsImage,
+                            ficti: goodsSales,
+                            stock: goodsStock,
+                            storeInfo: goodsRemarks,
+                            postage: goodsPostage,
+                            isNew: 0,
+                            isBest: 0,
+                            isBenefit: 0,
+                            useScore: integral,
+                            royaltyRate: goodsRoyaltyRate,
+                            giveIntegral: intNum,
+                            storeId: user.systemStoreId,
+                            id: onlineId
+                        }
+                    })
+                        .then(res => {
+                            console.log('修改普通商品成功', res)
+                            if (res.data.status === 200) {
+                                this.getOnlineList()
+                                this.setState({ goodsVisble: false })
+                            } else {
+                                message.error(res.data.message)
+                            }
+                        })
+                        .catch(err => {
+                            console.log('修改普通商品失败', err)
+                            message.error('服务器出错')
+                        })
+                }
+            }
+        }
     }
-    // 气泡删除
-    confirm = (re) => {
+    // 切换选项卡
+    getGoods = () => {
+        const { goodsType } = this.state
+        if (goodsType === 0) {
+            this.getService()
+        } else {
+            this.getOnlineList()
+        }
+    }
+    // 搜索
+    search = () => {
+        const { searchVal } = this.state
+        if (searchVal === '') {
+            message.warning('请先输入搜索内容!')
+        } else {
+            this.getGoods()
+        }
+    }
+    // 服务类商品上下架
+    changeFrame = id => {
         axios({
-            url: '/statistics/deletePhasedProject',
-            method: 'GET',
-            params: {
-                id: re.id
+            method: 'PUT',
+            url: `/statistics/dismountService?id=${id}`
+        })
+            .then(res => {
+                console.log('上下架成功', res)
+                this.getService()
+            })
+            .catch(err => {
+                console.log('上下架失败', err)
+                message.error('服务器出错')
+            })
+    }
+    // 开启关闭预约
+    switchService = (e, id) => {
+        let enableSub = e ? 0 : 1
+        let user = JSON.parse(localStorage.getItem('user'))
+        console.log(enableSub, id)
+        axios({
+            method: 'PUT',
+            url: '/sub/operate',
+            data: {
+                enterId: user.id,
+                productId: id,
+                operate: enableSub,
+                payType: 1
             }
         })
             .then(res => {
-                message.success('删除成功，已放入回收站！')
-                this.getStageItem()
+                console.log('开启或关闭预约成功', res)
+                if (res.data.status === 200) {
+                    message.success(res.data.message)
+                    this.getService()
+                } else {
+                    message.error(res.data.message)
+                }
             })
             .catch(err => {
-                message.error('删除失败')
+                console.log('开启或关闭预约失败', err)
+                message.error('服务器出错')
             })
     }
-    realDel = (re) => {
-        console.log('彻底删除', re)
-    }
-    restore = re => {
-        console.log('恢复', re)
+    // 打开服务类编辑框
+    editService = record => {
+        let appointmenTime = []
+        for (let key in JSON.parse(record.appointment)) {
+            appointmenTime.push(key)
+        }
+        let limitPerson = JSON.parse(record.appointment)[appointmenTime[0]]
         this.setState({
-            promptModal: true,
-            sureChange: re.id,
-            promptInfo: '下架'
+            goodsName: record.storeName,
+            goodsImage: record.image,
+            goodsClass: record.cateId,
+            goodsPrice: record.otPrice,
+            goodsSales: record.ficti,
+            integral: record.useScore,
+            intNum: record.giveIntegral,
+            servicePlepeo: limitPerson,
+            checkTimeArr: appointmenTime,
+            goodsRemarks: record.storeInfo,
+            serviceId: record.id,
+            enableSub: record.enableSub,
+            goodsRoyaltyRate: record.royaltyRate,
+            serviceTime: record.timeQuantum,
+            actionType: 'edit',
+            goodsTitle: '修改项目',
+            goodsVisble: true,
         })
     }
-    // 气泡取消
-    cancel = () => {
-        console.log('取消删除')
-    }
-    // 修改分期
-    sureChange = () => {
-        let user = JSON.parse(localStorage.getItem('user'))
-        const { stageName, stageKeyWord, stagePrice,
-            stageSales, stageNumVal, stageAmount,
-            stageRemarks, stageNo, fileList, value, royaltyRate } = this.state
-        if (stageName === '' || stagePrice === '' || stageNumVal === ''
-            || stageAmount === '' || stageRemarks === '' || fileList.length === 0) {
-            message.warning('请检查是否有未填写的内容！')
-        } else {
-            let photoStr = ''
-            let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
-            for (let i = 0; i < fileList.length; i++) {
-                if (fileList[i].response) {
-                    if (photoStr === '') {
-                        photoStr = baseUrl + fileList[i].response.data
-                    } else {
-                        photoStr = baseUrl + fileList[i].response.data + ',' + photoStr
-                    }
-                } else {
-                    if (photoStr === '') {
-                        photoStr = fileList[i].url
-                    } else {
-                        photoStr = fileList[i].url + ',' + photoStr
-                    }
-                }
-            }
-            let formData = new FormData()
-            formData.append('cateId', value)
-            formData.append('enterId', user.id)
-            formData.append('id', stageNo)
-            formData.append('keyword', stageKeyWord)
-            formData.append('name', stageName)
-            formData.append('photo', photoStr)
-            formData.append('prepaymentAmount', Number(stageAmount))
-            formData.append('price', Number(stagePrice))
-            formData.append('remarks', stageRemarks)
-            formData.append('sales', stageSales)
-            formData.append('stagesNumber', Number(stageNumVal))
-            formData.append('storeId', user.systemStoreId)
-            formData.append('royaltyRate', Number(royaltyRate))
-            axios({
-                url: '/statistics/updatePhasedProject',
-                method: 'POST',
-                data: formData
-            })
-                .then(res => {
-                    console.log('修改分期项目成功')
-                    message.success('分期项目修改成功', res)
-                    this.setState({
-                        stageVisible: false,
-                    }, () => {
-                        this.getStageItem()
-                    })
-                })
-                .catch(err => {
-                    console.log('修改分期项目失败', err)
-                })
-        }
-    }
-    // 添加分期
-    okShelves = () => {
-        let user = JSON.parse(localStorage.getItem('user'))
-        const { stageName, stageKeyWord, stagePrice,
-            stageSales, stageNumVal, stageAmount,
-            stageRemarks, fileList, value, royaltyRate } = this.state
-        if (stageName === '' || stagePrice === '' || stageNumVal === ''
-            || stageAmount === '' || stageRemarks === '' || fileList.length === 0) {
-            message.warning('请检查是否有未填写的内容！')
-        } else {
-            let photoStr = ''
-            let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
-            for (let i = 0; i < fileList.length; i++) {
-                if (photoStr === '') {
-                    photoStr = baseUrl + fileList[i].response.data
-                } else {
-                    photoStr = baseUrl + fileList[i].response.data + ',' + photoStr
-                }
-            }
-            let formData = new FormData()
-            formData.append('cateId', value)
-            formData.append('enterId', user.id)
-            formData.append('keyWord', stageKeyWord)
-            formData.append('name', stageName)
-            formData.append('photo', photoStr)
-            formData.append('prepaymentAmount', Number(stageAmount))
-            formData.append('price', Number(stagePrice))
-            formData.append('remarks', stageRemarks)
-            formData.append('sales', stageSales)
-            formData.append('stagesNumber', Number(stageNumVal))
-            formData.append('storeId', user.systemStoreId)
-            formData.append('royaltyRate', Number(royaltyRate))
-            axios({
-                url: '/statistics/addPhasedProject',
-                method: 'POST',
-                data: formData
-            })
-                .then(res => {
-                    console.log('添加分期项目成功', res)
-                    message.success('分期项目添加成功')
-                    this.setState({
-                        stageVisible: false,
-                        isStageDetailInfo: false
-                    }, () => {
-                        this.getStageItem()
-                    })
-                })
-                .catch(err => {
-                    console.log('添加分期项目失败', err)
-                })
-        }
-    }
-    // 下架和上架分期项目
-    dismount = (i, type) => {
+    // 删除服务商品
+    delService = id => {
         axios({
-            url: '/statistics/dismountPhasedProject',
+            method: 'DELETE',
+            url: `/statistics/service?id=${id}`
+        })
+            .then(res => {
+                if (res.data.status === 200) {
+                    console.log('删除服务商品成功', res)
+                    this.getService()
+                } else {
+                    message.error(res.data.message)
+                }
+            })
+            .catch(err => {
+                console.log('删除服务商品失败', err)
+                message.error('服务器出错')
+            })
+    }
+    // 回收站恢复服务类商品
+    restoreService = id => {
+        axios({
             method: 'GET',
+            url: '/statistics/recoveryService',
             params: {
-                id: i
+                id: id
             }
         })
             .then(res => {
-                type === '下架' ? message.success('下架成功') : message.success('上架成功')
-                this.getStageItem()
+                console.log('恢复成功', res)
+                if (res.data.status === 200) {
+                    this.getService()
+                } else {
+                    message.error(res.data.message)
+                }
             })
             .catch(err => {
-                console.log(err)
+                console.log('恢复失败', err)
+                message.error('服务器出错')
             })
     }
-    // 下架和上架线上商品
-    goodsUpDown = (i, type) => {
+    // 回收站彻底删除服务类商品
+    removeService = id => {
+        axios({
+            method: 'GET',
+            url: '/statistics/removeService',
+            params: {
+                id: id
+            }
+        })
+            .then(res => {
+                if (res.data.status === 200) {
+                    console.log('彻底删除成功', res)
+                    this.getService()
+                } else {
+                    message.error(res.data.message)
+                }
+            })
+            .catch(err => {
+                console.log('彻底删除失败', err)
+                message.error('服务器出错')
+            })
+    }
+    // 普通商品上下架
+    changeOnline = id => {
         axios({
             url: '/statistics/dismountOnlineProducts',
             method: 'GET',
             params: {
-                id: i
+                id: id
             }
         })
             .then(res => {
-                type === '下架' ? message.success('下架成功') : message.success('上架成功')
-                this.getOnlineItem()
+                console.log('上下架成功', res)
+                this.getOnlineList()
             })
             .catch(err => {
-                console.log(err)
+                console.log('上下架失败', err)
+                message.error('服务器出错')
             })
     }
-    handleOk = () => {
-        this.dismount(this.state.sureChange, this.state.promptInfo)
-        this.setState({
-            promptModal: false,
-            sureChange: ''
-        })
-    }
-    handleGoodsOk = () => {
-        this.goodsUpDown(this.state.goodsProId, this.state.goodsProInfo)
-        this.setState({
-            goodsProModal: false,
-            goodsProId: ''
-        })
-    }
-    handleCancel = () => {
-        this.setState({
-            promptModal: false,
-            sureChange: '',
-            goodsProModal: false,
-            goodsProId: ''
-        })
-    }
-    // 打开新增、编辑分期项目模态框
-    editStage = (type, i) => {
-        if (type === 'edit') {
-            let imgArr = []
-            let urlArr = i.photo.split(',')
-            for (let i = 0; i < urlArr.length; i++) {
-                let obj = {
-                    uid: i,
-                    url: urlArr[i]
-                }
-                imgArr.push(obj)
-            }
-            this.setState({
-                stageVisible: true,
-                stageVisiInfo: type,
-                stageName: i.name,
-                stageKeyWord: i.keyWord,
-                fileList: imgArr,
-                stagePrice: i.price,
-                stageSales: i.sales,
-                stageNumVal: i.stagesNumber,
-                stageAmount: i.prepaymentAmount,
-                stageRemarks: i.remarks,
-                stageNo: i.id,
-                value: i.cateId,
-                royaltyRate: i.royaltyRate
-            }, () => this.stageDetailInfo())
-        } else {
-            this.setState({
-                stageVisible: true,
-                stageVisiInfo: type,
-                stageFenlei: '',
-                stageName: '',
-                stageKeyWord: '',
-                stagePrice: '',
-                stageSales: '',
-                stageNumVal: '',
-                stageAmount: '',
-                stageRemarks: '',
-                stageNo: '',
-                cateId: '',
-                fileList: [],
-                value: 1,
-                royaltyRate: 0
-            }, () => this.stageDetailInfo())
-        }
-
-    }
-    checkIndex = (i) => {
-        this.setState({
-            goodsIndex: i,
-            goodsTable: 1
-        }, () => {
-            if (i === 1) {
-                this.getStageItem()
-            } else {
-                this.getOnlineItem()
-            }
-        })
-    }
-
-    // 添加线上商品-新增并上架
-    goodsOkShelves = (which) => {
-        let user = JSON.parse(localStorage.getItem('user'))
-        const { goodsClass, goodsName, goodsKey1, goodsKey2, goodsKey3,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales,
-            goodsSku, goodsFileList, value, integral, commission } = this.state
-        if (goodsName === '' || goodsRemarks === '' || goodsPrice === ''
-            || goodsSku === '' || goodsFileList.length === 0) {
-            message.warning('请检查是否有未填写的内容！')
-        } else {
-            let photoStr = ''
-            let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
-            for (let i = 0; i < goodsFileList.length; i++) {
-                if (photoStr === '') {
-                    photoStr = baseUrl + goodsFileList[i].response.data
-                } else {
-                    photoStr = baseUrl + goodsFileList[i].response.data + ',' + photoStr
-                }
-            }
-            let formData = new FormData()
-            formData.append('merId', user.id)
-            formData.append('keyword', goodsKey1 + ',' + goodsKey2 + ',' + goodsKey3)
-            formData.append('cateId', value)
-            formData.append('name', goodsName)
-            formData.append('price', Number(goodsPrice))
-            formData.append('vipPrice', Number(goodsVip))
-            formData.append('image', photoStr)
-            formData.append('ficti', Number(goodsSales))
-            formData.append('stock', Number(goodsSku))
-            formData.append('storeInfo', goodsRemarks)
-            formData.append('postage', Number(goodsPostage))
-            formData.append('isShow', which)
-            formData.append('isNew', 0)
-            formData.append('isBest', 0)
-            formData.append('isBenefit', 0)
-            formData.append('useScore', Number(integral))
-            formData.append('royaltyRate', Number(commission))
-            axios({
-                url: '/statistics/addProducts',
-                method: 'POST',
-                data: formData
-            })
-                .then(res => {
-                    console.log('新增线上商品成功', res)
-                    message.success('添加成功')
-                    this.getOnlineItem()
-                    this.setState({
-                        goodsModal: false
-                    })
-                })
-                .catch(err => {
-                    console.log('添加失败', err)
-                })
-        }
-    }
-    // 打开新增、编辑线上商品模态框
-    editOnline = (type, i) => {
-        this.setState({
-        }, () => {
-            console.log(i)
-            if (type === 'edit') {
-                let keyArr = i.keyword.split(',')
-                let imgArr = []
-                let urlArr = i.image.split(',')
-                for (let i = 0; i < urlArr.length; i++) {
-                    let obj = {
-                        uid: i,
-                        url: urlArr[i]
-                    }
-                    imgArr.push(obj)
-                }
-                this.setState({
-                    goodsModal: true,
-                    goodsMoInfo: type,
-                    goodsNo: i.id,
-                    value: i.cateId,
-                    goodsName: i.name,
-                    goodsKey1: keyArr[0],
-                    goodsKey2: keyArr[1],
-                    goodsKey3: keyArr[2],
-                    goodsRemarks: i.storeInfo,
-                    goodsPrice: i.price,
-                    goodsVip: i.vipPrice,
-                    goodsPostage: i.postage,
-                    goodsSales: i.ficti,
-                    goodsSku: i.stock,
-                    goodsFileList: imgArr,
-                    integral: i.useScore,
-                    commission: i.royaltyRate
-                })
-            } else {
-                this.setState({
-                    goodsModal: true,
-                    goodsMoInfo: type,
-                    goodsNo: '',
-                    goodsClass: '',
-                    goodsClassVal: '',
-                    goodsName: '',
-                    goodsKey1: '',
-                    goodsKey2: '',
-                    goodsKey3: '',
-                    goodsRemarks: '',
-                    goodsPrice: '',
-                    goodsVip: '',
-                    goodsPostage: '',
-                    goodsSales: '',
-                    goodsSku: '',
-                    goodsFileList: [],
-                    value: 1,
-                    integral: 1,
-                    commission: ''
-                })
-            }
-        })
-    }
-    // 修改线上商品
-    onlineSure = (i) => {
-        let user = JSON.parse(localStorage.getItem('user'))
-        const { goodsNo, goodsName, goodsKey1, goodsKey2, goodsKey3, goodsClass,
-            goodsRemarks, goodsPrice, goodsVip, goodsPostage, goodsSales, goodsSku, value,
-            goodsFileList, integral, commission } = this.state
-        if (goodsName === '' || goodsRemarks === '' || goodsPrice === ''
-            || goodsSku === '' || goodsFileList.length === 0) {
-            message.warning('请检查是否有未填写的内容！')
-        } else {
-            let photoStr = ''
-            let baseUrl = 'https://www.bkysc.cn/api/files-upload/'
-            for (let i = 0; i < goodsFileList.length; i++) {
-                if (goodsFileList[i].response) {
-                    if (photoStr === '') {
-                        photoStr = baseUrl + goodsFileList[i].response.data
-                    } else {
-                        photoStr = baseUrl + goodsFileList[i].response.data + ',' + photoStr
-                    }
-                } else {
-                    if (photoStr === '') {
-                        photoStr = goodsFileList[i].url
-                    } else {
-                        photoStr = goodsFileList[i].url + ',' + photoStr
-                    }
-                }
-            }
-            let isshow
-            if (i === 1) {
-                isshow = 1
-            } else {
-                isshow = 0
-            }
-            let formData = new FormData()
-            formData.append('cateId', value)
-            formData.append('ficti', goodsSales)
-            formData.append('id', goodsNo)
-            formData.append('image', photoStr)
-            formData.append('isShow', isshow)
-            formData.append('keyword', goodsKey1 + ',' + goodsKey2 + ',' + goodsKey3)
-            formData.append('merId', user.id)
-            formData.append('name', goodsName)
-            formData.append('postage', goodsPostage)
-            formData.append('price', Number(goodsPrice))
-            formData.append('stock', goodsSku)
-            formData.append('storeInfo', goodsRemarks)
-            formData.append('vipPrice', Number(goodsVip))
-            formData.append('useScore', Number(integral))
-            formData.append('royaltyRate', Number(commission))
-            axios({
-                url: '/statistics/updateOnlineProducts',
-                method: 'POST',
-                data: formData
-            })
-                .then(res => {
-                    message.success('修改成功')
-                    this.getOnlineItem()
-                    this.setState({
-                        goodsModal: false
-                    })
-                })
-                .catch(err => {
-                    console.log(err)
-                })
-        }
-    }
-    // 回收站商品
-    getRecycle = () => {
-        const { name, cateName } = this.state
-        let user = JSON.parse(localStorage.getItem('user'))
-        axios({
-            url: '/statistics/recycleBinProducts',
-            method: 'GET',
-            params: {
-                cateName: cateName, // 分类名称
-                enterId: user.id, // 商户id
-                limit: 10, // 每页数量
-                name: name, // 项目名称
-                offset: 1, // 页码
-                order: '', // 排序方式
-                type: 3,
-            }
-        })
-            .then(res => {
-                message.success('查询商品成功')
-                this.setState({
-                    onlineGoods: res.data
-                })
-            })
-            .catch(err => {
-                console.log(err)
-            })
-    }
-    // 商品放入回收站
-    goodsfirm = (re) => {
+    // 删除普通商品
+    delOnline = id => {
         axios({
             url: '/statistics/delOnlineProducts',
             method: 'GET',
             params: {
-                id: re.id
+                id: id
             }
         })
             .then(res => {
-                message.success('删除成功，已放入回收站！')
-                this.getOnlineItem()
+                console.log('普通商品删除成功', res)
+                if (res.data.status === 200) {
+                    this.getOnlineList()
+                } else {
+                    message.error(res.data.message)
+                }
             })
             .catch(err => {
-                message.error('删除失败')
+                console.log('普通商品删除失败', err)
+                message.error('服务器出错')
             })
     }
-    // 商品从回收站 ===> 未上架
-    delToNoShow = (re) => {
-        axios({
-            url: '/statistics/recoveryOnlineProducts',
-            method: 'GET',
-            params: {
-                id: re.id
-            }
-        })
-            .then(res => {
-                console.log('===========', res)
-                message.success('恢复成功')
-                this.getRecycle()
-            })
-            .catch(err => {
-                message.error('恢复失败')
-            })
-    }
-    // 回收站彻底删除
-    realDelOnline = (re) => {
+    // 回收站彻底删除普通商品
+    realDelOnline = id => {
         axios({
             url: '/statistics/removeOnlineProducts',
             method: 'GET',
             params: {
-                id: re.id
+                id: id
             }
         })
             .then(res => {
-                console.log('=============', res)
-                this.getRecycle()
-            })
-            .catch(err => {
-                console.log(err)
-            })
-    }
-    handleVisibleChange = visible => {
-        this.setState({ visible })
-    }
-    stageImgCancel = () => this.setState({ previewVisible: false })
-    goodsImgCancel = () => this.setState({ goodsimgVisible: false })
-
-    // 分期明细
-    stageDetailInfo = () => {
-        const { stagePrice, stageNumVal, stageAmount } = this.state
-        let eachStagePrice
-        if (stageAmount !== '' && stageNumVal !== '' && stagePrice !== '') {
-            eachStagePrice = (stagePrice - stageAmount) / stageNumVal
-            this.setState({
-                eachStagePrice: Math.round(eachStagePrice * 100) / 100,
-                isStageDetailInfo: true
-            })
-        } else {
-            this.setState({ isStageDetailInfo: false })
-        }
-    }
-
-    // 打开设置拼团模态框
-    spellGroup = data => {
-        console.log(data)
-        this.setState({
-            spellName: data.name,
-            spellImage: data.image,
-            spellStock: data.stock,
-            spellSales: data.ficti,
-            // spellPrice: data.price,
-            spellProductId: data.id,
-            originalPrice: data.price,
-            isSpellGroup: true
-        })
-    }
-    // 新增拼团
-    addSpellGroup = () => {
-        const { spellName, spellTime, spellImage, spellPrice,
-            spellPeople, spellSales, spellStock, spellPostage,
-            startDate, startTime, endTime, endDate, spellDescription,
-            spellIsShow, spellProductId, spellDiscount } = this.state
-        let merId = JSON.parse(localStorage.getItem('user')).id
-        if (startDate === '' || startTime === '' || endDate === '' || endTime === ''
-            || spellDescription === '' || spellDiscount === '' || spellName === ''
-            || spellImage === '' || spellPeople === '' || spellSales === ''
-            || spellStock === '' || spellPostage === '') {
-            message.warning('请确认信息填写完整！')
-        } else {
-            axios({
-                method: 'PUT',
-                url: '/api/yxStoreCombination',
-                data: {
-                    title: spellName,
-                    effectiveTime: spellTime,
-                    startTimeDate: startDate + ' ' + startTime,
-                    endTimeDate: endDate + ' ' + endTime,
-                    image: spellImage,
-                    price: spellPrice,
-                    people: spellPeople,
-                    sales: spellSales,
-                    stock: spellStock,
-                    postage: spellPostage,
-                    isShow: spellIsShow,
-                    description: spellDescription,
-                    productId: spellProductId,
-                    merId: merId,
-                    isDel: 0,
-                    combination: 1,
-                    isHost: 0,
-                    discount: spellDiscount
+                console.log('彻底删除成功', res)
+                if (res.data.status === 200) {
+                    this.getOnlineList()
+                } else {
+                    message.error(res.data.message)
                 }
             })
-                .then(res => {
-                    console.log('新增拼团成功', res)
-                    this.getOnlineItem()
-                    this.setState({ isSpellGroup: false })
-                    message.success('新增拼团商品成功')
-                })
-                .catch(err => {
-                    console.log('新增拼团失败', err)
-                })
+            .catch(err => {
+                console.log('彻底删除失败', err)
+                message.error('服务器出错')
+            })
+    }
+    // 回收站恢复普通商品
+    restoreOnline = id => {
+        axios({
+            url: '/statistics/recoveryOnlineProducts',
+            method: 'GET',
+            params: {
+                id: id
+            }
+        })
+            .then(res => {
+                console.log('恢复成功', res)
+                if (res.data.status === 200) {
+                    this.getOnlineList()
+                } else {
+                    message.error(res.data.message)
+                }
+            })
+            .catch(err => {
+                console.log('恢复失败', err)
+                message.error('服务器出错')
+            })
+    }
+    // 打开普通类商品编辑框
+    editOnline = record => {
+        this.setState({
+            goodsClass: record.cateId,
+            goodsName: record.name,
+            goodsImage: record.image,
+            integral: record.useScore,
+            intNum: record.giveIntegral,
+            goodsPrice: record.otPrice,
+            goodsSales: record.ficti,
+            goodsPostage: record.postage,
+            goodsStock: record.stock,
+            goodsRoyaltyRate: record.royaltyRate,
+            goodsRemarks: record.storeInfo,
+            onlineId: record.id,
+            actionType: 'edit',
+            goodsTitle: '修改项目',
+            goodsVisble: true,
+        })
+    }
+    // 打开设置拼团模态框
+    spellGroup = record => {
+        const { goodsType } = this.state
+        if (goodsType === 0) {
+            this.setState({
+                spellName: record.storeName,
+                spellImage: record.image,
+                spellSales: record.ficti,
+                spellProductId: record.id,
+                originalPrice: record.otPrice,
+                isSpellGroup: true
+            })
+        } else {
+            this.setState({
+                spellName: record.name,
+                spellImage: record.image,
+                spellSales: record.ficti,
+                spellPostage: record.postage,
+                spellProductId: record.id,
+                originalPrice: record.otPrice,
+                spellStock: record.stock,
+                isSpellGroup: true
+            })
         }
     }
     // 上传拼团照片
@@ -951,35 +831,6 @@ class Goods extends Component {
         console.log(endTime)
         this.setState({ endTime: endTime })
     }
-
-    // 正则判断线上商品员工提成
-    setCommission = e => {
-        this.setState({ commission: e.target.value }, () => {
-            if (this.state.commission) {
-                if (!(/^[0-9][0-9]{0,1}$/.test(this.state.commission))) {
-                    message.warning('请输入1-99的整数')
-                    this.setState({ commission: '' })
-                }
-            }
-        })
-    }
-    // 正则判断分期商品员工提成
-    setRoyaltyRate = e => {
-        this.setState({ royaltyRate: e.target.value }, () => {
-            if (this.state.royaltyRate) {
-                if (!(/^[0-9][0-9]{0,1}$/.test(this.state.royaltyRate))) {
-                    message.warning('请输入1-99的整数')
-                    this.setState({ royaltyRate: '' })
-                }
-            }
-        })
-    }
-
-    // 拼团商品服务时间
-    service = value => {
-        console.log(value)
-    }
-
     // 设置拼团折扣
     setDiscount = e => {
         const { originalPrice } = this.state
@@ -989,171 +840,93 @@ class Goods extends Component {
             spellPrice: originalPrice * discount
         })
     }
-    render() {
-        const { goodsIndex, goodsTable, name, stageVisible, stageName,
-            stagePrice, stageSales, stageNumVal, stageAmount, stageRemarks,
-            stageData, promptModal, promptInfo, stageVisiInfo, goodsModal,
-            goodsMoInfo, goodsName, goodsRemarks, goodsPrice, goodsPostage,
-            goodsSales, goodsSku, previewVisible, previewImage, fileList,
-            previewTitle, loading, goodsimgVisible, goodsImage, goodsFileList,
-            onlineGoods, goodsProModal, goodsProInfo, treeData, emptyText,
-            isStageDetailInfo, eachStagePrice, value, isSpellGroup,
-            spellName, spellTime, spellImage, spellPrice,
+    // 新增拼团
+    addSpellGroup = () => {
+        const { spellName, spellTime, spellImage, spellPrice,
             spellPeople, spellSales, spellStock, spellPostage,
-            spellIsShow, spellDescription, integral, commission, royaltyRate,
-            serviceEndTime, serviceStartTime, originalPrice, spellDiscount } = this.state
-        const columns = [
-            {
-                title: '项目编号',
-                dataIndex: 'id',
-                key: 'id',
-                render: text => <a>{text}</a>,
-            },
-            {
-                title: '项目图片',
-                dataIndex: 'photo',
-                key: 'photo',
-                render: src => {
-                    let arr = src.split(',')
-                    return (
-                        <Image className='tableGoodsImg' src={arr[0]}></Image>
-                    )
+            startDate, startTime, endTime, endDate, spellDescription,
+            spellIsShow, spellProductId, spellDiscount } = this.state
+        let merId = JSON.parse(localStorage.getItem('user')).id
+        if (startDate === '' || endDate === '' || endTime === ''
+            || spellDescription === '' || spellDiscount === '' || spellName === ''
+            || spellImage === '' || spellPeople === '' || spellSales === ''
+            || spellStock === '' || spellPostage === '') {
+            message.warning('请确认信息填写完整！')
+        } else {
+            axios({
+                method: 'PUT',
+                url: '/api/yxStoreCombination',
+                data: {
+                    title: spellName,
+                    // effectiveTime: spellTime,
+                    startTimeDate: startDate + ' ' + startTime,
+                    endTimeDate: endDate + ' ' + endTime,
+                    image: spellImage,
+                    price: spellPrice,
+                    people: spellPeople,
+                    sales: spellSales,
+                    stock: spellStock,
+                    postage: spellPostage,
+                    isShow: 1,
+                    description: spellDescription,
+                    productId: spellProductId,
+                    merId: merId,
+                    isDel: 0,
+                    combination: 1,
+                    isHost: 0,
+                    discount: spellDiscount,
+                    isPostage: 1
                 }
-            },
-            {
-                title: '项目名称',
-                dataIndex: 'name',
-                key: 'name',
-            },
-            {
-                title: '分类名称',
-                dataIndex: 'cateName',
-                key: 'cateName',
-            },
-            {
-                title: '项目价格',
-                dataIndex: 'price',
-                key: 'price',
-                render: text => <>￥{text}</>,
-            },
-            {
-                title: '总期数',
-                key: 'stagesNumber',
-                dataIndex: 'stagesNumber',
-                render: text => <span>{text}期</span>,
-            },
-            {
-                title: '销量',
-                key: 'sales',
-                dataIndex: 'sales',
-                render: tags => (
-                    <>{tags}</>
-                ),
-            },
-            {
-                title: '项目状态',
-                key: 'state',
-                dataIndex: 'state',
-                render: (text, record) => {
-                    if (goodsTable === 1) {
-                        return <Popover content={
-                            <Tag color='red'
-                                onClick={() => this.setState({
-                                    promptModal: true,
-                                    sureChange: record.id,
-                                    promptInfo: '下架'
-                                })} >下架</Tag>
-                        }>
-                            <Tag color='#2596FF'>出售中</Tag>
-                        </Popover>
-                    } else if (goodsTable === 2) {
-                        return <Popover content={
-                            <Tag color='red'
-                                onClick={() => this.setState({
-                                    promptModal: true,
-                                    sureChange: record.id,
-                                    promptInfo: '上架'
-                                })} >上架</Tag>
-                        }>
-                            <Tag color='#2596FF'>待上架</Tag>
-                        </Popover>
-                    } else {
-                        return <Tag color='#1890FF' >已删除</Tag>
-                    }
-                }
-                ,
-            },
-            {
-                title: '操作',
-                key: 'action',
-                render: (text, record) => {
-                    if (goodsTable !== 3) {
-                        return <Space size="middle">
-                            <a style={{ color: '#13CE66' }} onClick={() => {
-                                this.editStage('edit', record)
-                            }}>修改</a>
-                            <Popconfirm
-                                title="请您确认是否删除?"
-                                onConfirm={() => this.confirm(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#FF5A5A' }}>删除</a>
-                            </Popconfirm>
-                        </Space>
-                    } else {
-                        return <Space size="middle">
-                            <Popconfirm
-                                title="请您确认是否恢复?"
-                                onConfirm={() => this.restore(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#13CE66' }}>恢复</a>
-                            </Popconfirm>
-                            <Popconfirm
-                                title="请您确认是否彻底删除?"
-                                onConfirm={() => this.realDel(record)}
-                                onCancel={this.cancel}
-                                okText="是"
-                                cancelText="否"
-                            >
-                                <a style={{ color: '#FF5A5A' }}>彻底删除</a>
-                            </Popconfirm>
-                        </Space>
-                    }
-                },
-            },
-        ]
-        const colOnline = [
+            })
+                .then(res => {
+                    console.log('新增拼团成功', res)
+                    message.success('新增拼团成功!')
+                    this.setState({ isSpellGroup: false })
+                })
+                .catch(err => {
+                    console.log('新增拼团失败', err)
+                })
+        }
+    }
+    render() {
+        const { goodsTable, onlineList, loading, emptyText, searchVal, classify,
+            classList, goodsImage, goodsClass, goodsName, goodsPrice, goodsSales,
+            goodsRoyaltyRate, goodsRemarks, goodsType, goodsVisble, goodsTitle,
+            actionType, integral, intNum, cardType, astrict, goodsPostage,
+            goodsStock, serviceTime, checkTimeArr, servicePlepeo, timeArr,
+            proType, serviceType, serviceList, servicePage, isSpellGroup,
+            spellName, spellImage, originalPrice, spellPrice, spellPeople,
+            spellStock, spellDiscount, spellSales, spellDescription, spellPostage } = this.state
+
+        const onlineColumns = [
             {
                 title: '商品编号',
                 dataIndex: 'id',
                 key: 'id',
-                render: text => <a>{text}</a>,
+                align: 'center',
+                width: 120
             },
             {
                 title: '商品图片',
                 dataIndex: 'image',
                 key: 'image',
-                render: src => {
-                    let arr = src.split(',')
-                    return (
-                        <Image className='tableGoodsImg' src={arr[0]}></Image>
-                    )
-                }
+                render: src => <img className='tableGoodsImg' src={src} />,
+                align: 'center',
+                width: 120
             },
             {
                 title: '商品名称',
                 dataIndex: 'name',
                 key: 'name',
+                align: 'center',
+                width: 120
             },
             {
                 title: '分类名称',
                 dataIndex: 'cateName',
                 key: 'cateName',
+                align: 'center',
+                width: 120
             },
             {
                 title: '商品价格',
@@ -1162,11 +935,23 @@ class Goods extends Component {
                 render: text => (
                     <span>￥{text.toFixed(2)}</span>
                 ),
+                align: 'center',
+                width: 120
+            },
+            {
+                title: '积分抵扣',
+                dataIndex: 'giveIntegral',
+                key: 'giveIntegral',
+                align: 'center',
+                width: 120,
+                render: (text, record) => record.useScore === 1 ? <span>{text}</span> : <span>未开启</span>
             },
             {
                 title: '销量',
                 key: 'ficti',
                 dataIndex: 'ficti',
+                align: 'center',
+                width: 80
             },
             {
                 title: '库存',
@@ -1175,6 +960,8 @@ class Goods extends Component {
                 render: tags => (
                     <span>{tags}</span>
                 ),
+                align: 'center',
+                width: 80
             },
             {
                 title: '系统状态',
@@ -1183,23 +970,21 @@ class Goods extends Component {
                 render: (text, record) => {
                     if (goodsTable === 1) {
                         return <Popover content={
-                            <Tag color='red'
-                                onClick={() => this.setState({
-                                    goodsProModal: true,
-                                    goodsProId: record.id,
-                                    goodsProInfo: '下架'
-                                })} >下架</Tag>
+                            <Tag
+                                style={{ cursor: 'pointer' }}
+                                color='red'
+                                onClick={() => this.changeOnline(record.id)}
+                            >下架</Tag>
                         }>
                             <Tag color='#2596FF'>已上架</Tag>
                         </Popover>
-                    } else if (goodsTable === 2) {
+                    } else if (goodsTable === 0) {
                         return <Popover content={
-                            <Tag color='red'
-                                onClick={() => this.setState({
-                                    goodsProModal: true,
-                                    goodsProId: record.id,
-                                    goodsProInfo: '上架'
-                                })} >上架</Tag>
+                            <Tag
+                                color='red'
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => this.changeOnline(record.id)}
+                            >上架</Tag>
                         }>
                             <Tag color='#2596FF'>待上架</Tag>
                         </Popover>
@@ -1212,137 +997,217 @@ class Goods extends Component {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => {
-                    if (goodsTable !== 3) {
+                    if (goodsTable === 1) {
                         return (<Space size="middle">
-                            <a style={{ color: '#13CE66' }} onClick={() => this.editOnline('edit', record)} >修改</a>
+                            <Button type="primary" onClick={() => this.editOnline(record)} >编辑</Button>
                             <Popconfirm
                                 title="请您确认是否删除?"
-                                onConfirm={() => this.goodsfirm(record)}
-                                onCancel={this.cancel}
+                                onConfirm={() => this.delOnline(record.id)}
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF5A5A' }}>删除</a>
+                            <Button type="primary">删除</Button>
                             </Popconfirm>
-                            <Button type="default" onClick={() => this.spellGroup(record)}>开启拼团</Button>
+                            <Button type="default" style={{width: 120}} onClick={() => this.spellGroup(record)}>开启拼团</Button>
+                        </Space>)
+                    } else if (goodsTable === 0) {
+                        return (<Space size="middle">
+                        <Button type="primary" onClick={() => this.editOnline(record)} >编辑</Button>
+                            <Popconfirm
+                                title="请您确认是否删除?"
+                                onConfirm={() => this.delOnline(record.id)}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <Button type="primary">删除</Button>
+                            </Popconfirm>
                         </Space>)
                     } else {
                         return (<Space size="middle">
                             <Popconfirm
                                 title="请您确认是否恢复?"
-                                onConfirm={() => this.delToNoShow(record)}
-                                onCancel={this.cancel}
+                                onConfirm={() => this.restoreOnline(record.id)}
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#13CE66' }}>恢复</a>
+                                <Button type="primary">恢复</Button>
                             </Popconfirm>
                             <Popconfirm
                                 title="请您确认是否彻底删除?"
-                                onConfirm={() => this.realDelOnline(record)}
-                                onCancel={this.cancel}
+                                onConfirm={() => this.realDelOnline(record.id)}
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF5A5A' }}>彻底删除</a>
+                                <Button type="primary" danger style={{width: 120}}>彻底删除</Button>
                             </Popconfirm>
                         </Space>)
                     }
-                }
-
+                },
+                align: 'center'
             },
         ]
-        let _that = this
-        const uploadButton = (
-            <div>
-                <div style={{ marginTop: 8 }}>上传图片</div>
-            </div>
-        )
-        const props = {
-            name: 'file',
-            action: 'http://47.108.174.202:9010/upload/files-upload',
-            listType: 'picture-card',
-            headers: {
-                authorization: 'authorization-text',
-                Content_Type: 'multipart/form-data'
+        const serviceColumns = [
+            {
+                title: '服务编号',
+                dataIndex: 'id',
+                key: 'id',
+                align: 'center',
+                width: 120
             },
-            fileList: fileList,
-            onChange(info) {
-                if (info.file.status !== 'uploading') {
-                    console.log('上传的文件', info.fileList)
-                }
-                if (info.file.status === 'done') {
-                    message.success(`${info.file.name} 上传成功`)
-                    _that.setState({
-                        fileList: info.fileList,
-                    })
-                } else if (info.file.status === 'error') {
-                    message.error(`${info.file.name} 上传失败.`)
-                }
+            {
+                title: '服务图片',
+                dataIndex: 'image',
+                key: 'image',
+                align: 'center',
+                render: text => <img src={text} className='tableGoodsImg' />,
+                width: 120
             },
-            onPreview(file) {
-                console.log('预览', file)
-                let url
-                if (file.response) {
-                    url = 'https://www.bkysc.cn/api/files-upload/' + file.response.data
-                } else {
-                    url = file.url
-                }
-                _that.setState({
-                    previewImage: url,
-                    previewVisible: true,
-                    previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
-                })
+            {
+                title: '服务名称',
+                dataIndex: 'storeName',
+                key: 'storeName',
+                align: 'center',
+                width: 120
             },
-            onRemove(file) {
-                let newList = fileList.filter(item => item.uid !== file.uid)
-                _that.setState({
-                    fileList: newList
-                })
-            }
-        }
-        const goodsProps = {
-            name: 'file',
-            action: 'http://47.108.174.202:9010/upload/files-upload',
-            listType: 'picture-card',
-            headers: {
-                authorization: 'authorization-text',
-                Content_Type: 'multipart/form-data'
+            {
+                title: '服务时长',
+                dataIndex: 'timeQuantum',
+                key: 'timeQuantum',
+                align: 'center',
+                width: 120
             },
-            fileList: goodsFileList,
-            onChange(info) {
-                if (info.file.status !== 'uploading') {
-                    console.log('上传的文件', info.fileList)
-                }
-                if (info.file.status === 'done') {
-                    message.success(`${info.file.name} 上传成功`)
-                    _that.setState({
-                        goodsFileList: info.fileList,
-                    })
-                } else if (info.file.status === 'error') {
-                    message.error(`${info.file.name} 上传失败.`)
-                }
+            {
+                title: '价格',
+                dataIndex: 'otPrice',
+                key: 'otPrice',
+                align: 'center',
+                width: 80
             },
-            onPreview(file) {
-                console.log('预览', file)
-                let url
-                if (file.response) {
-                    url = 'https://www.bkysc.cn/api/files-upload/' + file.response.data
-                } else {
-                    url = file.url
-                }
-                _that.setState({
-                    goodsImage: url,
-                    goodsimgVisible: true,
-                    previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
-                })
+            {
+                title: '积分抵扣',
+                dataIndex: 'giveIntegral',
+                key: 'giveIntegral',
+                align: 'center',
+                width: 120,
+                render: (text, record) => record.useScore === 1 ? <span>{text}</span> : <span>未开启</span>
             },
-            onRemove(file) {
-                let newList = goodsFileList.filter(item => item.uid !== file.uid)
-                _that.setState({
-                    goodsFileList: newList
-                })
-            }
+            {
+                title: '销量',
+                key: 'ficti',
+                dataIndex: 'ficti',
+                align: 'center',
+                width: 80
+            },
+            {
+                title: '系统状态',
+                key: 'isShow',
+                dataIndex: 'isShow',
+                render: (text, record) => {
+                    if (goodsTable === 1) {
+                        return <Popover content={
+                            <Tag
+                                style={{ cursor: 'pointer' }}
+                                color='red'
+                                onClick={() => this.changeFrame(record.id)}
+                            >下架</Tag>
+                        }>
+                            <Tag color='#2596FF'>已上架</Tag>
+                        </Popover>
+                    } else if (goodsTable === 0) {
+                        return <Popover content={
+                            <Tag
+                                color='red'
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => this.changeFrame(record.id)}
+                            >上架</Tag>
+                        }>
+                            <Tag color='#2596FF'>待上架</Tag>
+                        </Popover>
+                    } else {
+                        return <Tag color='#1890FF'>已删除</Tag>
+                    }
+                },
+                align: 'center',
+                width: 120
+            },
+            {
+                title: '预约状态',
+                dataIndex: 'enableSub',
+                key: 'enableSub',
+                align: 'center',
+                width: 120,
+                render: (text, record) => goodsTable === 1
+                    ? <Popover content={<span style={{ color: 'red' }}>开启或关闭预约！！！</span>}>
+                        <Switch
+                            checkedChildren="开启"
+                            unCheckedChildren="关闭"
+                            checked={text === 0 ? true : false}
+                            onClick={e => this.switchService(e, record.id)}
+                        />
+                    </Popover>
+                    : <span>无</span>
+            },
+            {
+                title: '操作',
+                key: 'action',
+                render: (text, record) => {
+                    if (goodsTable === 1) {
+                        return (<Space size="middle">
+                            <Button type="primary" onClick={() => this.editService(record)} >编辑</Button>
+                            <Popconfirm
+                                title="请您确认是否删除?"
+                                onConfirm={() => this.delService(record.id)}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <Button type="primary" danger>删除</Button>
+                            </Popconfirm>
+                            <Button type="default" style={{width: 120}} onClick={() => this.spellGroup(record)}>开启拼团</Button>
+                        </Space>)
+                    } else if (goodsTable === 0) {
+                        return (<Space size="middle">
+                        <Button type="primary" onClick={() => this.editService(record)} >编辑</Button>
+                            <Popconfirm
+                                title="请您确认是否删除?"
+                                onConfirm={() => this.delService(record.id)}
+                                okText="是"
+                                cancelText="否"
+                            >
+                            <Button type="primary" danger>删除</Button>
+                            </Popconfirm>
+                        </Space>)
+                    } else {
+                        return (<Space size="middle">
+                            <Popconfirm
+                                title="请您确认是否恢复?"
+                                onConfirm={() => this.restoreService(record.id)}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <Button type="primary" >恢复</Button>
+                            </Popconfirm>
+                            <Popconfirm
+                                title="请您确认是否彻底删除?"
+                                onConfirm={() => this.removeService(record.id)}
+                                okText="是"
+                                cancelText="否"
+                            >
+                                <Button type="primary" danger style={{width: 120}}>彻底删除</Button>
+                            </Popconfirm>
+                        </Space>)
+                    }
+                },
+                align: 'center',
+                // width: 500
+            },
+        ]
+        let columns = [], data = []
+        if (goodsType === 0) {
+            columns = serviceColumns
+            data = serviceList
+        } else if (goodsType === 1) {
+            columns = onlineColumns
+            data = onlineList
         }
         const uploadButtonA = (
             <div>
@@ -1351,542 +1216,578 @@ class Goods extends Component {
             </div>
         )
         return (
-            <div className='goods'>
-                <div className='goodsHeaderTop'>
-                    <span>商品管理</span>
-                </div>
-                <div className='goodsHeaderBody'>
-                    <div className={goodsIndex === 1 ? 'goodsActive' : 'ghBodyBtn'}
-                        onClick={() => this.checkIndex(1)}>门店分期项目</div>
-                    <div className={goodsIndex === 2 ? 'goodsActive' : 'ghBodyBtn'}
-                        onClick={() => this.checkIndex(2)}>线上商品</div>
-                </div>
-                <div className='goodsBody'>
-                    <div className='goodsBodyTab'>
-                        <div className={goodsTable === 1 ? 'gtActive' : 'gbTabBtn'}
-                            onClick={() => this.chooseType(1)}>出售中</div>
-                        <div className={goodsTable === 2 ? 'gtActive' : 'gbTabBtn'}
-                            onClick={() => this.chooseType(2)}>待上架</div>
-                        <div className={goodsTable === 3 ? 'gtActive' : 'gbTabBtn'}
-                            onClick={() => this.chooseType(3)}>回收站</div>
-                    </div>
-                    <div className='gbTableTop'>
-                        <Input style={{ width: 150, margin: '0 20px' }}
-                            placeholder='请输入项目名搜索'
-                            value={name}
-                            onChange={e => this.setName(e)} />
-
-                        {goodsIndex === 1
-                            ? <div onClick={() => this.setState({ loading: true }, () => { this.getStageItem() })} className='search-btn'>
-                                <SearchOutlined />搜索
-                            </div>
-                            : <div onClick={() => this.setState({ loading: true }, () => { this.getOnlineItem() })} className='search-btn'>
-                                <SearchOutlined />搜索
-                            </div>}
-                        {goodsIndex === 1
-                            ? <div className='add-btn' onClick={() => this.editStage('add', 0)} style={{ width: 120 }}>
-                                <PlusOutlined />新增分期项目
-                            </div>
-                            : <div className='add-btn' onClick={() => this.editOnline('add', 0)}>
-                                <PlusOutlined />新增线上商品
-                            </div>}
-
-                        <Select
-                            style={{ width: 150 }}
-                            defaultValue="全部"
-                            onChange={e => this.setState({ cateName: e }, () => this.getStageItem())}
-                        >
-                            <Option value="">全部</Option>
-                            {
-                                treeData.map(item => (
-                                    <Option value={item.title} key={item.id}>{item.title}</Option>
-                                ))
-                            }
-                        </Select>
-
-                    </div>
-                    <div style={{ width: '100%', paddingBottom: 10 }}>
-                        {goodsIndex === 1 ?
-                            <Table columns={columns}
-                                dataSource={stageData}
-                                style={{ textAlign: 'center', paddingBottom: '10px' }}
-                                pagination={{ pageSize: 4, position: ['bottomLeft'] }}
-                                loading={loading}
-                                locale={{ emptyText: emptyText }} /> :
-                            <Table columns={colOnline}
-                                dataSource={onlineGoods}
-                                style={{ textAlign: 'center' }}
-                                pagination={{ pageSize: 4, position: ['bottomLeft'] }}
-                                loading={loading}
-                                locale={{ emptyText: emptyText }} />}
-                    </div>
-                    {/* 新增、编辑线上商品 */}
-                    <Modal
-                        visible={goodsModal}
-                        title={goodsMoInfo === 'add' ? "新增商品" : '修改商品'}
-                        onOk={() => this.setState({ goodsModal: false })}
-                        onCancel={() => this.setState({ goodsModal: false })}
-                        footer={goodsMoInfo === 'add'
-                            ? [<Button key="submit" type="primary" onClick={() => this.goodsOkShelves(1)}>
-                                确定并上架
-                        </Button>,
-                            <Button onClick={() => this.goodsOkShelves(0)}>
-                                保存至待上架
-                        </Button>]
-                            : [<Button key="submit" type="primary" onClick={() => this.onlineSure(goodsTable)}>
-                                确定修改
-                        </Button>,
-                            <Button key="back" type="primary" onClick={() => this.setState({ goodsModal: false })}>
-                                取消
-                        </Button>]}
-                        destroyOnClose={true}
-                        bodyStyle={{ fontSize: '12px', padding: '10px', color: '#666666' }}
-                        width={800}
-                    >
-                        <div className='goodsModalItem'>
-                            <span className='gmiLabel'>商品分类</span>
-                            <Select
-                                style={{ width: 150 }}
-                                defaultValue={value}
-                                onChange={e => this.setState({ value: e })}
-                            >
-                                {
-                                    treeData.map((item) => (
-                                        <Option value={item.value}>{item.title}</Option>
-                                    ))
-                                }
-                            </Select>
-                        </div>
-                        <div className='goodsModalItem'>
-                            <span className='gmiLabel'>商品名称</span>
-                            <Input placeholder='请输入项目名称' style={{ width: 250 }}
-                                value={goodsName}
-                                onChange={e => this.setState({ goodsName: e.target.value })} />
-                        </div>
-
-                        <div className='goodsModalImg'>
-                            <span className='gmiLabel'>商品图片</span>
-                            <Upload {...goodsProps} className='avatar-uploader'>
-                                {fileList.length >= 3 ? null : uploadButton}
-                            </Upload>
-                            <Modal
-                                visible={goodsimgVisible}
-                                title={previewTitle}
-                                footer={null}
-                                onCancel={this.goodsImgCancel}
-                            >
-                                <Image alt="example" style={{ width: '100%' }} src={goodsImage} />
-                            </Modal>
-                        </div>
-
-                        <div className='goodsModalItem'>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>商品价格</span>
-                                <Input placeholder='请输入价格'
-                                    value={goodsPrice}
-                                    onChange={e => this.setState({ goodsPrice: e.target.value })} />
-                            </div>
-
-                            <div className='littleitem'>
-                                <span className='littleLabel'>邮费</span>
-                                <Input placeholder='不填或输入0即为包邮'
-                                    value={goodsPostage}
-                                    onChange={e => this.setState({ goodsPostage: e.target.value })} />
-                            </div>
-                        </div>
-                        <div className='goodsModalItem'>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>销量</span>
-                                <Input placeholder='请输入销量'
-                                    value={goodsSales}
-                                    onChange={e => this.setState({ goodsSales: e.target.value })} />
-                            </div>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>库存</span>
-                                <Input placeholder='请输入库存'
-                                    value={goodsSku}
-                                    onChange={e => this.setState({ goodsSku: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div style={{ margin: '10px 39px' }}>
-                            <span className='integralSpan'>积分抵扣</span>
-                            <div className="integral">
-                                <Radio.Group value={integral} onChange={e => this.setState({ integral: e.target.value })}>
-                                    <Radio value={1}>开启</Radio>
-                                    <Radio value={0}>关闭</Radio>
-                                </Radio.Group>
-                            </div>
-                            <span className='integralSpan'>员工提成</span>
-                            <div className="integral">
-                                <Input
-                                    className="commission"
-                                    placeholder="请输入整数"
-                                    value={commission}
-                                    onChange={e => this.setCommission(e)}
-                                />
-                                <span style={{ fontSize: 18 }}>%</span>
-                            </div>
-                        </div>
-
-                        <div className='itemDirecte'>
-                            <span className='gmiLabel'>产品详情</span>
-                            <TextArea rows={6} style={{ width: '70%' }}
-                                value={goodsRemarks}
-                                onChange={e => this.setState({ goodsRemarks: e.target.value })} />
-                        </div>
-                    </Modal>
-                    {/* 分期项目上下架 */}
-                    <Modal
-                        visible={promptModal}
-                        title="上架 / 下架"
-                        onOk={this.handleOk}
-                        onCancel={this.handleCancel}
-                        okText='确定'
-                        cancelText='取消'
-                        destroyOnClose={true}
-                        bodyStyle={{ padding: '10px', color: '#666666' }}
-                        afterClose={() => this.setState({ sureChange: '' })}
-                    >
-                        <div style={{ width: '90%', margin: '0 auto', height: 50, textAlign: 'center', lineHeight: '50px' }}>
-                            {promptInfo === '下架'
-                                ? <span style={{ fontSize: 16 }}>您确定要将该分期项目放入待上架？</span>
-                                : <span style={{ fontSize: 16 }}>您确定要将该分期项目开始出售？</span>
-                            }
-                        </div>
-                    </Modal>
-                    {/* 线上商品上下架 */}
-                    <Modal
-                        visible={goodsProModal}
-                        title="上架 / 下架"
-                        onOk={this.handleGoodsOk}
-                        onCancel={this.handleCancel}
-                        okText='确定'
-                        cancelText='取消'
-                        destroyOnClose={true}
-                        bodyStyle={{ padding: '10px', color: '#666666' }}
-                        afterClose={() => this.setState({ goodsProId: '' })}
-                    >
-                        <div style={{ width: '90%', margin: '0 auto', height: 50, textAlign: 'center', lineHeight: '50px' }}>
-                            {goodsProInfo === '下架'
-                                ? <span style={{ fontSize: 16 }}>您确定要将该商品下架？</span>
-                                : <span style={{ fontSize: 16 }}>您确定要将该商品上架？</span>
-                            }
-                        </div>
-                    </Modal>
-                    {/* 新增、编辑分期项目 */}
-                    <Modal
-                        visible={stageVisible}
-                        title={stageVisiInfo === 'add' ? "新增分期项目" : '修改分期项目'}
-                        onOk={() => this.setState({ stageVisible: false })}
-                        onCancel={() => this.setState({ stageVisible: false, isStageDetailInfo: false })}
-                        footer={[
-                            stageVisiInfo === 'add' ?
-                                <Button key="submit" type="primary" onClick={() => this.okShelves()}>
-                                    确定并上架
-                            </Button> :
-                                <Button key="submit" type="primary" onClick={() => this.sureChange()}>
-                                    确定修改
-                            </Button>
-                        ]}
-                        destroyOnClose={true}
-                        bodyStyle={{ fontSize: '12px', padding: '10px', color: '#666666' }}
-                        width={800}
-                    >
-                        <div className='goodsModalItem'>
-                            <span className='gmiLabel'>项目分类</span>
-                            <Select
-                                style={{ width: 150 }}
-                                defaultValue={value}
-                                onChange={e => this.setState({ value: e })}
-                            >
-                                {
-                                    treeData.map((item) => (
-                                        <Option value={item.value}>{item.title}</Option>
-                                    ))
-                                }
-                            </Select>
-                        </div>
-                        <div className='goodsModalItem'>
-                            <span className='gmiLabel'>项目名称</span>
-                            <Input placeholder='请输入项目名称' style={{ width: 150 }}
-                                value={stageName}
-                                onChange={e => this.setState({ stageName: e.target.value })}></Input>
-                        </div>
-                        <div className='goodsModalImg'>
-                            <span className='gmiLabel'>项目图片</span>
-                            <Upload {...props} className='avatar-uploader'>
-                                {fileList.length >= 3 ? null : uploadButton}
-                            </Upload>
-                            <Modal
-                                visible={previewVisible}
-                                title={previewTitle}
-                                footer={null}
-                                onCancel={this.stageImgCancel}
-                            >
-                                <Image alt="example" style={{ width: '100%' }} src={previewImage} />
-                            </Modal>
-                        </div>
-
-                        <div className='goodsModalItem'>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>项目价格</span>
-                                <Input placeholder=''
-                                    value={stagePrice}
-                                    onChange={e => this.setState({ stagePrice: e.target.value }, () => this.stageDetailInfo())}></Input>
-                            </div>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>虚拟销量</span>
-                                <Input placeholder=''
-                                    value={stageSales}
-                                    onChange={e => this.setState({ stageSales: e.target.value })}></Input>
-                            </div>
-                        </div>
-                        <div className='goodsModalItem'>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>总期数</span>
-                                <Input placeholder='请输入总期数'
-                                    value={stageNumVal}
-                                    onChange={e => this.setState({ stageNumVal: e.target.value }, () => this.stageDetailInfo())}></Input>
-                            </div>
-                            <div className='littleitem'>
-                                <span className='littleLabel'>预付金额</span>
-                                <Input placeholder=''
-                                    value={stageAmount}
-                                    onChange={e => this.setState({ stageAmount: e.target.value }, () => this.stageDetailInfo())}></Input>
-                            </div>
-                        </div>
+            <div className="goods">
+                {/* 新增、编辑线上项目模态框 */}
+                <Modal
+                    visible={goodsVisble}
+                    onCancel={() => this.setState({ goodsVisble: false })}
+                    onOk={() => this.goodsAction(actionType)}
+                    width={800}
+                    okText='确定'
+                    cancelText="取消"
+                    title={goodsTitle}
+                >
+                    <div className="goods-modal-installment">
 
                         {
-                            isStageDetailInfo
-                                ? <div className='goodsModalItem' style={{ marginLeft: '20%', fontSize: 16, }}>
-                                    项目价格 <span style={{ color: 'red', fontSize: 18 }}>{stagePrice}</span>,
-                                    总期数 <span style={{ color: 'red', fontSize: 18 }}>{stageNumVal}</span>,
-                                    每一期价格 <span style={{ color: 'red', fontSize: 18 }}>{eachStagePrice}</span>,
-                                    首次付款 <span style={{ color: 'red', fontSize: 18 }}>{stageAmount + '+' + eachStagePrice}</span>,
+                            goodsType === 0
+                                ? <div>
+                                    <div className="goods-modal-header">
+                                        <span className="goods-modal-header-span">服务类型</span>
+                                        <Radio.Group value={serviceType} onChange={e => this.setState({ serviceType: e.target.value })}>
+                                            <Radio value={1}>单次</Radio>
+                                            <Radio value={2}>卡项</Radio>
+                                        </Radio.Group>
+                                    </div>
+                                    {
+                                        serviceType === 2
+                                            ? <div>
+                                                <div className="goods-modal-body-item">
+                                                    <span className="goods-modal-header-span">卡项分类</span>
+                                                    <Radio.Group value={cardType} onChange={e => this.setState({ cardType: e.target.value })}>
+                                                        <Radio value={1}>次数卡</Radio>
+                                                        <Radio value={0}>时间卡</Radio>
+                                                    </Radio.Group>
+                                                </div>
+                                                <div className="goods-modal-body-item">
+                                                    <span className="goods-modal-body-span">{cardType === 1 ? '有效次数' : '有效天数'}</span>
+                                                    <Input
+                                                        className="goods-modal-body-input"
+                                                        placeholder={cardType === 1 ? '请输入有效次数' : '请输入有效天数'}
+                                                        value={astrict}
+                                                        onChange={e => this.setState({ astrict: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                            : null
+                                    }
+                                    <div className="goods-modal-header">
+                                        <span className="goods-modal-header-span">单次服务时长</span>
+                                        <Select
+                                            placeholder='请选择服务时长'
+                                            style={{ width: 250 }}
+                                            value={serviceTime}
+                                            onChange={(key, item) => {
+                                                this.setState({
+                                                    serviceTime: item.children
+                                                }, () => {
+                                                    let timeArr
+                                                    if (this.state.serviceTime === '30分钟') {
+                                                        timeArr = [
+                                                            { id: 5, value: '8:00-8:30' },
+                                                            { id: 6, value: '8:30-9:00' },
+                                                            { id: 7, value: '9:00-9:30' },
+                                                            { id: 8, value: '9:30-10:00' },
+                                                            { id: 9, value: '10:00-10:30' },
+                                                            { id: 10, value: '10:30-11:00' },
+                                                            { id: 11, value: '11:00-11:30' },
+                                                            { id: 12, value: '11:30-12:00' },
+                                                            { id: 13, value: '13:00-13:30' },
+                                                            { id: 14, value: '13:30-14:00' },
+                                                            { id: 15, value: '14:00-14:30' },
+                                                            { id: 16, value: '14:30-15:00' },
+                                                            { id: 17, value: '15:00-15:30' },
+                                                            { id: 18, value: '15:30-16:00' },
+                                                            { id: 19, value: '16:00-16:30' },
+                                                            { id: 20, value: '16:30-17:00' },
+                                                            { id: 21, value: '17:00-17:30' },
+                                                            { id: 22, value: '17:30-18:00' },
+                                                            { id: 23, value: '18:00-18:30' },
+                                                            { id: 24, value: '18:30-19:00' },
+                                                            { id: 25, value: '19:00-19:30' },
+                                                            { id: 26, value: '19:30-20:00' },
+                                                            { id: 27, value: '20:00-20:30' },
+                                                            { id: 28, value: '20:30-21:00' },
+                                                            { id: 29, value: '21:00-21:30' },
+                                                            { id: 30, value: '21:30-22:00' },
+                                                        ]
+                                                    } else if (this.state.serviceTime === '60分钟') {
+                                                        timeArr = [
+                                                            { id: 31, value: '8:00-9:00' },
+                                                            { id: 32, value: '9:00-10:00' },
+                                                            { id: 33, value: '10:00-11:00' },
+                                                            { id: 34, value: '11:00-12:00' },
+                                                            { id: 35, value: '13:00-14:00' },
+                                                            { id: 36, value: '14:00-15:00' },
+                                                            { id: 37, value: '15:00-16:00' },
+                                                            { id: 38, value: '16:00-17:00' },
+                                                            { id: 39, value: '17:00-18:00' },
+                                                            { id: 40, value: '18:00-19:00' },
+                                                            { id: 41, value: '19:00-20:00' },
+                                                            { id: 42, value: '20:00-21:00' },
+                                                            { id: 43, value: '21:00-22:00' },
+                                                        ]
+                                                    } else if (this.state.serviceTime === '90分钟') {
+                                                        timeArr = [
+                                                            { id: 44, value: '8:00-9:30' },
+                                                            { id: 45, value: '9:30-11:00' },
+                                                            { id: 46, value: '11:00-12:30' },
+                                                            { id: 47, value: '13:30-15:00' },
+                                                            { id: 48, value: '15:00-16:30' },
+                                                            { id: 49, value: '16:30-18:00' },
+                                                            { id: 50, value: '18:00-19:30' },
+                                                            { id: 51, value: '19:30-21:00' },
+                                                            { id: 52, value: '21:00-22:30' },
+                                                        ]
+                                                    } else {
+                                                        timeArr = [
+                                                            { id: 53, value: '8:00-10:00' },
+                                                            { id: 54, value: '10:00-12:00' },
+                                                            { id: 55, value: '13:00-15:00' },
+                                                            { id: 56, value: '15:00-17:00' },
+                                                            { id: 57, value: '17:00-19:00' },
+                                                            { id: 58, value: '19:00-21:00' },
+                                                        ]
+                                                    }
+                                                    this.setState({
+                                                        timeArr,
+                                                        checkTimeArr: []
+                                                    })
+                                                })
+                                            }}
+                                        >
+                                            <Option value='30分钟'>30分钟</Option>
+                                            <Option value='60分钟'>60分钟</Option>
+                                            <Option value='90分钟'>90分钟</Option>
+                                            <Option value='120分钟'>120分钟</Option>
+                                        </Select>
+                                    </div>
+                                    <div className='goods-modal-header'>
+                                        <span className='goods-modal-body-span'>可预约时间</span>
+                                        <Select
+                                            placeholder='请选择可预约时间'
+                                            style={{ width: 500 }}
+                                            defaultValue={checkTimeArr}
+                                            value={checkTimeArr}
+                                            mode="multiple"
+                                            optionLabelProp="label"
+                                            onChange={(value, label) => {
+                                                console.log(value)
+                                                this.setState({
+                                                    checkTimeArr: value
+                                                })
+                                            }}
+                                        >
+                                            {timeArr.map(item => {
+                                                return (
+                                                    <Option key={item.id} label={item.value} value={item.value}>{item.value}</Option>
+                                                )
+                                            })}
+                                        </Select>
+                                    </div>
+                                    <div className='goods-modal-header'>
+                                        <span className='goods-modal-body-span'>服务人数上限</span>
+                                        <InputNumber
+                                            className="goods-modal-body-input"
+                                            min={1}
+                                            max={10}
+                                            value={servicePlepeo}
+                                            style={{ width: 250 }}
+                                            onChange={e => this.setState({ servicePlepeo: e })}
+                                        />
+                                    </div>
                                 </div>
                                 : null
                         }
 
-                        <div style={{ margin: '10px 39px' }}>
-                            <span className='integralSpan'>员工提成</span>
-                            <div className="integral">
-                                <Input
-                                    className="commission"
-                                    placeholder="请输入整数"
-                                    value={royaltyRate}
-                                    onChange={e => this.setRoyaltyRate(e)}
-                                />
-                                <span style={{ fontSize: 18 }}>%</span>
+                        <div className='goods-modal-body-item'>
+                            <span className='goods-modal-body-span'>项目分类</span>
+                            <Select
+                                className="goods-modal-body-input"
+                                value={goodsClass}
+                                onChange={e => this.setState({ goodsClass: e })}
+                            >
+                                {
+                                    classList.map(item =>
+                                        <Option key={item.id} value={item.id}>{item.cateName}</Option>
+                                    )
+                                }
+                            </Select>
+                        </div>
+
+                        <div className="goods-modal-body-item">
+                            <span className="goods-modal-body-span">项目名称</span>
+                            <Input
+                                className="goods-modal-body-input"
+                                placeholder="请输入项目名称"
+                                value={goodsName}
+                                onChange={e => this.setState({ goodsName: e.target.value })}
+                            />
+                        </div>
+                        <div className="goods-modal-header">
+                            <span className="goods-modal-body-span">项目图片</span>
+                            <div className="goods-modal-body-image">
+                                <Upload
+                                    listType="picture-card"
+                                    showUploadList={false}
+                                    action="http://47.108.174.202:9010/upload/files-upload"
+                                    onChange={this.uploadGoodsImage}
+                                >
+                                    {goodsImage === null
+                                        ? uploadButtonA
+                                        : <img src={goodsImage} alt="photos" className='fItemConimg' />}
+                                </Upload>
                             </div>
                         </div>
 
-                        <div style={{ width: '90%', margin: '0 auto' }} className='itemDirecte'>
-                            <span className='gmiLabel'>产品详情</span>
-                            <TextArea rows={6} style={{ width: '70%' }}
-                                value={stageRemarks}
-                                onChange={e => this.setState({ stageRemarks: e.target.value })} />
+                        <div className={integral === 1 ? 'goods-modal-body-item' : 'goods-modal-header'}>
+                            <span className="goods-modal-body-span">积分抵扣</span>
+                            <Radio.Group
+                                value={integral}
+                                onChange={e => this.setState({ integral: e.target.value })}>
+                                <Radio value={1}>开启</Radio>
+                                <Radio value={0}>关闭</Radio>
+                            </Radio.Group>
                         </div>
-                    </Modal>
-                    {/* 开启拼团模态框 */}
-                    <Modal
-                        visible={isSpellGroup}
-                        onCancel={() => this.setState({ isSpellGroup: false })}
-                        onOk={this.addSpellGroup}
-                        width={800}
-                        okText='确定'
-                        cancelText="取消"
-                        title="开启拼团"
-                    >
-                        <div style={{ width: '80%', margin: '0 auto' }}>
-                            <div className="spellItem">
-                                <span className="spellSpan">拼团名称</span>
-                                <Input
-                                    className="spellInput"
-                                    value={spellName}
-                                    allowClear={false}
-                                    onChange={e => this.setState({ spellName: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="spellItem">
-                                <span className="spellSpan">拼团时效</span>
-                                <Input
-                                    className="spellInput"
-                                    value={spellTime}
-                                    allowClear={false}
-                                    onChange={e => this.setState({ spellTime: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="spellItem">
-                                <span className="spellSpan">拼团开始时间</span>
-                                <DatePicker
-                                    locale={locale}
-                                    style={{ marginRight: 10 }}
-                                    allowClear={false}
-                                    onChange={this.getStartDate}
-                                />
-                                <TimePicker
-                                    locale={locale}
-                                    allowClear={false}
-                                    onChange={this.getStartTime}
-                                />
-                            </div>
-
-                            <div className="spellItem">
-                                <span className="spellSpan">拼团结束时间</span>
-                                <DatePicker
-                                    locale={locale}
-                                    allowClear={false}
-                                    style={{ marginRight: 10 }}
-                                    onChange={this.getEndDate}
-                                />
-                                <TimePicker
-                                    locale={locale}
-                                    allowClear={false}
-                                    onChange={this.getEndTime}
-                                />
-                            </div>
-
-                            {/* <div className="spellItem">
-                                <span className="spellSpan">服务时间段</span>
-                                <RangePicker
-                                    locale={locale}
-                                    // showTime={{ format: 'HH'}}
-                                    format="YYYY-MM-DD"
-                                    onChange={this.service}
-                                    value={moment[serviceStartTime,serviceEndTime]}
-                                />
-                            </div> */}
-
-                            <div className="spellItem">
-                                <span className="spellSpan">产品图片</span>
-                                <div className="spellItemImage">
-                                    <Upload
-                                        listType="picture-card"
-                                        showUploadList={false}
-                                        action="http://47.108.174.202:9010/upload/files-upload"
-                                        onChange={this.uploadSpellImage}
-                                    >
-                                        {spellImage === null
-                                            ? uploadButtonA
-                                            : <img src={spellImage} alt="photos" className='fItemConimg' />}
-                                    </Upload>
-                                </div>
-                            </div>
-
-                            <div className="spellItem">
-                                <div className="timeItem">
-                                    <span className="smallSpan">原价</span>
+                        {
+                            integral === 1
+                                ? <div className="goods-modal-body-item">
+                                    <span className="goods-modal-body-span">可抵积分</span>
                                     <Input
-                                        disabled={true}
-                                        className="smallInput"
-                                        value={originalPrice}
-                                    // onChange={e => this.setState({ spellPrice: e.target.value })}
-                                    />
-                                </div>
-                                <div className="timeItem">
-                                    <span className="smallSpan">拼团折扣</span>
-                                    <Input
-                                        className="smallInput"
-                                        placeholder="请输入两位小数，例如0.85"
-                                        value={spellDiscount}
-                                        onChange={e => this.setDiscount(e)}
+                                        className="goods-modal-body-input"
+                                        placeholder="请输入项目价格"
+                                        value={intNum}
+                                        onChange={e => this.setState({ intNum: e.target.value })}
                                         onBlur={() => {
-                                            if (this.state.spellDiscount) {
-                                                if (!/^\d+(\.\d{0,2})?$/.test(this.state.spellDiscount)) {
-                                                    message.warning('折扣请正确输入两位小数')
-                                                    this.setState({
-                                                        spellDiscount: '',
-                                                        spellPrice: ''
-                                                    })
-                                                }
+                                            if (/^([0-9][0-9]*)$/.test(this.state.intNum)) {
+
+                                            } else {
+                                                message.warning('请输入整数')
+                                                this.setState({ intNum: null })
                                             }
                                         }}
                                     />
                                 </div>
-                            </div>
+                                : null
+                        }
 
-                            <div className="spellItem">
-                                <div className="timeItem">
-                                    <span className="smallSpan">拼团价</span>
-                                    <Input
-                                        disabled={true}
-                                        className="smallInput"
-                                        placeholder="请输入拼团折扣"
-                                        value={spellPrice}
-                                    // onChange={e => this.setState({ spellPrice: e.target.value })}
-                                    />
-                                </div>
-                                <div className="timeItem">
-                                    <span className="smallSpan">拼团人数</span>
-                                    <Input
-                                        className="smallInput"
-                                        value={spellPeople}
-                                        onChange={e => this.setState({ spellPeople: e.target.value })}
-                                    />
-                                </div>
-                            </div>
+                        <div className="goods-modal-body-item">
+                            <span className="goods-modal-body-span">项目价格</span>
+                            <Input
+                                className="goods-modal-body-input"
+                                placeholder="请输入项目价格"
+                                value={goodsPrice}
+                                onChange={e => this.setState({ goodsPrice: e.target.value })}
+                            />
+                        </div>
+                        <div className="goods-modal-body-item">
+                            <span className="goods-modal-body-span">虚拟销量</span>
+                            <Input
+                                className="goods-modal-body-input"
+                                placeholder="请输入虚拟销量"
+                                value={goodsSales}
+                                onChange={e => this.setState({ goodsSales: e.target.value })}
+                            />
+                        </div>
 
-                            <div className="spellItem">
-                                <div className="timeItem">
-                                    <span className="smallSpan">库存</span>
-                                    <Input
-                                        className="smallInput"
-                                        value={spellStock}
-                                        onChange={e => this.setState({ spellStock: e.target.value })}
-                                    />
-                                </div>
-                                <div className="timeItem">
-                                    <span className="smallSpan">销量</span>
-                                    <Input
-                                        className="smallInput"
-                                        value={spellSales}
-                                        onChange={e => this.setState({ spellSales: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="spellItem">
-                                <div className="timeItem">
-                                    <span className="smallSpan">邮费</span>
-                                    <Input
-                                        className="smallInput"
-                                        value={spellPostage}
-                                        onChange={e => this.setState({ spellPostage: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="timeItem">
-                                    <span className="smallSpan">活动状态</span>
-                                    <div className="spellIsShow">
-                                        <Radio.Group value={spellIsShow} onChange={e => this.setState({ spellIsShow: e.target.value })}>
-                                            <Radio value={1}>开启</Radio>
-                                            <Radio value={0}>关闭</Radio>
-                                        </Radio.Group>
+                        {
+                            goodsType === 1
+                                ? <div>
+                                    <div className="goods-modal-body-item">
+                                        <span className="goods-modal-body-span">项目邮费</span>
+                                        <Input
+                                            className="goods-modal-body-input"
+                                            placeholder="请输入项目邮费"
+                                            value={goodsPostage}
+                                            onChange={e => this.setState({ goodsPostage: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="goods-modal-body-item">
+                                        <span className="goods-modal-body-span">项目库存</span>
+                                        <Input
+                                            className="goods-modal-body-input"
+                                            placeholder="请输入项目库存"
+                                            value={goodsStock}
+                                            onChange={e => this.setState({ goodsStock: e.target.value })}
+                                        />
                                     </div>
                                 </div>
-                            </div>
+                                : null
+                        }
 
-                            <div className="spellItem">
-                                <span className="spellSpan areaSpan">拼团内容</span>
-                                <TextArea
+                        <div className="goods-modal-body-item">
+                            <span className="goods-modal-body-span">员工提成</span>
+                            <Input
+                                className="goods-modal-body-input"
+                                placeholder="请输入整数"
+                                value={goodsRoyaltyRate}
+                                onChange={e => this.setState({ goodsRoyaltyRate: e.target.value })}
+                                onBlur={() => {
+                                    if (this.state.goodsRoyaltyRate) {
+                                        if (!(/^[0-9][0-9]{0,1}$/.test(this.state.goodsRoyaltyRate))) {
+                                            message.warning('请输入1-99的整数')
+                                            this.setState({ goodsRoyaltyRate: '' })
+                                        }
+                                    }
+                                }}
+                            />
+                            <span style={{ fontSize: 18 }}>%</span>
+                        </div>
+
+                        <div className="goods-modal-header">
+                            <span className="goods-modal-body-span" style={{ verticalAlign: 'top' }}>项目详情</span>
+                            <TextArea rows={6} style={{ width: '70%' }}
+                                value={goodsRemarks}
+                                onChange={e => this.setState({ goodsRemarks: e.target.value })} />
+
+                        </div>
+                    </div>
+                </Modal>
+
+                {/* 开启拼团模态框 */}
+                <Modal
+                    visible={isSpellGroup}
+                    onCancel={() => this.setState({ isSpellGroup: false })}
+                    onOk={this.addSpellGroup}
+                    width={800}
+                    okText='确定'
+                    cancelText="取消"
+                    title="开启拼团"
+                >
+                    <div style={{ width: '80%', margin: '0 auto' }}>
+                        <div className="spellItem">
+                            <span className="spellSpan">拼团项目类型</span>
+                            <Input
+                                className="spellInput"
+                                value={goodsType === 0 ? '服务类' : '实物类'}
+                                disabled={true}
+                            />
+                        </div>
+                        <div className="spellItem">
+                            <span className="spellSpan">拼团名称</span>
+                            <Input
+                                className="spellInput"
+                                value={spellName}
+                                onChange={e => this.setState({ spellName: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="spellItem">
+                            <span className="spellSpan">拼团开始时间</span>
+                            <DatePicker
+                                locale={locale}
+                                style={{ marginRight: 10 }}
+                                allowClear={false}
+                                onChange={this.getStartDate}
+                            />
+                            <TimePicker
+                                locale={locale}
+                                allowClear={false}
+                                onChange={this.getStartTime}
+                            />
+                        </div>
+
+                        <div className="spellItem">
+                            <span className="spellSpan">拼团结束时间</span>
+                            <DatePicker
+                                locale={locale}
+                                allowClear={false}
+                                style={{ marginRight: 10 }}
+                                onChange={this.getEndDate}
+                            />
+                            <TimePicker
+                                locale={locale}
+                                allowClear={false}
+                                onChange={this.getEndTime}
+                            />
+                        </div>
+
+                        <div className="spellItem">
+                            <span className="spellSpan">产品图片</span>
+                            <div className="spellItemImage">
+                                <Upload
+                                    listType="picture-card"
+                                    showUploadList={false}
+                                    action="http://47.108.174.202:9010/upload/files-upload"
+                                    onChange={this.uploadSpellImage}
+                                >
+                                    {spellImage === null
+                                        ? uploadButtonA
+                                        : <img src={spellImage} alt="photos" className='fItemConimg' />}
+                                </Upload>
+                            </div>
+                        </div>
+
+                        <div className="spellItem">
+                            <div className="timeItem">
+                                <span className="smallSpan">原价</span>
+                                <Input
+                                    disabled={true}
                                     className="smallInput"
-                                    rows={4}
-                                    placeholder="请输入拼团内容及描述"
-                                    value={spellDescription}
-                                    onChange={e => this.setState({ spellDescription: e.target.value })}
+                                    value={originalPrice}
+                                />
+                            </div>
+                            <div className="timeItem">
+                                <span className="smallSpan">拼团折扣</span>
+                                <Input
+                                    className="smallInput"
+                                    placeholder="请输入两位小数，例如0.85"
+                                    value={spellDiscount}
+                                    onChange={e => this.setDiscount(e)}
+                                    onBlur={() => {
+                                        if (this.state.spellDiscount) {
+                                            if (!/^\d+(\.\d{0,2})?$/.test(this.state.spellDiscount)) {
+                                                message.warning('折扣请正确输入两位小数')
+                                                this.setState({
+                                                    spellDiscount: '',
+                                                    spellPrice: ''
+                                                })
+                                            }
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="spellItem">
+                            <div className="timeItem">
+                                <span className="smallSpan">拼团价</span>
+                                <Input
+                                    disabled={true}
+                                    className="smallInput"
+                                    placeholder="请输入拼团折扣"
+                                    value={spellPrice}
+                                />
+                            </div>
+                            <div className="timeItem">
+                                <span className="smallSpan">拼团人数</span>
+                                <Input
+                                    className="smallInput"
+                                    value={spellPeople}
+                                    onChange={e => this.setState({ spellPeople: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="spellItem">
+                            <div className="timeItem">
+                                <span className="smallSpan">库存</span>
+                                <Input
+                                    placeholder="请输入库存"
+                                    className="smallInput"
+                                    value={spellStock}
+                                    onChange={e => this.setState({ spellStock: e.target.value })}
+                                />
+                            </div>
+                            <div className="timeItem">
+                                <span className="smallSpan">邮费</span>
+                                <Input
+                                    className="smallInput"
+                                    value={spellPostage}
+                                    onChange={e => this.setState({ spellPostage: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="spellItem">
+
+                            <div className="timeItem">
+                                <span className="smallSpan">销量</span>
+                                <Input
+                                    className="smallInput"
+                                    value={spellSales}
+                                    onChange={e => this.setState({ spellSales: e.target.value })}
                                 />
                             </div>
 
                         </div>
 
-                    </Modal>
+                        <div className="spellItem">
+                            <span className="spellSpan areaSpan">拼团内容</span>
+                            <TextArea
+                                className="smallInput"
+                                rows={4}
+                                placeholder="请输入拼团内容及描述"
+                                value={spellDescription}
+                                onChange={e => this.setState({ spellDescription: e.target.value })}
+                            />
+                        </div>
+
+                    </div>
+
+                </Modal>
+
+                <div className='goods-header'>
+                    <span>线上项目</span>
                 </div>
-            </div>
+
+                <div style={{ margin: 20, marginBottom: 0 }}>
+                    <span
+                        className={goodsType === 0 ? 'goods-check-type' : 'goods-not-check-type'}
+                        onClick={() => this.setState({ goodsType: 0, goodsTable: 1 }, () => this.getGoods())}
+                    >服务类</span>
+                    <span
+                        className={goodsType === 1 ? 'goods-check-type' : 'goods-not-check-type'}
+                        onClick={() => this.setState({ goodsType: 1, goodsTable: 1 }, () => this.getGoods())}
+                    >实物类</span>
+                </div>
+
+                <div className="goods-body">
+                    <div className='goods-class'>
+                        <span
+                            className={goodsTable === 1 ? 'goods-check-class' : 'goods-not-check-calss'}
+                            onClick={() => this.setState({ goodsTable: 1 }, () => this.getGoods())}
+                        >出售中</span>
+                        <span
+                            className={goodsTable === 0 ? 'goods-check-class' : 'goods-not-check-calss'}
+                            onClick={() => this.setState({ goodsTable: 0 }, () => this.getGoods())}
+                        >待上架</span>
+                        <span
+                            className={goodsTable === 3 ? 'goods-check-class' : 'goods-not-check-calss'}
+                            onClick={() => this.setState({ goodsTable: 3 }, () => this.getGoods())}
+                        >回收站</span>
+                    </div>
+
+                    <div className="goods-search">
+                        <Input
+                            className="goods-search-input"
+                            value={searchVal}
+                            onChange={e => this.setState({ searchVal: e.target.value })}
+                            placeholder="输入项目名搜索"
+                        />
+                        <span className="goods-search-btn" onClick={this.search}>搜索</span>
+                        <span className="goods-search-refresh"
+                            onClick={() => this.setState({ searchVal: '' }, () => this.getGoods())}>刷新</span>
+
+                        <div className="goods-search-add" onClick={this.addGoods}>
+                            <PlusOutlined className="goods-search-add-icon" />
+                            <span className="goods-search-add-span">新增线上项目</span>
+                        </div>
+                        <Select
+                            className="goods-search-class"
+                            value={classify}
+                            onChange={e => this.setState({ classify: e }, () => this.getGoods())}
+                        >
+                            <Option value="">全部</Option>
+                            {
+                                classList.map(item =>
+                                    <Option key={item.id} value={item.id}>{item.cateName}</Option>
+                                )
+                            }
+                        </Select>
+                    </div>
+                    <Table
+                        style={{ width: '100%' }}
+                        columns={columns}
+                        dataSource={data}
+                        locale={{ emptyText: emptyText }}
+                        loading={loading}
+                        pagination={{
+                            pageSize: 10,
+                            position: ['bottomLeft'],
+                            onChange: (page, pageSize) => {
+                                console.log('page：', page)
+                                this.setState({
+                                    loading: true,
+                                    servicePage: page
+                                }, () => this.getGoods())
+                            },
+                            current: servicePage,
+                            total: data.length
+                        }}
+                    />
+                </div>
+            </div >
         )
     }
 }
-
-export default Goods

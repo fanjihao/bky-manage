@@ -63,7 +63,6 @@ export default class Spell extends Component {
     getSpellList = () => {
         const { searchVal } = this.state
         const id = JSON.parse(localStorage.getItem('user')).id
-        console.log(id)
         this.setState({ loading: true })
         axios({
             method: 'GET',
@@ -203,7 +202,7 @@ export default class Spell extends Component {
             || spellDescription === '' || spellDiscount === '' || spellName === ''
             || spellImage === '' || spellPeople === '' || spellSales === ''
             || spellStock === '' || spellPostage === '') {
-                message.warning('请确认信息填写完整！')
+            message.warning('请确认信息填写完整！')
         } else {
             axios({
                 method: 'PUT',
@@ -243,10 +242,10 @@ export default class Spell extends Component {
 
     }
     // 删除拼团商品
-    delSpellGroup = data => {
+    delSpellGroup = id => {
         axios({
             method: 'DELETE',
-            url: `/api/yxStoreCombination/${data.id}`
+            url: `/api/yxStoreCombination/${id}`
         })
             .then(res => {
                 console.log('删除拼团商品成功', res)
@@ -310,77 +309,87 @@ export default class Spell extends Component {
                 key: 'image',
                 dataIndex: 'image',
                 render: text => (
-                    <Image src={text} width={50} />
+                    <img src={text} width={50} />
                 ),
                 align: 'center',
                 width: 100
-            }, {
+            },
+            {
                 title: '拼团名称',
                 key: 'title',
                 dataIndex: 'title',
                 align: 'center',
                 width: 100
-            }, {
+            },
+            {
                 title: '参团人数',
                 key: 'people',
                 dataIndex: 'people',
                 align: 'center',
                 width: 100
-            }, {
+            },
+            {
                 title: '拼团价',
                 key: 'price',
                 dataIndex: 'price',
                 align: 'center',
                 width: 100
-            }, {
+            },
+            {
                 title: '库存',
                 key: 'stock',
                 dataIndex: 'stock',
                 align: 'center',
                 width: 80
-            }, {
+            },
+            {
                 title: '参与人数',
                 key: 'countPeopleAll',
                 dataIndex: 'countPeopleAll',
                 align: 'center',
                 width: 100
-            }, {
+            },
+            {
                 title: '成团数量',
                 key: 'countPeopleBrowse',
                 dataIndex: 'countPeopleBrowse',
                 align: 'center',
                 width: 100
-            }, {
+            },
+            {
                 title: '访客人数',
                 key: 'countPeoplePink',
                 dataIndex: 'countPeoplePink',
                 align: 'center',
                 width: 100
-            }, {
-                title: '状态',
-                key: 'isShow',
-                dataIndex: 'isShow',
-                render: (text, record) => text === 1
-                    ? <span className="spellListSpanA" onClick={() => this.setState({
-                        title: '确认进行【下架】操作',
-                        visible: true,
-                        spellIsShow: 0,
-                        ID: record.id
-                    })}>已开启</span>
-                    : <span className="spellListSpanB" onClick={() => this.setState({
-                        title: '确认进行【上架】操作',
-                        visible: true,
-                        spellIsShow: 1,
-                        ID: record.id
-                    })}>已关闭</span>,
-                align: 'center'
-            }, {
+            },
+            // {
+            //     title: '状态',
+            //     key: 'isShow',
+            //     dataIndex: 'isShow',
+            //     render: (text, record) => text === 1
+            //         ? <span className="spellListSpanA" onClick={() => this.setState({
+            //             title: '确认进行【下架】操作',
+            //             visible: true,
+            //             spellIsShow: 0,
+            //             ID: record.id
+            //         })}>已开启</span>
+            //         : <span className="spellListSpanB" onClick={() => this.setState({
+            //             title: '确认进行【上架】操作',
+            //             visible: true,
+            //             spellIsShow: 1,
+            //             ID: record.id
+            //         })}>已关闭</span>,
+            //     align: 'center'
+            // },
+            {
                 title: '结束时间',
                 key: 'endTimeDate',
                 dataIndex: 'endTimeDate',
                 align: 'center',
                 width: 200
-            }, {
+            },
+            {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => (
@@ -388,7 +397,7 @@ export default class Spell extends Component {
                         <Button type="primary" style={{ marginRight: 10 }} onClick={() => this.editSpell(record)}>编辑</Button>
                         <Popconfirm
                             title="请您确认是否删除?"
-                            onConfirm={() => this.delSpellGroup(record)}
+                            onConfirm={() => this.delSpellGroup(record.id)}
                             okText="是"
                             cancelText="否"
                         >
@@ -400,7 +409,6 @@ export default class Spell extends Component {
                 align: 'center'
             },
         ]
-        console.log(startDate)
 
         const uploadButtonA = (
             <div>
@@ -421,11 +429,17 @@ export default class Spell extends Component {
                         value={searchVal}
                         onChange={e => this.setState({ searchVal: e.target.value })}
                     />
-                    <div className='spell-searchBtn search-btn' onClick={this.getSpellList}>
+                    <div className='spell-searchBtn search-btn' onClick={() => {
+                        if(this.state.searchVal === ''){
+                            message.warning('请先输入搜索内容!')
+                        }else{
+                            this.getSpellList()
+                        }
+                    }}>
                         <SearchOutlined />
                         <span>搜索</span>
                     </div>
-                    <div className="spell-refresh" onClick={this.getSpellList}>
+                    <div className="spell-refresh" onClick={() => this.setState({searchVal: ''},() => this.getSpellList())}>
                         <SyncOutlined />
                         <span>刷新</span>
                     </div>
@@ -458,7 +472,7 @@ export default class Spell extends Component {
                             />
                         </div>
 
-                        <div className="spellItem">
+                        {/* <div className="spellItem">
                             <span className="spellSpan">拼团时效</span>
                             <Input
                                 className="spellInput"
@@ -466,7 +480,7 @@ export default class Spell extends Component {
                                 allowClear={false}
                                 onChange={e => this.setState({ spellTime: e.target.value })}
                             />
-                        </div>
+                        </div> */}
 
                         <div className="spellItem">
                             <span className="spellSpan">拼团开始时间</span>

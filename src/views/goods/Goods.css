@@ -1,7 +1,4 @@
-.goods{
-    font-weight: normal;
-}
-.goodsHeaderTop{
+.goods-header{
     width: 100%;
     height: 50px;
     background-color: #e6e6e6;
@@ -9,172 +6,149 @@
     padding: 0 0 0 20px;
     text-align: left;
 }
-.goodsHeaderBody{
-    width: 98%;
-    margin: 0 auto;
-    height: 100px;
-    padding: 25px 0;
+.goods-body{
+    padding: 20px;
 }
-.ghBodyBtn{
-    height: 44px;
-    display: inline-block;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-right: 20px;
+.goods-class{
+    border: 1px solid #E6E6E6;
     border-radius: 3px;
-    width: 120px;
+}
+.goods-check-class{
+    display: inline-block;
+    width: 100px;
     text-align: center;
-}
-.goodsActive{
-    height: 44px;
-    display: inline-block;
-    padding: 10px;
-    color: white;
-    background-color: #1089EB;
-    margin-right: 20px;
-    border-radius: 3px;
-    width: 120px;
-    text-align: center;
-    cursor: pointer;
-}
-.ghBodyBtn:hover{
-    cursor: pointer;
-}
-.goodsBody{
-    width: 98%;
-    border: 1px solid #ccc;
-    margin: 0 auto;
-    border-radius: 5px;
-}
-.goodsBodyTab{
-    width: 100%;
-    border-bottom: 1px solid #ccc;
-}
-.gbTabBtn{
-    height: 45px;
-    display: inline-block;
-    line-height: 45px;
-    border-right: 1px #ccc solid;
-    padding: 0 20px;
-}
-.gtActive:hover,.gbTabBtn:hover{
-    cursor: pointer;
-}
-.gtActive{
-    height: 45px;
-    display: inline-block;
-    line-height: 45px;
-    border-right: 1px #ccc solid;
-    padding: 0 20px;
-    border-bottom: 2px solid #1089EB;
+    height: 40px;
+    line-height: 40px;
     color: #1089EB;
-    box-sizing: content-box;
+    border-right: 1px solid #E4E7ED;
+    border-bottom: 2px solid #1089EB;
+    cursor: pointer;
 }
-.gbTableTop{
-    width: 98%;
-    height: 100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-}
-.tableGoodsImg{
-    width: 70px;
-    height: 70px;
-    border: 1px solid #e6e6e6;
-}
-.tableGoodsImg img{
-    width: 100%;
-    height: 100%;
-}
-.goodsModalItem{
-    width: 90%;
-    height: 40px;
-    margin: 10px auto;
-    line-height: 40px;
-}
-.goodsModalImg{
-    width: 90%;
-    height: 100px;
-    margin: 10px auto;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-.gmiLabel{
-    width: 15%;
+.goods-not-check-calss{
+    display: inline-block;
+    width: 100px;
+    text-align: center;
     height: 40px;
     line-height: 40px;
-    display: inline-block;
-    text-align: right;
-    margin-right: 10px;
-    vertical-align: top;
+    color: #666666;
+    border-right: 1px solid #E4E7ED;
+    cursor: pointer;
 }
-.littleitem{
-    width: 33%;
+.goods-search-input{
+    width: 150px;
+    margin: 10px;
     height: 40px;
+    margin-left: 0;
+}
+.goods-search-btn{
     display: inline-block;
-}
-.littleitem input{
-    width: 50%;
-}
-.littleLabel{
-    width: 45%;
+    width: 80px;
+    text-align: center;
     height: 40px;
     line-height: 40px;
+    color: white;
+    background-color: #13CE66;
+    margin: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.goods-search-refresh{
     display: inline-block;
-    text-align: right;
-    margin-right: 10px;
+    width: 80px;
+    text-align: center;
+    height: 40px;
+    line-height: 40px;
+    color: white;
+    background-color: #FF6D6D;
+    margin: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+
 }
-.gmiImg{
-    width: 90px;
-    height: 90px;
-    border: 1px solid;
-    margin-right: 10px;
+.goods-search-add{
+    display: inline-block;
+    width: 150px;
+    height: 40px;
+    line-height: 40px;
+    background-color: #1089EB;
+    color: white;
+    margin: 10px;
+    border-radius: 3px;
+    cursor: pointer;
 }
-.itemDirecte{
-    width: 90%;
-    margin: 0 auto 20px;
-    display: flex;
+.goods-search-add-icon{
+    width: 40px;
+    text-align: center;
 }
-.xiajiaBtn{
-    display: none;
-    position: absolute;
-    top: 40px;
-    left: 0;
+.goods-search-add-span{
+    width: 110px;
+    text-align: center;
 }
-.statusPart{
-    position: relative;
+.goods-search-class{
+    width: 150px;
+    margin-left: 10px;
+    text-align: center;
+}
+.goods-table-image{
+    width: 50px;
     height: 50px;
 }
-.statusPart>div{
-    overflow: hidden;
+.goods-modal-installment{
+    width: 100%;
 }
-.statusPart:hover .xiajiaBtn{
+.goods-modal-header{
+    margin-bottom: 10px;
+}
+.goods-modal-header-span{
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    width: 100px;
+    text-align: left;
+}
+.goods-modal-body-span{
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    width: 100px;
+    text-align: left;
+}
+.goods-modal-body-input{
+    width: 150px;
+    height: 40px;
+}
+.goods-modal-body-item{
+    margin-bottom: 10px;
+    width: 50%;
     display: inline-block;
 }
-.avatar-uploader>.ant-upload{
-    border-radius: 5px;
+.goods-modal-body-image{
+    display: inline-block;
 }
-.avatar-uploader{
-    width: 85%;
+.goods-stageDetailInfo{
+    border: 1px dashed red;
 }
-.uploadDiv{
-    width: 100px;
-    height: 100px;
+.goods-not-check-type{
+    display: inline-block;
+    width: 145px;
     text-align: center;
-    line-height: 100px;
+    height: 50px;
+    line-height: 50px;
+    border: 1px solid #E6E6E6;
+    border-radius: 3px;
+    margin-right: 20px;
     cursor: pointer;
-    font-style:normal;
 }
-.goodsCate{
-    width:100px;
-    height:30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 3px;
-}
-.goodsCate:hover{
+.goods-check-type{
+    display: inline-block;
+    width: 145px;
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+    background-color: #1089EB;
+    color: white;
+    border-radius: 3px;
+    margin-right: 20px;
     cursor: pointer;
 }
 .spellItem{
@@ -226,20 +200,4 @@
 }
 .areaSpan{
     float: left;
-}
-.integral{
-    display: inline-block;
-}
-.integralSpan{
-    display: inline-block;
-    width: 105px;
-    height: 40px;
-    line-height: 40px;
-    text-align: right;
-    margin-right: 10px;
-}
-.commission{
-    display: inline-block;
-    width: 100px;
-    margin-right: 10px;
 }

@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import '../custom/Custom.css'
-import { Button, Input, Table, Modal, Popover, Select, message, DatePicker } from 'antd'
+import {
+    Button, Input, Table, Modal, Popover, Select,
+    message, DatePicker, Space, Popconfirm
+} from 'antd'
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons'
 import axios from '../../http'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
@@ -15,7 +18,7 @@ class Custom extends Component {
         // 所有客户数据
         data: [],
         // 搜索框数据
-        searchValue: null,
+        searchValue: '',
         // 新增客户信息弹框
         customAdd: false,
         // 新增内美辽师
@@ -85,27 +88,31 @@ class Custom extends Component {
     search = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { searchValue, selectLevel } = this.state
-        axios({
-            method: 'GET',
-            url: '/client',
-            params: {
-                parm: searchValue,
-                enterId: user.id,
-                clientLevel: selectLevel
-            }
-        })
-            .then(res => {
-                console.log('搜索成功', res)
-                let newData = res.data.data
-                for (let i = 0; i < newData.length; i++) {
-                    newData[i].key = i + 1
+        if (searchValue === '') {
+            message.warning('请先输入搜索内容!')
+        } else {
+            axios({
+                method: 'GET',
+                url: '/client',
+                params: {
+                    parm: searchValue,
+                    enterId: user.id,
+                    clientLevel: selectLevel
                 }
-                console.log(newData)
-                this.setState({ data: newData })
             })
-            .catch(err => {
-                console.log('搜索失败', err)
-            })
+                .then(res => {
+                    console.log('搜索成功', res)
+                    let newData = res.data.data
+                    for (let i = 0; i < newData.length; i++) {
+                        newData[i].key = i + 1
+                    }
+                    console.log(newData)
+                    this.setState({ data: newData })
+                })
+                .catch(err => {
+                    console.log('搜索失败', err)
+                })
+        }
     }
     // 获取员工信息
     getEmploy = () => {
@@ -301,6 +308,27 @@ class Custom extends Component {
         console.log(birth)
         this.setState({ birth: birth })
     }
+    // 删除客户
+    delCustom = id => {
+        axios({
+            method: 'DELETE',
+            url: `/client?clientId=${id}`,
+            // data: {
+            //     clientId: id
+            // }
+        })
+            .then(res => {
+                console.log('删除客户成功', res)
+                if (res.data.status === 200) {
+                    this.getAllCustom()
+                } else {
+                    message.error(res.data.message)
+                }
+            })
+            .catch(err => {
+                console.log('删除客户失败', err)
+            })
+    }
 
     render = () => {
         const { loading, data, searchValue, customAdd,
@@ -380,17 +408,27 @@ class Custom extends Component {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => (
-                    <Button type="primary" onClick={() =>
-                        this.setState({
-                            customEdit: true,
-                            customId: record.id,
-                            name: record.name,
-                            userPhone: record.userPhone,
-                            employ: record.staff,
-                            level: record.level,
-                            birth: record.birthday
-                        })
-                    }>修改</Button>
+                    <Space>
+                        <Button type="primary" onClick={() =>
+                            this.setState({
+                                customEdit: true,
+                                customId: record.id,
+                                name: record.name,
+                                userPhone: record.userPhone,
+                                employ: record.staff,
+                                level: record.level,
+                                birth: record.birthday
+                            })
+                        }>修改</Button>
+                        <Popconfirm
+                            title="请您确认是否删除?"
+                            onConfirm={() => this.delCustom(record.id)}
+                            okText="是"
+                            cancelText="否"
+                        >
+                            <Button type="primary" danger>删除</Button>
+                        </Popconfirm>
+                    </Space>
                 ),
                 align: 'center'
             }
@@ -457,6 +495,10 @@ class Custom extends Component {
                             onChange={e => this.setState({ searchValue: e.target.value })}
                         />
                         <div className='search-btn' onClick={this.search}><SearchOutlined />搜索</div>
+
+                        <span className="goods-search-refresh"
+                            onClick={() => this.setState({ searchValue: '' }, () => this.getAllCustom())}>刷新</span>
+
                         <div className='add-btn' onClick={() =>
                             this.setState({
                                 customAdd: true,
@@ -601,7 +643,7 @@ class Custom extends Component {
                                 locale={locale}
                                 allowClear={false}
                                 onChange={this.getBirth}
-                                value={birth ? moment(birth,'YYYY-MM-DD') : birth}
+                                value={birth ? moment(birth, 'YYYY-MM-DD') : birth}
                             />
                         </div>
                         <div className="addCustomItem">

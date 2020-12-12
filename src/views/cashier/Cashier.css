@@ -48,10 +48,10 @@
     color: #1089eb;
 }
 .goodsBody{
-    width: 96%;
     border: 1px solid #ccc;
-    margin: 0 auto;
     border-radius: 5px;
+    margin: 0 20px;
+    
 }
 .goodsBodyTab{
     width: 100%;
@@ -116,15 +116,16 @@
     margin-right: 10px;
 }
 .daochu-btn{
+    display: inline-block;
     width: 100px;
-    height: 35px;
-    line-height: 35px;
+    height: 40px;
+    line-height: 40px;
     text-align: center;
     border-radius: 3px;
     background-color: orange;
     color:white;
-    margin-right: 10px;
     cursor: pointer;
+    margin-left: 10px;
 }
 .search-btn:hover, .daochu-btn:hover{
     cursor: pointer;
@@ -142,7 +143,6 @@
 .goods-item-img{
     width: 50px;
     height: 50px;
-    border: 1px solid #eee;
 }
 .input-box{
     width: 150px;

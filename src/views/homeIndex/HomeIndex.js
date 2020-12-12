@@ -740,7 +740,7 @@ class HomeIndex extends Component {
                     </div>
 
                     <div className="homeIndex-online">
-                        <div className="homeIndex-onlineTitle">
+                        {/* <div className="homeIndex-onlineTitle">
                             <span>线上商品统计：</span>
                             <span className="homeIndex-renderDate">{startTime}至{endTime}</span>
                         </div>
@@ -753,7 +753,7 @@ class HomeIndex extends Component {
                                 <span className="stagePrice">{onlineData.stageMoney}</span>
                                 <span className="stageUnit">元</span>
                             </div>
-                        </div>
+                        </div> */}
                         {/* 店铺信息 */}
                         <div className="storeInfo">
                             <header className="storeInfo-header">

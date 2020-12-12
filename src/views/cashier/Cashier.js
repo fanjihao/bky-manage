@@ -1,10 +1,16 @@
 import React, { Component } from 'react'
 import axios from '../../http'
 import './Cashier.css'
-import { Input, Select, Space, Table, Modal, message, Image, DatePicker, Popover, Button } from 'antd'
+import {
+    Input, Select, Space, Table, Modal, message,
+    Image, DatePicker, Popover, Button, Popconfirm
+} from 'antd'
 import moment from 'moment'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
-import { CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons'
+import {
+    CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined,
+    SearchOutlined, DownloadOutlined, PlusOutlined
+} from '@ant-design/icons'
 import XLSX from 'xlsx'
 
 const { RangePicker } = DatePicker
@@ -114,7 +120,9 @@ class Cashier extends Component {
         inLineTrueCount: 0,
         // 线下订单总额
         inLineOrderNum: 0,
-        inLineOrderCount: 0
+        inLineOrderCount: 0,
+        // 员工姓名
+        employName: ''
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -225,7 +233,7 @@ class Cashier extends Component {
             endTime: endTime
         }, () => {
             // 订单数据
-            this.getOrderData(id, 1)
+            this.getOrderData(1)
             // 营收数据
             this.getRevenueData(id)
         })
@@ -285,9 +293,9 @@ class Cashier extends Component {
             })
     }
     // 订单数据
-    getOrderData = (id, type) => {
+    getOrderData = (type) => {
         const { startTime, endTime, goodsName } = this.state
-        // console.log(goodsName)
+        const id = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'GET',
             url: '/cash/order',
@@ -414,7 +422,7 @@ class Cashier extends Component {
             // 总营收数据
             this.getAllData(id)
             // 订单数据
-            this.getOrderData(id, 1)
+            this.getOrderData(1)
             // 员工
             this.getEmploy()
             // 商店项目
@@ -425,10 +433,13 @@ class Cashier extends Component {
     }
     // 搜索
     search = () => {
-        this.setState({ loading: true })
-        const { tabCheck } = this.state
-        const id = JSON.parse(localStorage.getItem('user')).id
-        this.getOrderData(id, tabCheck)
+        if (this.state.goodsName === '') {
+            message.warning('请先输入搜索内容!')
+        } else {
+            this.setState({ loading: true })
+            const { tabCheck } = this.state
+            this.getOrderData(tabCheck)
+        }
     }
     // 添加线下订单
     addProject = () => {
@@ -438,7 +449,7 @@ class Cashier extends Component {
     }
     addOrder = () => {
         const { offlineAmount, offlineUserPhone, offlineStaff, offlineMark,
-            projectId, projectImage, projectName } = this.state
+            projectId, projectImage, projectName, tabCheck } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
             url: '/consume',
@@ -452,13 +463,21 @@ class Cashier extends Component {
                 name: projectName,
                 orderId: '',
                 phasesId: projectId,
-                staff: offlineStaff,
+                staffId: offlineStaff,
                 storeId: user.systemStoreId,
                 userPhone: offlineUserPhone
             }
         })
             .then(res => {
                 console.log('添加线下订单成功', res)
+                if (res.data.status === 200) {
+                    this.getOrderData(tabCheck)
+                    this.setState({
+                        addVisible: false
+                    })
+                } else {
+                    message.error(res.data.message)
+                }
             })
             .catch(err => {
                 console.log('添加线下订单失败', err)
@@ -516,7 +535,7 @@ class Cashier extends Component {
                 console.log('修改订单信息成功', res)
                 if (res.data.status === 200) {
                     message.success('修改成功')
-                    this.getOrderData(id, tabCheck)
+                    this.getOrderData(tabCheck)
                     this.setState({ visible: false, orderVisible: false })
                 } else {
                     message.error('修改失败')
@@ -525,6 +544,24 @@ class Cashier extends Component {
             .catch(err => {
                 console.log('修改订单信息失败', err)
                 message.error('修改失败')
+            })
+    }
+    // 删除订单
+    delOrder = record => {
+        axios({
+            method: 'DELETE',
+            url: `/cash`,
+            data: {
+                classify: record.classify,
+                orderId: record.orderId
+            }
+        })
+            .then(res => {
+                console.log('订单删除成功', res)
+                this.getOrderData(this.state.tabCheck)
+            })
+            .catch(err => {
+                console.log('订单删除失败', err)
             })
     }
     render() {
@@ -543,7 +580,7 @@ class Cashier extends Component {
             offlineAmount, offlineUserPhone, addVisible, offlineStaff,
             offlineMark, projectList, projectVis, projectName,
             projectImage, clientName, customData, customVisible,
-            clientLevel, isONlineOrder, isOnlineNum } = this.state
+            clientLevel, isONlineOrder, isOnlineNum, employName } = this.state
 
         let newData, newText
 
@@ -563,6 +600,13 @@ class Cashier extends Component {
         }
         const columns = [
             {
+                title: '项目编号',
+                dataIndex: 'id',
+                key: 'id',
+                align: 'center',
+                width: 120
+            },
+            {
                 title: '项目图片',
                 dataIndex: 'image',
                 key: 'image',
@@ -572,7 +616,7 @@ class Cashier extends Component {
                         src = text.split(',')[0]
                     }
                     return (
-                        <Image className='goods-item-img' src={src}></Image>
+                        <img className='goods-item-img' src={src} />
                     )
                 },
                 align: 'center'
@@ -621,9 +665,15 @@ class Cashier extends Component {
                 key: 'action',
                 render: (text, record) => {
                     return <Space>
-                        <Button type="primary" onClick={() => this.detail('look', record)}>查看详情</Button>
-                        {/* <span className='look-action actions' onClick={() => this.detail('look', record)}>查看详情</span> */}
-                        {/* <span className='edit-action actions' onClick={() => this.detail('edit', record)}>编辑</span> */}
+                        <Button type="primary" onClick={() => this.detail('look', record)}>编辑</Button>
+                        <Popconfirm
+                            title="请您确认是否删除?"
+                            onConfirm={() => this.delOrder(record)}
+                            okText="是"
+                            cancelText="否"
+                        >
+                            <Button type="primary" danger>删除</Button>
+                        </Popconfirm>
                     </Space>
                 },
                 align: 'center'
@@ -645,9 +695,9 @@ class Cashier extends Component {
                 key: 'action',
                 render: (text, record) => <a onClick={() => {
                     if (addVisible) {
-                        this.setState({ visible: false, offlineStaff: record.id })
+                        this.setState({ visible: false, offlineStaff: record.id, employName: record.staffName })
                     } else {
-                        this.setState({ visible: false, staffName: record.staffName, staffId: record.id })
+                        this.setState({ visible: false, staffName: record.staffName, staffId: record.id, employName: record.staffName })
                     }
                 }}>选择</a>
 
@@ -805,31 +855,42 @@ class Cashier extends Component {
                     <div className='goodsBodyTab'>
                         <div className={tabCheck === 1 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 1, loading: true }, () => this.getOrderData(id, 1))
+                                this.setState({ tabCheck: 1, loading: true }, () => this.getOrderData(1))
                             }}>全部订单</div>
                         <div className={tabCheck === 2 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 2, loading: true }, () => this.getOrderData(id, 2))
+                                this.setState({ tabCheck: 2, loading: true }, () => this.getOrderData(2))
                             }}>线上订单</div>
                         <div className={tabCheck === 3 ? 'gtActive' : 'gbTabBtn'}
                             onClick={() => {
-                                this.setState({ tabCheck: 3, loading: true }, () => this.getOrderData(id, 3))
+                                this.setState({ tabCheck: 3, loading: true }, () => this.getOrderData(3))
                             }}>线下订单</div>
                         <div className='tableTips'>
                             “线上”即app成交订单，“线下”即收银牌收银订单。线下订单提交后需操作完善订单详情。
                         </div>
                     </div>
-                    <div className='gbTableTop'>
+                    <div className='goods-search'>
 
-                        <Input placeholder='输入商品名或客户电话查询'
-                            className='nameInput'
+                        <Input
+                            placeholder='输入商品名或客户电话查询'
+                            className='goods-search-input'
                             value={goodsName}
+                            style={{ width: 200 }}
                             onChange={e => this.setState({ goodsName: e.target.value })}
                         />
-                        <div className='search-btn' onClick={this.search}><SearchOutlined />搜索</div>
-                        <div className='add-btn' style={{ width: 130 }} onClick={this.addProject}>
-                            <PlusOutlined />新增线下订单
-                        </div>
+                        <div className='goods-search-btn' onClick={this.search}>搜索</div>
+
+                        <span className="goods-search-refresh"
+                            onClick={() => this.setState({ searchVal: '' }, () => this.getOrderData(tabCheck))}>刷新</span>
+
+                        {
+                            tabCheck === 3
+                                ? <div className='goods-search-add' onClick={this.addProject}>
+                                    <PlusOutlined className="goods-search-add-icon" />
+                                    <span className="goods-search-add-span">新增线下订单</span>
+                                </div>
+                                : null
+                        }
                         <div className='daochu-btn' onClick={() => {
                             this.exportExcel(columns, newData, newText)
                         }}><DownloadOutlined />导出</div>
@@ -876,7 +937,7 @@ class Cashier extends Component {
                                         onVisibleChange={visible => this.setState({ visible })}
                                     >
                                         {offlineStaff
-                                            ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ projectVis: true })}>{offlineStaff}</Button>
+                                            ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ visible: true })}>{employName}</Button>
                                             : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>}
                                     </Popover>
                                 </div>
@@ -1008,24 +1069,32 @@ class Cashier extends Component {
                                 <span style={{ marginRight: 10 }}>项目名称</span>
                                 <span>{name}</span>
                             </div>
-                            <div className='mbLabel'>
+                            {/* <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目总数</span>
                                 <span>{stagesNum}</span>
-                            </div>
+                            </div> */}
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分类</span>
                                 <span>{classify === 1 ? '线上项目' : '线下项目'}</span>
                             </div>
-                            <div className='mbLabel'>
+                            {/* <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>库存</span>
                                 <span>{stock}</span>
-                            </div>
+                            </div> */}
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>支付方式</span>
                                 <span style={{ color: '#13CE66' }}>
-                                    {payType === 'bank' ? '银行卡' : null}
-                                    {payType === 'alipay' ? '支付宝' : null}
-                                    {payType === 'weixin' ? '微信' : null}
+                                    {
+                                        () => {
+                                            if (payType) {
+                                                if (payType === 'bank') return '银行卡'
+                                                else if (payType === 'alipay') return '支付宝'
+                                                else if (payType === 'weixin') return '微信'
+                                            } else {
+                                                return '线下支付'
+                                            }
+                                        }
+                                    }
                                 </span>
                             </div>
                             <div className='mbLabel'>
@@ -1039,7 +1108,7 @@ class Cashier extends Component {
                                 <span>{paid === 0 ? '未支付' : '已支付'}</span>
                             </div>
 
-                            {amount === null ? null : <div className='mbLabel'>
+                            {type === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期总额</span>
                                 <span>{amount}</span>
                             </div>}
@@ -1054,12 +1123,12 @@ class Cashier extends Component {
                                 </span>
                             </div>}
 
-                            <div className='mbLabel'>
+                            {/* <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>销量</span>
                                 <span>{sales}</span>
-                            </div>
+                            </div> */}
 
-                            {amount === null ? null : <div className='mbLabel'>
+                            {type === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期</span>
                                 <span>￥{stagesNum * stagesPrice}/{stagesNum}</span>
                                 {
