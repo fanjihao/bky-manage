@@ -80,7 +80,7 @@ class Home extends Component {
                                 </Menu.Item>
                                 <Menu.Item key="installment" icon={<ShoppingOutlined />}>
                                     <NavLink to='/home/installment'>
-                                        <span className='nav-span'>分期项目</span></NavLink>
+                                        <span className='nav-span'>分期上下架</span></NavLink>
                                 </Menu.Item>
                                 {/* <Menu.Item key="subscribe" icon={<CommentOutlined />}>
                                     <NavLink to='/home/subscribe'>

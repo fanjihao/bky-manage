@@ -3,7 +3,7 @@ import axios from '../../http'
 import './Cashier.css'
 import {
     Input, Select, Space, Table, Modal, message,
-    Image, DatePicker, Popover, Button, Popconfirm
+    Image, DatePicker, Popover, Button, Popconfirm, InputNumber
 } from 'antd'
 import moment from 'moment'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
@@ -126,7 +126,9 @@ class Cashier extends Component {
         // 线下录入客户姓名
         offlineUserName: '',
         // 服务手工费
-        serviceCost: ''
+        serviceCost: '',
+        customName: '',
+        serviceMoney: ''
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -171,7 +173,9 @@ class Cashier extends Component {
                     userPhone: res.data.data.userPhone,
                     staffId: res.data.data.staffId,
                     clientLevel: res.data.data.clientLevel,
-                    clientName: res.data.data.clientName
+                    clientName: res.data.data.clientName,
+                    customName: res.data.data.clientName,
+                    serviceMoney: res.data.data.serviceMoney
                 }, () => {
                     this.setState({
                         orderVisible: true
@@ -449,44 +453,61 @@ class Cashier extends Component {
     // 添加线下订单
     addProject = () => {
         this.setState({
-            addVisible: true
+            offlineAmount: '',
+            offlineUserName: '',
+            offlineUserPhone: '',
+            offlineMark: '',
+            projectId: '',
+            projectImage: '',
+            projectName: '',
+            serviceCost: '',
+            offlineStaff: '',
+            addVisible: true,
         })
     }
     addOrder = () => {
         const { offlineAmount, offlineUserPhone, offlineStaff, offlineMark,
-            projectId, projectImage, projectName, tabCheck } = this.state
+            projectId, projectImage, projectName, tabCheck, offlineUserName,
+            serviceCost } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
-        axios({
-            url: '/consume',
-            method: 'POST',
-            data: {
-                amount: Number(offlineAmount),
-                classify: 2,
-                enterId: user.id,
-                image: projectImage,
-                mark: offlineMark,
-                name: projectName,
-                orderId: '',
-                phasesId: projectId,
-                staffId: offlineStaff,
-                storeId: user.systemStoreId,
-                userPhone: offlineUserPhone
-            }
-        })
-            .then(res => {
-                console.log('添加线下订单成功', res)
-                if (res.data.status === 200) {
-                    this.getOrderData(tabCheck)
-                    this.setState({
-                        addVisible: false
-                    })
-                } else {
-                    message.error(res.data.message)
+        if (offlineAmount === '' || offlineUserPhone === '' || offlineUserName === ''
+            || offlineStaff === '' || projectName === '' || serviceCost === '') {
+            message.warning('请确认信息填写完整！')
+        } else {
+            axios({
+                url: '/consume',
+                method: 'POST',
+                data: {
+                    amount: Number(offlineAmount),
+                    classify: 2,
+                    enterId: user.id,
+                    image: projectImage,
+                    mark: offlineMark,
+                    name: projectName,
+                    orderId: '',
+                    phasesId: projectId,
+                    staffId: offlineStaff,
+                    storeId: user.systemStoreId,
+                    userPhone: offlineUserPhone,
+                    clientName: offlineUserName,
+                    serviceMoney: serviceCost
                 }
             })
-            .catch(err => {
-                console.log('添加线下订单失败', err)
-            })
+                .then(res => {
+                    console.log('添加线下订单成功', res)
+                    if (res.data.status === 200) {
+                        this.getOrderData(tabCheck)
+                        this.setState({
+                            addVisible: false
+                        })
+                    } else {
+                        message.error(res.data.message)
+                    }
+                })
+                .catch(err => {
+                    console.log('添加线下订单失败', err)
+                })
+        }
     }
     // 时间戳转换
     formatTime = (time) => {
@@ -518,8 +539,15 @@ class Cashier extends Component {
     }
     // 修改订单信息
     updateOrder = () => {
-        const { staffId, mark, orderId, classify, clientId, clientLevel, clientName, amount, tabCheck } = this.state
-        console.log(clientName)
+        const { staffId, mark, orderId, classify, clientId, clientLevel,
+            clientName, amount, tabCheck, serviceMoney, customName } = this.state
+        console.log(clientName, customName, 'dgsdgsdga')
+        let name
+        if (classify === 2) {
+            name = customName
+        }else{
+            name = clientName
+        }
         const id = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'POST',
@@ -531,9 +559,10 @@ class Cashier extends Component {
                 classify,
                 clientLevel,
                 clientId,
-                clientName,
+                clientName: name,
                 enterId: id,
-                amount
+                amount,
+                serviceMoney
             }
         })
             .then(res => {
@@ -585,8 +614,7 @@ class Cashier extends Component {
             offlineMark, projectList, projectVis, projectName,
             projectImage, clientName, customData, customVisible,
             clientLevel, isONlineOrder, isOnlineNum, employName,
-            offlineUserName, serviceCost } = this.state
-        console.log(payType)
+            offlineUserName, serviceCost, serviceMoney, customName } = this.state
 
         let newData, newText
 
@@ -1031,7 +1059,6 @@ class Cashier extends Component {
                     title="订单信息"
                     onOk={() => this.updateOrder()}
                     onCancel={() => this.setState({ orderVisible: false, visible: false, customVisible: false })}
-                    destroyOnClose={true}
                     width={800}
                     okText="修改"
                     cancelText="取消"
@@ -1084,10 +1111,20 @@ class Cashier extends Component {
                                         }
                                     </Popover>
                                 </div>
-                                : <div className='modalItem'>
-                                    <span style={{ marginRight: 10 }}>客户</span>
-                                    <span>客户姓名</span>
-                                </div>
+                                :
+                                clientName === null
+                                    ? <div className='modalItem'>
+                                        <span style={{ marginRight: 10 }}>客户</span>
+                                        <Input
+                                            style={{ width: 150 }}
+                                            placeholder="请添加客户姓名"
+                                            onChange={e => this.setState({ customName: e.target.value })}
+                                        />
+                                    </div>
+                                    : <div className='modalItem'>
+                                        <span style={{ marginRight: 10 }}>客户</span>
+                                        <Button style={{ width: 120 }} type="primary" disabled={true}>{customName}</Button>
+                                    </div>
                         }
                     </div>
                     <div className='modalBody'>
@@ -1151,6 +1188,19 @@ class Cashier extends Component {
                                 <span style={{ marginRight: 10 }}>客户电话</span>
                                 <span>{userPhone}</span>
                             </div>
+                            {
+                                classify === 2
+                                    ? <div className='mbLabel'>
+                                        <span style={{ marginRight: 10 }}>线下服务手工费</span>
+                                        <Input
+                                            placeholder="请输入手工费"
+                                            style={{ width: 120 }}
+                                            value={serviceMoney}
+                                            onChange={e => this.setState({ serviceMoney: e.target.value })}
+                                        />
+                                    </div>
+                                    : null
+                            }
                         </div>
                     </div>
                     <div className='modalNote'>

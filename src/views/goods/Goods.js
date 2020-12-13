@@ -120,7 +120,7 @@ export default class Goods extends Component {
         // 产品图片
         spellImage: null,
         // 拼团价
-        spellPrice: 0,
+        spellPrice: '',
         // 拼团人数
         spellPeople: 2,
         // 库存
@@ -240,11 +240,12 @@ export default class Goods extends Component {
     }
     // 上传项目图片
     uploadGoodsImage = info => {
+        this.setState({goodsImage: ''})
         const res = info.fileList[0].response
         if (res) {
             this.setState({
                 goodsImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
-            })
+            },() => console.log(res))
         }
     }
     // 打开新增模态框
@@ -848,9 +849,9 @@ export default class Goods extends Component {
             spellIsShow, spellProductId, spellDiscount } = this.state
         let merId = JSON.parse(localStorage.getItem('user')).id
         if (startDate === '' || endDate === '' || endTime === ''
-            || spellDescription === '' || spellDiscount === '' || spellName === ''
+            || spellDescription === '' || spellName === ''
             || spellImage === '' || spellPeople === '' || spellSales === ''
-            || spellStock === '' || spellPostage === '') {
+            || spellStock === '' || spellPostage === '' || spellPrice === '') {
             message.warning('请确认信息填写完整！')
         } else {
             axios({
@@ -874,7 +875,7 @@ export default class Goods extends Component {
                     isDel: 0,
                     combination: 1,
                     isHost: 0,
-                    discount: spellDiscount,
+                    // discount: spellDiscount,
                     isPostage: 1
                 }
             })
@@ -1618,6 +1619,15 @@ export default class Goods extends Component {
                                 />
                             </div>
                             <div className="timeItem">
+                                <span className="smallSpan">拼成价格</span>
+                                <Input
+                                    className="smallInput"
+                                    placeholder="请输入拼成价格"
+                                    value={spellPrice}
+                                    onChange={e => this.setState({spellPrice: e.target.value})}
+                                />
+                            </div>
+                            {/* <div className="timeItem">
                                 <span className="smallSpan">拼团折扣</span>
                                 <Input
                                     className="smallInput"
@@ -1636,25 +1646,25 @@ export default class Goods extends Component {
                                         }
                                     }}
                                 />
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="spellItem">
-                            <div className="timeItem">
-                                <span className="smallSpan">拼团价</span>
-                                <Input
-                                    disabled={true}
-                                    className="smallInput"
-                                    placeholder="请输入拼团折扣"
-                                    value={spellPrice}
-                                />
-                            </div>
+                            
                             <div className="timeItem">
                                 <span className="smallSpan">拼团人数</span>
                                 <Input
                                     className="smallInput"
                                     value={spellPeople}
                                     onChange={e => this.setState({ spellPeople: e.target.value })}
+                                />
+                            </div>
+                            <div className="timeItem">
+                                <span className="smallSpan">销量</span>
+                                <Input
+                                    className="smallInput"
+                                    value={spellSales}
+                                    onChange={e => this.setState({ spellSales: e.target.value })}
                                 />
                             </div>
                         </div>
@@ -1680,19 +1690,6 @@ export default class Goods extends Component {
                         </div>
 
                         <div className="spellItem">
-
-                            <div className="timeItem">
-                                <span className="smallSpan">销量</span>
-                                <Input
-                                    className="smallInput"
-                                    value={spellSales}
-                                    onChange={e => this.setState({ spellSales: e.target.value })}
-                                />
-                            </div>
-
-                        </div>
-
-                        <div className="spellItem">
                             <span className="spellSpan areaSpan">拼团内容</span>
                             <TextArea
                                 className="smallInput"
@@ -1715,11 +1712,11 @@ export default class Goods extends Component {
                     <span
                         className={goodsType === 0 ? 'goods-check-type' : 'goods-not-check-type'}
                         onClick={() => this.setState({ goodsType: 0, goodsTable: 1 }, () => this.getGoods())}
-                    >服务类</span>
+                    >服务类（可预约）</span>
                     <span
                         className={goodsType === 1 ? 'goods-check-type' : 'goods-not-check-type'}
                         onClick={() => this.setState({ goodsType: 1, goodsTable: 1 }, () => this.getGoods())}
-                    >实物类</span>
+                    >实物类（不可预约）</span>
                 </div>
 
                 <div className="goods-body">
