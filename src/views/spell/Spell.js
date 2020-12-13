@@ -199,9 +199,9 @@ export default class Spell extends Component {
             spellIsShow, spellProductId, ID, spellDiscount } = this.state
         let merId = JSON.parse(localStorage.getItem('user')).id
         if (startDate === '' || startTime === '' || endDate === '' || endTime === ''
-            || spellDescription === '' || spellDiscount === '' || spellName === ''
+            || spellDescription === '' || spellName === ''
             || spellImage === '' || spellPeople === '' || spellSales === ''
-            || spellStock === '' || spellPostage === '') {
+            || spellStock === '' || spellPostage === '' || spellPrice === '') {
             message.warning('请确认信息填写完整！')
         } else {
             axios({
@@ -226,7 +226,7 @@ export default class Spell extends Component {
                     combination: 1,
                     isHost: 0,
                     id: ID,
-                    discount: spellDiscount
+                    // discount: spellDiscount
                 }
             })
                 .then(res => {
@@ -297,13 +297,6 @@ export default class Spell extends Component {
                 align: 'center',
                 width: 50
             },
-            // {
-            //     title: '商品ID',
-            //     key: 'productId',
-            //     dataIndex: 'productId',
-            //     align: 'center',
-            //     width: 100
-            // }, 
             {
                 title: '产品图',
                 key: 'image',
@@ -363,25 +356,6 @@ export default class Spell extends Component {
                 align: 'center',
                 width: 100
             },
-            // {
-            //     title: '状态',
-            //     key: 'isShow',
-            //     dataIndex: 'isShow',
-            //     render: (text, record) => text === 1
-            //         ? <span className="spellListSpanA" onClick={() => this.setState({
-            //             title: '确认进行【下架】操作',
-            //             visible: true,
-            //             spellIsShow: 0,
-            //             ID: record.id
-            //         })}>已开启</span>
-            //         : <span className="spellListSpanB" onClick={() => this.setState({
-            //             title: '确认进行【上架】操作',
-            //             visible: true,
-            //             spellIsShow: 1,
-            //             ID: record.id
-            //         })}>已关闭</span>,
-            //     align: 'center'
-            // },
             {
                 title: '结束时间',
                 key: 'endTimeDate',
@@ -430,16 +404,16 @@ export default class Spell extends Component {
                         onChange={e => this.setState({ searchVal: e.target.value })}
                     />
                     <div className='spell-searchBtn search-btn' onClick={() => {
-                        if(this.state.searchVal === ''){
+                        if (this.state.searchVal === '') {
                             message.warning('请先输入搜索内容!')
-                        }else{
+                        } else {
                             this.getSpellList()
                         }
                     }}>
                         <SearchOutlined />
                         <span>搜索</span>
                     </div>
-                    <div className="spell-refresh" onClick={() => this.setState({searchVal: ''},() => this.getSpellList())}>
+                    <div className="spell-refresh" onClick={() => this.setState({ searchVal: '' }, () => this.getSpellList())}>
                         <SyncOutlined />
                         <span>刷新</span>
                     </div>
@@ -543,31 +517,40 @@ export default class Spell extends Component {
                                 />
                             </div>
                             <div className="timeItem">
+                                <span className="smallSpan">拼团价</span>
+                                <Input
+                                    className="smallInput"
+                                    value={spellPrice}
+                                    onChange={e => this.setState({ spellPrice: e.target.value })}
+                                />
+                            </div>
+                            {/* <div className="timeItem">
                                 <span className="smallSpan">拼团折扣</span>
                                 <Input
                                     className="smallInput"
                                     value={spellDiscount}
                                     onChange={e => this.setDiscount(e)}
                                 />
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="spellItem">
-                            <div className="timeItem">
-                                <span className="smallSpan">拼团价</span>
-                                <Input
-                                    disabled={true}
-                                    className="smallInput"
-                                    value={spellPrice}
-                                // onChange={e => this.setState({ spellPrice: e.target.value })}
-                                />
-                            </div>
+
                             <div className="timeItem">
                                 <span className="smallSpan">拼团人数</span>
                                 <Input
                                     className="smallInput"
                                     value={spellPeople}
                                     onChange={e => this.setState({ spellPeople: e.target.value })}
+                                />
+                            </div>
+                            
+                            <div className="timeItem">
+                                <span className="smallSpan">邮费</span>
+                                <Input
+                                    className="smallInput"
+                                    value={spellPostage}
+                                    onChange={e => this.setState({ spellPostage: e.target.value })}
                                 />
                             </div>
                         </div>
@@ -589,27 +572,6 @@ export default class Spell extends Component {
                                     onChange={e => this.setState({ spellSales: e.target.value })}
                                 />
                             </div>
-                        </div>
-
-                        <div className="spellItem">
-                            <div className="timeItem">
-                                <span className="smallSpan">邮费</span>
-                                <Input
-                                    className="smallInput"
-                                    value={spellPostage}
-                                    onChange={e => this.setState({ spellPostage: e.target.value })}
-                                />
-                            </div>
-
-                            {/* <div className="timeItem">
-                                <span className="smallSpan">活动状态</span>
-                                <div className="spellIsShow">
-                                    <Radio.Group value={spellIsShow} onChange={e => this.setState({ spellIsShow: e.target.value })}>
-                                        <Radio value={1}>开启</Radio>
-                                        <Radio value={0}>关闭</Radio>
-                                    </Radio.Group>
-                                </div>
-                            </div> */}
                         </div>
 
                         <div className="spellItem">
