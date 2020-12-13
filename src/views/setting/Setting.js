@@ -98,7 +98,9 @@ class Setting extends Component {
             // 商户性质
             natureMerchant: null,
             // 账户银行
-            depositBank: null
+            depositBank: null,
+            // 门店电话
+            phone:''
         },
         editStatus: false,
         modalImage: null,
@@ -112,7 +114,6 @@ class Setting extends Component {
     }
     // 查询商户详细信息
     getUserInfo = id => {
-
         axios({
             method: 'GET',
             url: `/merchantOrder/merchantDetails?id=${id}`,
@@ -408,6 +409,21 @@ class Setting extends Component {
                                                 merchantDetailInfo: {
                                                     ...this.state.merchantDetailInfo,
                                                     businessTime: e.target.value
+                                                }
+                                            })} />
+                                    </div>
+                                </div>
+                                <div className='sbodyFormItem'>
+                                    <div className='formItemLabel'>
+                                        <span>门店电话</span>
+                                    </div>
+                                    <div className='formItemCon'>
+                                        <Input value={merchantDetailInfo.phone}
+                                            disabled={disabled}
+                                            onChange={e => this.setState({
+                                                merchantDetailInfo: {
+                                                    ...this.state.merchantDetailInfo,
+                                                    phone: e.target.value
                                                 }
                                             })} />
                                     </div>

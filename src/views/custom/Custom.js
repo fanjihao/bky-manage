@@ -52,7 +52,8 @@ class Custom extends Component {
         // 客户消费金额
         money: null,
 
-        selectLevel: ''
+        selectLevel: '',
+        telWrong:false, // 正则手机号
     }
     componentDidMount() {
         this.setState({ loading: true })
@@ -145,10 +146,12 @@ class Custom extends Component {
     // 新增客户
     addCustom = () => {
         let user = JSON.parse(localStorage.getItem('user'))
-        const { name, userPhone, employId, level, birth } = this.state
+        const { name, userPhone, employId, level, birth, telWrong } = this.state
         console.log(level, '客户等级')
         if (name === null || userPhone === null) {
             message.warning('请填写完整信息')
+        } else if(telWrong) {
+            message.warning('手机号格式不正确')
         } else {
             axios({
                 method: 'POST',
@@ -334,7 +337,7 @@ class Custom extends Component {
         const { loading, data, searchValue, customAdd,
             addPopover, employList, employ, name,
             userPhone, customEdit, expenseDetail, expenseDetailData,
-            addExpense, money, level, selectLevel, birth } = this.state
+            addExpense, money, level, selectLevel, birth, telWrong } = this.state
         const columns = [
             {
                 title: '序号',
@@ -560,9 +563,23 @@ class Custom extends Component {
                             <span>客户电话:</span>
                             <Input
                                 placeholder="请输入"
-                                style={{ width: 200 }}
+                                style={telWrong ? {width:200, borderColor:'red'} : {width:200, borderColor:'#ccc'}}
                                 value={userPhone}
-                                onChange={e => this.setState({ userPhone: e.target.value })}
+                                onChange={e => {
+                                    this.setState({
+                                        userPhone: e.target.value
+                                    }, () => {
+                                        if (!(/^[1][3,4,5,7,8,9][0-9]{9}$/.test(this.state.userPhone))) {
+                                            this.setState({
+                                                telWrong: true,
+                                            })
+                                        } else {
+                                            this.setState({
+                                                telWrong: false
+                                            })
+                                        }
+                                    })
+                                }}
                             />
                         </div>
                         <div className="addCustomItem">
