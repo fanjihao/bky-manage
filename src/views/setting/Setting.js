@@ -479,7 +479,7 @@ class Setting extends Component {
                                         onChange={this.handleChange}
                                         onRemove={this.onRemove}
                                     >
-                                        {fileList.length >= 3 ? null : uploadButtonA}
+                                        {fileList.length >= 6 ? null : uploadButtonA}
                                     </Upload>
                                 </div>
                             </div>

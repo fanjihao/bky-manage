@@ -435,7 +435,7 @@ export default class BookingManage extends Component {
                         value={moment(time, 'YYYY-MM-DD')}
                         allowClear={false}
                     />
-                    <Input
+                    {/* <Input
                         placeholder="请输入项目名搜索"
                         className="spell-searchInput"
                         value={searchVal}
@@ -444,8 +444,8 @@ export default class BookingManage extends Component {
                     <div className='spell-searchBtn search-btn' >
                         <SearchOutlined />
                         <span>搜索</span>
-                    </div>
-                    <div className="spell-refresh" onClick={() => this.getSbuData()}>
+                    </div> */}
+                    <div className="spell-refresh" style={{margin: 20}} onClick={() => this.getSbuData()}>
                         <SyncOutlined />
                         <span>刷新</span>
                     </div>

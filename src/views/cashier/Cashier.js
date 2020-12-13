@@ -122,7 +122,11 @@ class Cashier extends Component {
         inLineOrderNum: 0,
         inLineOrderCount: 0,
         // 员工姓名
-        employName: ''
+        employName: '',
+        // 线下录入客户姓名
+        offlineUserName: '',
+        // 服务手工费
+        serviceCost: ''
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -311,8 +315,9 @@ class Cashier extends Component {
                 console.log('查询订单数据成功', res)
                 if (res.data.data.length > 0) {
                     let data = res.data.data
-                    data.map(item => {
+                    data.map((item, index) => {
                         item.key = item.orderId
+                        item.keyId = index + 1
                     })
                     this.setState({ data, loading: false })
                 } else {
@@ -538,12 +543,11 @@ class Cashier extends Component {
                     this.getOrderData(tabCheck)
                     this.setState({ visible: false, orderVisible: false })
                 } else {
-                    message.error('修改失败')
+                    message.error(res.data.message)
                 }
             })
             .catch(err => {
                 console.log('修改订单信息失败', err)
-                message.error('修改失败')
             })
     }
     // 删除订单
@@ -580,7 +584,9 @@ class Cashier extends Component {
             offlineAmount, offlineUserPhone, addVisible, offlineStaff,
             offlineMark, projectList, projectVis, projectName,
             projectImage, clientName, customData, customVisible,
-            clientLevel, isONlineOrder, isOnlineNum, employName } = this.state
+            clientLevel, isONlineOrder, isOnlineNum, employName,
+            offlineUserName, serviceCost } = this.state
+        console.log(payType)
 
         let newData, newText
 
@@ -601,8 +607,8 @@ class Cashier extends Component {
         const columns = [
             {
                 title: '项目编号',
-                dataIndex: 'id',
-                key: 'id',
+                dataIndex: 'keyId',
+                key: 'keyId',
                 align: 'center',
                 width: 120
             },
@@ -619,46 +625,53 @@ class Cashier extends Component {
                         <img className='goods-item-img' src={src} />
                     )
                 },
-                align: 'center'
+                align: 'center',
+                width: 120
             },
             {
                 title: '项目名称',
                 dataIndex: 'name',
                 key: 'name',
-                align: 'center'
+                align: 'center',
+                width: 120
             },
             {
                 title: '实付金额',
                 dataIndex: 'payPrice',
                 key: 'payPrice',
                 align: 'center',
-                render: text => <>￥{text}</>
+                render: text => <>￥{text}</>,
+                width: 120
             },
             {
                 title: '订单总额',
                 key: 'totalPrice',
                 dataIndex: 'totalPrice',
                 align: 'center',
-                render: text => <>￥{text}</>
+                render: text => <>￥{text}</>,
+                width: 120
             },
             {
                 title: '交易时间',
                 key: 'creatTime',
                 dataIndex: 'creatTime',
-                align: 'center'
+                align: 'center',
+                width: 120
             },
             {
                 title: '客户电话',
                 key: 'userPhone',
                 align: 'center',
-                dataIndex: 'userPhone'
+                dataIndex: 'userPhone',
+                width: 120
             },
             {
                 title: '客户备注',
                 key: 'mark',
                 dataIndex: 'mark',
                 align: 'center',
-                render: text => (<>{text ? text : '无'}</>)
+                render: text => (<>{text ? text : '无'}</>),
+                width: 120
             },
             {
                 title: '操作',
@@ -922,7 +935,7 @@ class Cashier extends Component {
                     <div className='addBody'>
                         <div className=''>
                             <div className='cashmbLabel'>
-                                <span className='add-pro-span'>美疗师</span>
+                                <span className='add-pro-span'>员工</span>
                                 <div className='input-box'>
                                     <Popover
                                         content={<Table
@@ -963,27 +976,41 @@ class Cashier extends Component {
                                 </div>
                             </div>
                             <div className='project-img'>
-                                <span className='add-pro-span'>项目图片</span>
+                                <span className='add-pro-span' style={{ verticalAlign: 'top' }}>项目图片</span>
                                 <div className='input-box'>
                                     {projectImage
-                                        ? <div style={{ width: 150, height: 150, border: '1px solid #eee', overflow: 'hidden', lineHeight: '150px', textAlign: 'center' }}>
+                                        ? <div style={{ width: 100, height: 100, border: '1px solid #eee', overflow: 'hidden', lineHeight: '150px', textAlign: 'center' }}>
                                             <Image src={projectImage} style={{ width: '100%', height: '100%' }}></Image>
                                         </div>
-                                        : <div style={{ width: 150, height: 150, border: '1px solid #eee' }}></div>}
+                                        : <div style={{ width: 100, height: 100, border: '1px solid #eee' }}></div>}
+                                </div>
+                            </div>
+                            <div className='cashmbLabel'>
+                                <span className='add-pro-span'>客户姓名</span>
+                                <div className='input-box'>
+                                    <Input placeholder='请输入客户姓名' value={offlineUserName} style={{ width: 200 }}
+                                        onChange={(e) => this.setState({ offlineUserName: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className='cashmbLabel'>
+                                <span className='add-pro-span'>客户手机号</span>
+                                <div className='input-box'>
+                                    <Input placeholder='请输入用户手机号' value={offlineUserPhone} style={{ width: 200 }}
+                                        onChange={(e) => this.setState({ offlineUserPhone: e.target.value })} />
                                 </div>
                             </div>
                             <div className='cashmbLabel'>
                                 <span className='add-pro-span'>消费金额</span>
                                 <div className='input-box'>
                                     <Input placeholder='请输入用户消费金额' value={offlineAmount} style={{ width: 200 }}
-                                        onChange={(e) => this.setState({ offlineAmount: e.target.value })}></Input>
+                                        onChange={(e) => this.setState({ offlineAmount: e.target.value })} />
                                 </div>
                             </div>
                             <div className='cashmbLabel'>
-                                <span className='add-pro-span'>用户手机号</span>
+                                <span className='add-pro-span'>服务手工费</span>
                                 <div className='input-box'>
-                                    <Input placeholder='请输入用户手机号' value={offlineUserPhone} style={{ width: 200 }}
-                                        onChange={(e) => this.setState({ offlineUserPhone: e.target.value })}></Input>
+                                    <Input placeholder='请输入服务手工费' value={serviceCost} style={{ width: 200 }}
+                                        onChange={(e) => this.setState({ serviceCost: e.target.value })} />
                                 </div>
                             </div>
                         </div>
@@ -998,22 +1025,20 @@ class Cashier extends Component {
                         </div>
                     </div>
                 </Modal>
-                {/* 订单信息详情 */}
+                {/* 线上订单信息详情 */}
                 <Modal
                     visible={orderVisible}
                     title="订单信息"
                     onOk={() => this.updateOrder()}
                     onCancel={() => this.setState({ orderVisible: false, visible: false, customVisible: false })}
                     destroyOnClose={true}
-                    bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
                     okText="修改"
                     cancelText="取消"
                 >
                     <div className='modalheader'>
                         <div className='modalItem'>
-                            <span style={{ marginRight: 10 }}>美疗师</span>
-                            {/* <span>{staffName ? staffName : '未分配美疗师'}</span> */}
+                            <span style={{ marginRight: 10 }}>员工</span>
                             <Popover
                                 content={<Table
                                     columns={employColumns}
@@ -1035,67 +1060,53 @@ class Cashier extends Component {
                             </Popover>
 
                         </div>
-                        <div className='modalItem'>
-                            <span style={{ marginRight: 10 }}>客户</span>
-                            <Popover
-                                content={<Table
-                                    columns={customColumns}
-                                    dataSource={customData}
-                                    style={{ textAlign: 'center' }}
-                                    pagination={{ pageSize: 2 }}
-                                    locale={{ emptyText: '暂无数据' }} />}
-                                trigger="click"
-                                onVisibleChange={customVisible => this.setState({ customVisible })}
-                                placement="bottom"
-                                visible={customVisible}
-                            >
+                        {
+                            classify === 1
+                                ? <div className='modalItem'>
+                                    <span style={{ marginRight: 10 }}>客户</span>
+                                    <Popover
+                                        content={<Table
+                                            columns={customColumns}
+                                            dataSource={customData}
+                                            style={{ textAlign: 'center' }}
+                                            pagination={{ pageSize: 2 }}
+                                            locale={{ emptyText: '暂无数据' }} />}
+                                        trigger="click"
+                                        onVisibleChange={customVisible => this.setState({ customVisible })}
+                                        placement="bottom"
+                                        visible={customVisible}
+                                    >
 
-                                {
-                                    clientLevel
-                                        ? <Button style={{ width: 120 }} type="primary" onClick={() => this.setState({ customVisible: true })}>{clientName + '-' + clientLevel}</Button>
-                                        : <Button style={{ width: 120 }} type="primary" danger onClick={() => this.setState({ customVisible: true })}>点击关联客户</Button>
-                                }
-                            </Popover>
-                        </div>
+                                        {
+                                            clientLevel
+                                                ? <Button style={{ width: 120 }} type="primary" onClick={() => this.setState({ customVisible: true })}>{clientName + '-' + clientLevel}</Button>
+                                                : <Button style={{ width: 120 }} type="primary" danger onClick={() => this.setState({ customVisible: true })}>点击关联客户</Button>
+                                        }
+                                    </Popover>
+                                </div>
+                                : <div className='modalItem'>
+                                    <span style={{ marginRight: 10 }}>客户</span>
+                                    <span>客户姓名</span>
+                                </div>
+                        }
                     </div>
                     <div className='modalBody'>
                         <div className='modalBodyChild'>
                             <div className='mbLabel'>
                                 <span>订单编号</span>
                                 <span>{orderId}</span>
-                                {/* <span style={{ color: '#1089EB' }}>复制</span> */}
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目名称</span>
                                 <span>{name}</span>
                             </div>
-                            {/* <div className='mbLabel'>
-                                <span style={{ marginRight: 10 }}>项目总数</span>
-                                <span>{stagesNum}</span>
-                            </div> */}
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>分类</span>
                                 <span>{classify === 1 ? '线上项目' : '线下项目'}</span>
                             </div>
-                            {/* <div className='mbLabel'>
-                                <span style={{ marginRight: 10 }}>库存</span>
-                                <span>{stock}</span>
-                            </div> */}
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>支付方式</span>
-                                <span style={{ color: '#13CE66' }}>
-                                    {
-                                        () => {
-                                            if (payType) {
-                                                if (payType === 'bank') return '银行卡'
-                                                else if (payType === 'alipay') return '支付宝'
-                                                else if (payType === 'weixin') return '微信'
-                                            } else {
-                                                return '线下支付'
-                                            }
-                                        }
-                                    }
-                                </span>
+                                <span style={{ color: '#13CE66' }}>{payType === null ? '线下支付' : '线上支付'}</span>
                             </div>
                             <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>创建时间</span>
@@ -1122,11 +1133,6 @@ class Cashier extends Component {
                                     {type === 4 ? '未处理' : null}
                                 </span>
                             </div>}
-
-                            {/* <div className='mbLabel'>
-                                <span style={{ marginRight: 10 }}>销量</span>
-                                <span>{sales}</span>
-                            </div> */}
 
                             {type === null ? null : <div className='mbLabel'>
                                 <span style={{ marginRight: 10 }}>项目分期</span>
@@ -1158,6 +1164,10 @@ class Cashier extends Component {
                     </div>
                 </Modal>
 
+                {/* 线下订单信息详情 */}
+                {/* <Modal>
+
+                </Modal> */}
                 <div className='footer-statistical'>
                     <span>总销售额：￥{allNum ? allNum : 0}</span>
                     <span>线上总销售额：￥{onlineNum ? onlineNum : 0}</span>

@@ -4,7 +4,7 @@ import '../goods/Goods.css'
 import {
     Table, Input, Select, message, Image, Modal,
     Radio, Upload, Popover, Tag, Space, Popconfirm,
-    InputNumber, Switch
+    InputNumber, Switch, Button
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import axios from '../../http'
@@ -254,7 +254,7 @@ export default class Installment extends Component {
         } = this.state
         if (astrict === '' || installmentName === '' || installmentImage === null ||
             installmentPrice === '' || installmentSales === '' || installmentTotal === '' ||
-            installmentAmount === '' || installmentRoyaltyRate === '' || 
+            installmentAmount === '' || installmentRoyaltyRate === '' ||
             installmentRemarks === '' || checkTimeArr.length === 0) {
             message.warning('请检查是否有未填写的内容！')
         } else {
@@ -602,27 +602,26 @@ export default class Installment extends Component {
                 render: (text, record) => {
                     if (goodsTable === 1) {
                         return (<Space size="middle">
-                            <a style={{ color: '#13CE66' }} onClick={() => this.editInstallment(record)} >修改</a>
+                            <Button type="primary" onClick={() => this.editInstallment(record)} >编辑</Button>
                             <Popconfirm
                                 title="请您确认是否删除?"
                                 onConfirm={() => this.delInstallment(record.id)}
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF5A5A' }}>删除</a>
+                                <Button type="primary" danger>删除</Button>
                             </Popconfirm>
-                            {/* <a style={{ color: '#2C9DFF' }} onClick={() => this.spellGroup(record)}>开启拼团</a> */}
                         </Space>)
                     } else if (goodsTable === 2) {
                         return (<Space size="middle">
-                            <a style={{ color: '#13CE66' }} onClick={() => this.editInstallment(record)} >修改</a>
+                            <Button type="primary" onClick={() => this.editInstallment(record)} >编辑</Button>
                             <Popconfirm
                                 title="请您确认是否删除?"
                                 onConfirm={() => this.delInstallment(record.id)}
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF5A5A' }}>删除</a>
+                                <Button type="primary" danger>删除</Button>
                             </Popconfirm>
                         </Space>)
                     } else {
@@ -633,7 +632,7 @@ export default class Installment extends Component {
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#13CE66' }}>恢复</a>
+                                <Button type="primary">恢复</Button>
                             </Popconfirm>
                             <Popconfirm
                                 title="请您确认是否彻底删除?"
@@ -641,7 +640,7 @@ export default class Installment extends Component {
                                 okText="是"
                                 cancelText="否"
                             >
-                                <a style={{ color: '#FF5A5A' }}>彻底删除</a>
+                                <Button type="primary" danger style={{width: 120}}>彻底删除</Button>
                             </Popconfirm>
                         </Space>)
                     }
