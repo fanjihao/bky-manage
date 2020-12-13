@@ -545,7 +545,7 @@ class Cashier extends Component {
         let name
         if (classify === 2) {
             name = customName
-        }else{
+        } else {
             name = clientName
         }
         const id = JSON.parse(localStorage.getItem('user')).id

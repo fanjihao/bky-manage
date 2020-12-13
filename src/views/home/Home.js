@@ -3,7 +3,7 @@ import './home.css'
 import { Layout, Menu } from 'antd'
 import {
     HomeOutlined, ShoppingOutlined, AccountBookOutlined, SettingOutlined,
-    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined, 
+    TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined,
     CommentOutlined, MenuUnfoldOutlined, MenuFoldOutlined, ScheduleOutlined
 } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'

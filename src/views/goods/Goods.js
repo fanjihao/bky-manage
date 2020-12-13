@@ -240,12 +240,12 @@ export default class Goods extends Component {
     }
     // 上传项目图片
     uploadGoodsImage = info => {
-        this.setState({goodsImage: ''})
+        this.setState({ goodsImage: '' })
         const res = info.fileList[0].response
         if (res) {
             this.setState({
                 goodsImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
-            },() => console.log(res))
+            }, () => console.log(res))
         }
     }
     // 打开新增模态框
@@ -1007,13 +1007,13 @@ export default class Goods extends Component {
                                 okText="是"
                                 cancelText="否"
                             >
-                            <Button type="primary">删除</Button>
+                                <Button type="primary">删除</Button>
                             </Popconfirm>
-                            <Button type="default" style={{width: 120}} onClick={() => this.spellGroup(record)}>开启拼团</Button>
+                            <Button type="default" style={{ width: 120 }} onClick={() => this.spellGroup(record)}>开启拼团</Button>
                         </Space>)
                     } else if (goodsTable === 0) {
                         return (<Space size="middle">
-                        <Button type="primary" onClick={() => this.editOnline(record)} >编辑</Button>
+                            <Button type="primary" onClick={() => this.editOnline(record)} >编辑</Button>
                             <Popconfirm
                                 title="请您确认是否删除?"
                                 onConfirm={() => this.delOnline(record.id)}
@@ -1039,7 +1039,7 @@ export default class Goods extends Component {
                                 okText="是"
                                 cancelText="否"
                             >
-                                <Button type="primary" danger style={{width: 120}}>彻底删除</Button>
+                                <Button type="primary" danger style={{ width: 120 }}>彻底删除</Button>
                             </Popconfirm>
                         </Space>)
                     }
@@ -1163,18 +1163,18 @@ export default class Goods extends Component {
                             >
                                 <Button type="primary" danger>删除</Button>
                             </Popconfirm>
-                            <Button type="default" style={{width: 120}} onClick={() => this.spellGroup(record)}>开启拼团</Button>
+                            <Button type="default" style={{ width: 120 }} onClick={() => this.spellGroup(record)}>开启拼团</Button>
                         </Space>)
                     } else if (goodsTable === 0) {
                         return (<Space size="middle">
-                        <Button type="primary" onClick={() => this.editService(record)} >编辑</Button>
+                            <Button type="primary" onClick={() => this.editService(record)} >编辑</Button>
                             <Popconfirm
                                 title="请您确认是否删除?"
                                 onConfirm={() => this.delService(record.id)}
                                 okText="是"
                                 cancelText="否"
                             >
-                            <Button type="primary" danger>删除</Button>
+                                <Button type="primary" danger>删除</Button>
                             </Popconfirm>
                         </Space>)
                     } else {
@@ -1193,7 +1193,7 @@ export default class Goods extends Component {
                                 okText="是"
                                 cancelText="否"
                             >
-                                <Button type="primary" danger style={{width: 120}}>彻底删除</Button>
+                                <Button type="primary" danger style={{ width: 120 }}>彻底删除</Button>
                             </Popconfirm>
                         </Space>)
                     }
@@ -1624,7 +1624,7 @@ export default class Goods extends Component {
                                     className="smallInput"
                                     placeholder="请输入拼成价格"
                                     value={spellPrice}
-                                    onChange={e => this.setState({spellPrice: e.target.value})}
+                                    onChange={e => this.setState({ spellPrice: e.target.value })}
                                 />
                             </div>
                             {/* <div className="timeItem">
@@ -1650,7 +1650,7 @@ export default class Goods extends Component {
                         </div>
 
                         <div className="spellItem">
-                            
+
                             <div className="timeItem">
                                 <span className="smallSpan">拼团人数</span>
                                 <Input

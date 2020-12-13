@@ -100,7 +100,7 @@ class Setting extends Component {
             // 账户银行
             depositBank: null,
             // 门店电话
-            phone:''
+            phone: ''
         },
         editStatus: false,
         modalImage: null,
@@ -119,16 +119,16 @@ class Setting extends Component {
             url: `/merchantOrder/merchantDetails?id=${id}`,
         })
             .then(res => {
-                console.log('查询商户详细信息成功',res)
+                console.log('查询商户详细信息成功', res)
                 let otherImgList = []
-                if(res.data.otherPhoto === ''){
+                if (res.data.otherPhoto === '') {
 
-                }else{
+                } else {
                     let otherImg = res.data.otherPhoto.split(',')
-                    for(let i = 0; i < otherImg.length; i ++ ) {
+                    for (let i = 0; i < otherImg.length; i++) {
                         let obj = {
-                            uid:i,
-                            url:otherImg[i]
+                            uid: i,
+                            url: otherImg[i]
                         }
                         otherImgList.push(obj)
                     }
@@ -243,7 +243,7 @@ class Setting extends Component {
             }
         })
             .then(res => {
-                console.log('修改商户信息成功',res)
+                console.log('修改商户信息成功', res)
                 if (res.data.status === 200) {
                     message.success('修改信息成功')
                     // this.setState({fileList: oldFileList})
@@ -257,7 +257,7 @@ class Setting extends Component {
                 })
             })
             .catch(err => {
-                console.log('修改商户信息失败',err)
+                console.log('修改商户信息失败', err)
                 message.error('修改信息失败')
             })
     }
@@ -324,7 +324,7 @@ class Setting extends Component {
         if (info.file.status === 'done') {
             message.success(`${info.file.name} 上传成功`)
             this.setState({
-                fileList:info.fileList
+                fileList: info.fileList
             })
         } else if (info.file.status === 'error') {
             message.error(`${info.file.name} 上传失败.`)
