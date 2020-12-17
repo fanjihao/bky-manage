@@ -234,52 +234,45 @@ export default class BookingManage extends Component {
                 title: '预约编号',
                 dataIndex: 'id',
                 key: 'id',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '预约项目图片',
                 dataIndex: 'image',
                 key: 'image',
                 render: text => <img src={text} className='tableGoodsImg' />,
-                align: 'center',
-                width: 160
+                align: 'center'
             },
             {
                 title: '项目名称',
                 dataIndex: 'serviceName',
                 key: 'serviceName',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '预约客户',
                 dataIndex: 'userName',
                 key: 'userName',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '客户电话',
                 dataIndex: 'phone',
                 key: 'phone',
                 align: 'center',
-                width: 140,
                 render: text => text === null ? <span>暂无</span> : <span>{text}</span>
             },
             {
                 title: '预约时间段',
                 key: 'subsTime',
                 dataIndex: 'subsTime',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '预约状态',
                 key: 'reach',
                 dataIndex: 'reach',
                 align: 'center',
-                width: 140,
                 render: (text, record) => <Select value={text} style={{ width: 120 }} onChange={e => {
                     this.setState({
                         promptModal: true,
@@ -298,7 +291,6 @@ export default class BookingManage extends Component {
                 key: 'serviceMoney',
                 dataIndex: 'serviceMoney',
                 align: 'center',
-                width: 140,
                 render: (text, record) => {
                     if (record.reach === 1) {
                         let dom
@@ -393,8 +385,7 @@ export default class BookingManage extends Component {
                         }
                         return dom
                     }
-                },
-                width: 200
+                }
             }
         ]
         const employColumns = [
@@ -460,6 +451,7 @@ export default class BookingManage extends Component {
                     destroyOnClose={true}
                     bodyStyle={{ padding: '10px', color: '#666666' }}
                     afterClose={() => this.setState({ goodsProId: '' })}
+                    maskClosable={false}
                 >
                     <div>
                         <div style={{ width: '100%', display: 'inline-block', height: 50, textAlign: 'center', lineHeight: '50px', paddingRight: 20 }}>
@@ -479,6 +471,7 @@ export default class BookingManage extends Component {
                     destroyOnClose={true}
                     bodyStyle={{ padding: '10px', color: '#666666' }}
                     afterClose={() => this.setState({ goodsProId: '' })}
+                    maskClosable={false}
                 >
                     <div>
                         <div style={{ width: '100%' }}>

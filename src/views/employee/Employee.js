@@ -469,16 +469,6 @@ export default class Employee extends Component {
                 render: (text, record) => <span>{text}</span>,
                 align: 'center'
             },
-            // {
-            //     title: '员工头像',
-            //     dataIndex: 'avatar',
-            //     key: 'avatar',
-            //     render: src => {
-            //         return (
-            //             <Avatar className='tableImg' src={src}></Avatar>
-            //         )
-            //     }
-            // },
             {
                 title: '员工等级',
                 dataIndex: 'grade',
@@ -515,16 +505,6 @@ export default class Employee extends Component {
                         : <span>女</span>,
                 align: 'center'
             },
-            // {
-            //     title: '婚姻状态',
-            //     key: 'maritalStatus',
-            //     dataIndex: 'maritalStatus',
-            //     render: (text, record) =>
-            //         text === 1
-            //             ? <span>未婚</span>
-            //             : <span>已婚</span>
-            //     ,
-            // },
             {
                 title: '现居住地址',
                 key: 'currentAddress',
@@ -646,6 +626,7 @@ export default class Employee extends Component {
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '12px', fontWeight: 'bold', padding: '10px', color: '#666666' }}
                     width={800}
+                    maskClosable={false}
                 >
                     <div className='modalItem'>
                         <span style={{ color: '#1089EB', marginLeft: 30 }}>基本信息</span>

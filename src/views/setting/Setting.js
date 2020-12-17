@@ -264,7 +264,7 @@ class Setting extends Component {
 
     // 上传门店招牌照片
     signboardPhotoUpload = info => {
-        const res = info.fileList[0].response
+        const res = info.fileList[info.fileList.length-1].response
         if (res) {
             this.setState({
                 merchantDetailInfo: {

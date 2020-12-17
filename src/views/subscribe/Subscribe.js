@@ -230,7 +230,7 @@ export default class Subscribe extends Component {
     }
     // 上传服务商品照片
     uploadServiceImage = info => {
-        const res = info.fileList[0].response
+        const res = info.fileList[info.fileList.length - 1].response
         if (res) {
             console.log('111111111', 'https://www.bkysc.cn/api/files-upload/' + res.data)
             this.setState({
@@ -532,7 +532,7 @@ export default class Subscribe extends Component {
     }
     // 上传拼团照片
     uploadSpellImage = info => {
-        const res = info.fileList[0].response
+        const res = info.fileList[info.fileList.length - 1].response
         if (res) {
             this.setState({
                 spellImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
@@ -871,6 +871,7 @@ export default class Subscribe extends Component {
                     okText='确定'
                     cancelText="取消"
                     title={title}
+                    maskClosable={false}
                 >
                     <div className='goodsModalItem'>
                         <span className='gmiLabel'>商品分类</span>
@@ -1107,6 +1108,7 @@ export default class Subscribe extends Component {
                     okText='确定'
                     cancelText="取消"
                     title="开启拼团"
+                    maskClosable={false}
                 >
                     <div style={{ width: '80%', margin: '0 auto' }}>
                         <div className="spellItem">

@@ -43,6 +43,7 @@ class Home extends Component {
     componentDidMount() {
         const merchantName = JSON.parse(localStorage.getItem('user')).merchantName
         this.setState({ merchantName })
+        console.log(JSON.parse(localStorage.getItem('user')))
     }
 
     render = () => {
@@ -74,18 +75,18 @@ class Home extends Component {
                                 </NavLink>
                             </Menu.Item>
                             <SubMenu key="6" icon={<ShoppingOutlined />} title="商品">
-                                <Menu.Item key="goods" icon={<ShoppingOutlined />}>
+                                <Menu.Item key="goods"
+                                    // icon={<ShoppingOutlined />}
+                                >
                                     <NavLink to='/home/goods'>
                                         <span className='nav-span'>线上项目</span></NavLink>
                                 </Menu.Item>
-                                <Menu.Item key="installment" icon={<ShoppingOutlined />}>
+                                <Menu.Item key="installment"
+                                    // icon={<ShoppingOutlined />}
+                                >
                                     <NavLink to='/home/installment'>
                                         <span className='nav-span'>分期上下架</span></NavLink>
                                 </Menu.Item>
-                                {/* <Menu.Item key="subscribe" icon={<CommentOutlined />}>
-                                    <NavLink to='/home/subscribe'>
-                                        <span className='nav-span'>服务项目</span></NavLink>
-                                </Menu.Item> */}
                             </SubMenu>
                             <Menu.Item key="bookingmanage" icon={<CommentOutlined />}>
                                 <NavLink to='/home/bookingmanage'>

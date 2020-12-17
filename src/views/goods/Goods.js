@@ -92,7 +92,7 @@ export default class Goods extends Component {
             { id: 30, value: '21:30-22:00' },
         ],
         // 预约状态
-        enableSub: 0,
+        enableSub: 1,
         // 项目类型
         proType: 0,
         // 服务类型
@@ -150,7 +150,9 @@ export default class Goods extends Component {
         // 拼团折扣
         spellDiscount: '',
         // 可抵积分
-        intNum: 0
+        intNum: 0,
+        // 商品总数
+        goodsTotal: ''
     }
     componentDidMount() {
         this.getGoodsClass()
@@ -193,10 +195,15 @@ export default class Goods extends Component {
         })
             .then(res => {
                 console.log('查询线上商品成功', res)
+                let data = res.data.data.list
+                data.map((item, index) => {
+                    item.key = index + 1
+                })
                 if (res.data.status === 200) {
                     this.setState({
                         loading: false,
-                        onlineList: res.data.data.list
+                        onlineList: data,
+                        goodsTotal: res.data.data.total
                     })
                 } else {
                     message.error(res.data.message)
@@ -210,7 +217,7 @@ export default class Goods extends Component {
     // 服务类商品列表
     getService = () => {
         this.setState({ loading: true })
-        const { searchVal, goodsTable, classify } = this.state
+        const { searchVal, goodsTable, classify, servicePage } = this.state
         let user = JSON.parse(localStorage.getItem('user'))
         axios({
             method: 'GET',
@@ -225,9 +232,14 @@ export default class Goods extends Component {
             .then(res => {
                 console.log('查询服务商品成功', res)
                 if (res.data.status === 200) {
+                    let data = res.data.data
+                    data.map((item, index) => {
+                        item.key = index + 1
+                    })
                     this.setState({
-                        serviceList: res.data.data,
-                        loading: false
+                        serviceList: data,
+                        loading: false,
+                        goodsTotal: res.data.data.length
                     })
                 } else {
                     message.error(res.data.message)
@@ -240,12 +252,12 @@ export default class Goods extends Component {
     }
     // 上传项目图片
     uploadGoodsImage = info => {
-        this.setState({ goodsImage: '' })
-        const res = info.fileList[0].response
+        console.log(info)
+        const res = info.fileList[info.fileList.length - 1].response
         if (res) {
             this.setState({
                 goodsImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
-            }, () => console.log(res))
+            })
         }
     }
     // 打开新增模态框
@@ -771,7 +783,7 @@ export default class Goods extends Component {
     }
     // 上传拼团照片
     uploadSpellImage = info => {
-        const res = info.fileList[0].response
+        const res = info.fileList[info.fileList.length - 1].response
         if (res) {
             this.setState({
                 spellImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
@@ -897,37 +909,34 @@ export default class Goods extends Component {
             goodsStock, serviceTime, checkTimeArr, servicePlepeo, timeArr,
             proType, serviceType, serviceList, servicePage, isSpellGroup,
             spellName, spellImage, originalPrice, spellPrice, spellPeople,
-            spellStock, spellDiscount, spellSales, spellDescription, spellPostage } = this.state
+            spellStock, spellDiscount, spellSales, spellDescription, spellPostage,
+            goodsTotal } = this.state
 
         const onlineColumns = [
             {
                 title: '商品编号',
-                dataIndex: 'id',
-                key: 'id',
-                align: 'center',
-                width: 120
+                dataIndex: 'key',
+                key: 'key',
+                align: 'center'
             },
             {
                 title: '商品图片',
                 dataIndex: 'image',
                 key: 'image',
                 render: src => <img className='tableGoodsImg' src={src} />,
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '商品名称',
                 dataIndex: 'name',
                 key: 'name',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '分类名称',
                 dataIndex: 'cateName',
                 key: 'cateName',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '商品价格',
@@ -936,23 +945,20 @@ export default class Goods extends Component {
                 render: text => (
                     <span>￥{text.toFixed(2)}</span>
                 ),
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '积分抵扣',
                 dataIndex: 'giveIntegral',
                 key: 'giveIntegral',
                 align: 'center',
-                width: 120,
                 render: (text, record) => record.useScore === 1 ? <span>{text}</span> : <span>未开启</span>
             },
             {
                 title: '销量',
                 key: 'ficti',
                 dataIndex: 'ficti',
-                align: 'center',
-                width: 80
+                align: 'center'
             },
             {
                 title: '库存',
@@ -961,8 +967,7 @@ export default class Goods extends Component {
                 render: tags => (
                     <span>{tags}</span>
                 ),
-                align: 'center',
-                width: 80
+                align: 'center'
             },
             {
                 title: '系统状态',
@@ -1050,54 +1055,47 @@ export default class Goods extends Component {
         const serviceColumns = [
             {
                 title: '服务编号',
-                dataIndex: 'id',
-                key: 'id',
-                align: 'center',
-                width: 120
+                dataIndex: 'key',
+                key: 'key',
+                align: 'center'
             },
             {
                 title: '服务图片',
                 dataIndex: 'image',
                 key: 'image',
                 align: 'center',
-                render: text => <img src={text} className='tableGoodsImg' />,
-                width: 120
+                render: text => <img src={text} className='tableGoodsImg' />
             },
             {
                 title: '服务名称',
                 dataIndex: 'storeName',
                 key: 'storeName',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '服务时长',
                 dataIndex: 'timeQuantum',
                 key: 'timeQuantum',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '价格',
                 dataIndex: 'otPrice',
                 key: 'otPrice',
-                align: 'center',
-                width: 80
+                align: 'center'
             },
             {
                 title: '积分抵扣',
                 dataIndex: 'giveIntegral',
                 key: 'giveIntegral',
                 align: 'center',
-                width: 120,
                 render: (text, record) => record.useScore === 1 ? <span>{text}</span> : <span>未开启</span>
             },
             {
                 title: '销量',
                 key: 'ficti',
                 dataIndex: 'ficti',
-                align: 'center',
-                width: 80
+                align: 'center'
             },
             {
                 title: '系统状态',
@@ -1128,8 +1126,7 @@ export default class Goods extends Component {
                         return <Tag color='#1890FF'>已删除</Tag>
                     }
                 },
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '预约状态',
@@ -1198,8 +1195,7 @@ export default class Goods extends Component {
                         </Space>)
                     }
                 },
-                align: 'center',
-                // width: 500
+                align: 'center'
             },
         ]
         let columns = [], data = []
@@ -1227,6 +1223,7 @@ export default class Goods extends Component {
                     okText='确定'
                     cancelText="取消"
                     title={goodsTitle}
+                    maskClosable={false}
                 >
                     <div className="goods-modal-installment">
 
@@ -1544,6 +1541,7 @@ export default class Goods extends Component {
                     okText='确定'
                     cancelText="取消"
                     title="开启拼团"
+                    maskClosable={false}
                 >
                     <div style={{ width: '80%', margin: '0 auto' }}>
                         <div className="spellItem">
@@ -1711,11 +1709,11 @@ export default class Goods extends Component {
                 <div style={{ margin: 20, marginBottom: 0 }}>
                     <span
                         className={goodsType === 0 ? 'goods-check-type' : 'goods-not-check-type'}
-                        onClick={() => this.setState({ goodsType: 0, goodsTable: 1 }, () => this.getGoods())}
+                        onClick={() => this.setState({ goodsType: 0, goodsTable: 1, servicePage: 1 }, () => this.getGoods())}
                     >服务类（可预约）</span>
                     <span
                         className={goodsType === 1 ? 'goods-check-type' : 'goods-not-check-type'}
-                        onClick={() => this.setState({ goodsType: 1, goodsTable: 1 }, () => this.getGoods())}
+                        onClick={() => this.setState({ goodsType: 1, goodsTable: 1, servicePage: 1 }, () => this.getGoods())}
                     >实物类（不可预约）</span>
                 </div>
 
@@ -1780,7 +1778,7 @@ export default class Goods extends Component {
                                 }, () => this.getGoods())
                             },
                             current: servicePage,
-                            total: data.length
+                            total: goodsTotal
                         }}
                     />
                 </div>

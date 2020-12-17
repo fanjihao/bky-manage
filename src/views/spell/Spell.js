@@ -130,7 +130,7 @@ export default class Spell extends Component {
     }
     // 上传拼团照片
     uploadSpellImage = info => {
-        const res = info.fileList[0].response
+        const res = info.fileList[info.fileList.length - 1].response
         if (res) {
             this.setState({
                 spellImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
@@ -294,8 +294,7 @@ export default class Spell extends Component {
                 title: 'id',
                 key: 'id',
                 dataIndex: 'id',
-                align: 'center',
-                width: 50
+                align: 'center'
             },
             {
                 title: '产品图',
@@ -304,64 +303,55 @@ export default class Spell extends Component {
                 render: text => (
                     <img src={text} width={50} />
                 ),
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '拼团名称',
                 key: 'title',
                 dataIndex: 'title',
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '参团人数',
                 key: 'people',
                 dataIndex: 'people',
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '拼团价',
                 key: 'price',
                 dataIndex: 'price',
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '库存',
                 key: 'stock',
                 dataIndex: 'stock',
-                align: 'center',
-                width: 80
+                align: 'center'
             },
             {
                 title: '参与人数',
                 key: 'countPeopleAll',
                 dataIndex: 'countPeopleAll',
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '成团数量',
                 key: 'countPeopleBrowse',
                 dataIndex: 'countPeopleBrowse',
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '访客人数',
                 key: 'countPeoplePink',
                 dataIndex: 'countPeoplePink',
-                align: 'center',
-                width: 100
+                align: 'center'
             },
             {
                 title: '结束时间',
                 key: 'endTimeDate',
                 dataIndex: 'endTimeDate',
-                align: 'center',
-                width: 200
+                align: 'center'
             },
             {
                 title: '操作',
@@ -379,7 +369,6 @@ export default class Spell extends Component {
                         </Popconfirm>
                     </div>
                 ),
-                width: 200,
                 align: 'center'
             },
         ]
@@ -417,6 +406,7 @@ export default class Spell extends Component {
                         <SyncOutlined />
                         <span>刷新</span>
                     </div>
+                    {/* <Button type="primary" */}
 
                     <Table
                         columns={columns}
@@ -434,6 +424,7 @@ export default class Spell extends Component {
                     okText='确定'
                     cancelText="取消"
                     title="开启拼团"
+                    maskClosable={false}
                 >
                     <div style={{ width: '80%', margin: '0 auto' }}>
                         <div className="spellItem">
@@ -596,7 +587,9 @@ export default class Spell extends Component {
                     width={300}
                     okText='确定'
                     cancelText="取消"
-                    title="提示">
+                    title="提示"
+                    maskClosable={false}
+                    >
                     <div>
                         <ExclamationCircleOutlined style={{ color: '#FAAD14', fontSize: 18 }} />
                         <span style={{ marginLeft: 20, display: 'inline-block' }}>{title}</span>

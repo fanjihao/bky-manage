@@ -613,6 +613,7 @@ class Order extends Component {
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
+                    maskClosable={false}
                 >
                     <div className='modalheader'>
                         <div className='modalItem'>
@@ -629,8 +630,8 @@ class Order extends Component {
                                 visible={visible}
                             >
                                 {linkEmploy
-                                    ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ visible: true })}>{linkEmploy}</Button>
-                                    : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ visible: true })}>点击关联员工</Button>}
+                                    ? <Button type="primary" style={{ width: 120 }} onClick={() => this.setState({ visible: true })} disabled={true}>{linkEmploy}</Button>
+                                    : <Button type="primary" style={{ width: 120 }} danger onClick={() => this.setState({ visible: true })} disabled={true}>点击关联员工</Button>}
                             </Popover>
                         </div>
                         <div className='modalItem'>
@@ -718,6 +719,7 @@ class Order extends Component {
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
+                    maskClosable={false}
                 >
                     <div style={{ width: '90%', margin: '0 auto' }}>
                         <div className='mbLabel'>

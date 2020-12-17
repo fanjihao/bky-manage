@@ -549,6 +549,7 @@ class Custom extends Component {
                     width={800}
                     okText='确定'
                     cancelText="取消"
+                    maskClosable={false}
                 >
                     <div className="addCustom">
                         <div className="addCustomItem">
@@ -635,6 +636,7 @@ class Custom extends Component {
                     width={800}
                     okText='确定'
                     cancelText="取消"
+                    maskClosable={false}
                 >
                     <div className="addCustom">
                         <div className="addCustomItem">
@@ -707,6 +709,7 @@ class Custom extends Component {
                     width={600}
                     okText='确定'
                     cancelText="取消"
+                    maskClosable={false}
                 >
                     <Button type="primary" style={{ margin: 10 }} onClick={() => this.setState({ addExpense: true, behavior: 1 })}>添加</Button>
                     <Table
@@ -729,6 +732,7 @@ class Custom extends Component {
                     width={600}
                     okText='确定'
                     cancelText="取消"
+                    maskClosable={false}
                 >
                     <div className="addExpense">
                         <div className="addExpenseItem">

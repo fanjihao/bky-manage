@@ -128,7 +128,9 @@ class Cashier extends Component {
         // 服务手工费
         serviceCost: '',
         customName: '',
-        serviceMoney: ''
+        serviceMoney: '',
+        onlineType: '',
+        offlineOrderId: ''
     }
     // 隐藏信息
     changeEyeTrue = () => {
@@ -462,8 +464,8 @@ class Cashier extends Component {
             projectName: '',
             serviceCost: '',
             offlineStaff: '',
-            addVisible: true,
-        })
+            onlineType: 'add',
+        }, () => this.setState({ addVisible: true }))
     }
     addOrder = () => {
         const { offlineAmount, offlineUserPhone, offlineStaff, offlineMark,
@@ -597,6 +599,75 @@ class Cashier extends Component {
                 console.log('订单删除失败', err)
             })
     }
+    // 打开线下订单编辑框
+    delOnline = record => {
+        axios({
+            method: 'GET',
+            url: `/cash/detail/{orderId}`,
+            params: {
+                orderId: record.orderId
+            }
+        })
+            .then(res => {
+                console.log('获取线下订单详情成功', res)
+                this.setState({
+                    offlineStaff: res.data.data.staffName,
+                    projectName: res.data.data.name,
+                    offlineUserName: res.data.data.clientName,
+                    offlineUserPhone: res.data.data.userPhone,
+                    offlineAmount: res.data.data.amount,
+                    serviceCost: res.data.data.serviceMoney,
+                    onlineType: 'edit',
+                    classify: res.data.data.classify,
+                    projectImage: res.data.data.image,
+                    employName: res.data.data.staffName,
+                    offlineMark: res.data.data.mark,
+                    offlineOrderId: res.data.data.orderId
+                }, () => this.setState({ addVisible: true }))
+            })
+            .catch(err => {
+                console.log('获取线下订单失败', err)
+                message.error('服务器错误！')
+            })
+    }
+    // 修改线下订单信息
+    editOnlineOrder = () => {
+        const { staffId,projectId,offlineStaff,offlineAmount,projectImage,offlineMark,
+                offlineOrderId,offlineUserName,offlineUserPhone, serviceCost, tabCheck } = this.state
+        const id = JSON.parse(localStorage.getItem('user')).id
+        axios({
+            method: 'POST',
+            url: '/cash/update',
+            data: {
+                staffId: offlineStaff,
+                mark: offlineMark,
+                classify: 2,
+                clientLevel: null,
+                clientId: null,
+                clientName: offlineUserName,
+                enterId: id,
+                amount: offlineAmount,
+                serviceMoney: serviceCost,
+                phasesId: projectId,
+                userPhone: offlineUserPhone,
+                orderId: offlineOrderId,
+            }
+        })
+        .then(res => {
+            console.log('修改线下订单成功',res,staffId)
+            if(res.data.status === 200){
+                message.success('修改成功')
+                this.getOrderData(tabCheck)
+                this.setState({addVisible: false})
+            }else{
+                message.error(res.data.message)
+            }
+        })
+        .catch(err => {
+            console.log('修改线下订单失败',err)
+            message.error('服务器错误！')
+        })
+    }
     render() {
         const { tabCheck, eyeTrue, allEyeTrue, orderVisible,
             startTime, endTime, data, allNum,
@@ -614,7 +685,8 @@ class Cashier extends Component {
             offlineMark, projectList, projectVis, projectName,
             projectImage, clientName, customData, customVisible,
             clientLevel, isONlineOrder, isOnlineNum, employName,
-            offlineUserName, serviceCost, serviceMoney, customName } = this.state
+            offlineUserName, serviceCost, serviceMoney, customName,
+            onlineType } = this.state
 
         let newData, newText
 
@@ -637,8 +709,7 @@ class Cashier extends Component {
                 title: '项目编号',
                 dataIndex: 'keyId',
                 key: 'keyId',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '项目图片',
@@ -653,60 +724,57 @@ class Cashier extends Component {
                         <img className='goods-item-img' src={src} />
                     )
                 },
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '项目名称',
                 dataIndex: 'name',
                 key: 'name',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '实付金额',
                 dataIndex: 'payPrice',
                 key: 'payPrice',
                 align: 'center',
-                render: text => <>￥{text}</>,
-                width: 120
+                render: text => <>￥{text}</>
             },
             {
                 title: '订单总额',
                 key: 'totalPrice',
                 dataIndex: 'totalPrice',
                 align: 'center',
-                render: text => <>￥{text}</>,
-                width: 120
+                render: text => <>￥{text}</>
             },
             {
                 title: '交易时间',
                 key: 'creatTime',
                 dataIndex: 'creatTime',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '客户电话',
                 key: 'userPhone',
                 align: 'center',
-                dataIndex: 'userPhone',
-                width: 120
+                dataIndex: 'userPhone'
             },
             {
                 title: '客户备注',
                 key: 'mark',
                 dataIndex: 'mark',
                 align: 'center',
-                render: text => (<>{text ? text : '无'}</>),
-                width: 120
+                render: text => (<>{text ? text : '无'}</>)
             },
             {
                 title: '操作',
                 key: 'action',
                 render: (text, record) => {
                     return <Space>
-                        <Button type="primary" onClick={() => this.detail('look', record)}>编辑</Button>
+                        {
+                            record.classify === 2
+                                ? <Button type="primary" onClick={() => this.delOnline(record)}>编辑</Button>
+                                : <Button type="primary" onClick={() => this.detail('look', record)}>编辑</Button>
+                        }
                         <Popconfirm
                             title="请您确认是否删除?"
                             onConfirm={() => this.delOrder(record)}
@@ -738,7 +806,12 @@ class Cashier extends Component {
                     if (addVisible) {
                         this.setState({ visible: false, offlineStaff: record.id, employName: record.staffName })
                     } else {
-                        this.setState({ visible: false, staffName: record.staffName, staffId: record.id, employName: record.staffName })
+                        this.setState({ 
+                            visible: false, 
+                            staffName: record.staffName, 
+                            staffId: record.id, 
+                            employName: record.staffName 
+                        },() => console.log(this.status.staffId))
                     }
                 }}>选择</a>
 
@@ -952,13 +1025,14 @@ class Cashier extends Component {
                 <Modal
                     visible={addVisible}
                     title="订单信息"
-                    onOk={() => this.addOrder()}
+                    onOk={onlineType === 'add' ? this.addOrder : this.editOnlineOrder}
                     onCancel={() => this.setState({ addVisible: false, projectVis: false, visible: false })}
                     destroyOnClose={true}
                     bodyStyle={{ fontSize: '15px', padding: '10px', color: '#666666' }}
                     width={800}
                     okText='确定'
                     cancelText="取消"
+                    maskClosable={false}
                 >
                     <div className='addBody'>
                         <div className=''>
@@ -1053,6 +1127,9 @@ class Cashier extends Component {
                         </div>
                     </div>
                 </Modal>
+
+
+
                 {/* 线上订单信息详情 */}
                 <Modal
                     visible={orderVisible}
@@ -1062,6 +1139,7 @@ class Cashier extends Component {
                     width={800}
                     okText="修改"
                     cancelText="取消"
+                    maskClosable={false}
                 >
                     <div className='modalheader'>
                         <div className='modalItem'>
@@ -1214,10 +1292,6 @@ class Cashier extends Component {
                     </div>
                 </Modal>
 
-                {/* 线下订单信息详情 */}
-                {/* <Modal>
-
-                </Modal> */}
                 <div className='footer-statistical'>
                     <span>总销售额：￥{allNum ? allNum : 0}</span>
                     <span>线上总销售额：￥{onlineNum ? onlineNum : 0}</span>

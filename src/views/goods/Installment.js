@@ -220,7 +220,7 @@ export default class Installment extends Component {
     }
     // 上传分期项目图片
     uploadInstallmentImage = info => {
-        const res = info.fileList[0].response
+        const res = info.fileList[info.fileList.length-1].response
         if (res) {
             this.setState({
                 installmentImage: 'https://www.bkysc.cn/api/files-upload/' + res.data
@@ -498,58 +498,50 @@ export default class Installment extends Component {
                 title: '分期项目编号',
                 dataIndex: 'id',
                 key: 'id',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '分期项目图片',
                 dataIndex: 'photo',
                 key: 'photo',
                 align: 'center',
-                width: 140,
                 render: text => <img src={text} className="goods-table-image tableGoodsImg" />
             },
             {
                 title: '分期项目名称',
                 dataIndex: 'name',
                 key: 'name',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '分期项目分类',
                 dataIndex: 'cateName',
                 key: 'cateName',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '分期项目价格',
                 dataIndex: 'price',
                 key: 'price',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '分期项目总期数',
                 dataIndex: 'stagesNumber',
                 key: 'stagesNumber',
-                align: 'center',
-                width: 140
+                align: 'center'
             },
             {
                 title: '本项目销量',
                 dataIndex: 'sales',
                 key: 'sales',
-                align: 'center',
-                width: 120
+                align: 'center'
             },
             {
                 title: '预约状态',
                 dataIndex: 'enableSub',
                 key: 'enableSub',
                 align: 'center',
-                width: 120,
                 render: (text, record) => goodsTable === 1
                     ? <Popover content={<span style={{ color: 'red' }}>开启或关闭预约！！！</span>}>
                         <Switch
@@ -566,7 +558,6 @@ export default class Installment extends Component {
                 dataIndex: 'state',
                 key: 'state',
                 align: 'center',
-                width: 140,
                 render: (text, record) => {
                     if (goodsTable === 1) {
                         return <Popover content={
@@ -598,7 +589,6 @@ export default class Installment extends Component {
                 dataIndex: '',
                 key: '',
                 align: 'center',
-                width: 150,
                 render: (text, record) => {
                     if (goodsTable === 1) {
                         return (<Space size="middle">
@@ -664,6 +654,7 @@ export default class Installment extends Component {
                     okText='确定'
                     cancelText="取消"
                     title={installmentTitle}
+                    maskClosable={false}
                 >
                     <div className="goods-modal-installment">
                         <div className="goods-modal-header">
