@@ -144,8 +144,12 @@ export default class Installment extends Component {
             .then(res => {
                 console.log('获取分期项目列表成功', res)
                 if (res.data.status === 200) {
+                    let data = res.data.data.list
+                    data.map((item,index) => {
+                        item.key = index + 1   
+                    })
                     this.setState({
-                        installmentList: res.data.data.list,
+                        installmentList: data,
                         loading: false
                     })
                 } else {
@@ -496,8 +500,8 @@ export default class Installment extends Component {
         const installmentColumns = [
             {
                 title: '分期项目编号',
-                dataIndex: 'id',
-                key: 'id',
+                dataIndex: 'key',
+                key: 'key',
                 align: 'center'
             },
             {

@@ -4,7 +4,7 @@ import { Layout, Menu } from 'antd'
 import {
     HomeOutlined, ShoppingOutlined, AccountBookOutlined, SettingOutlined,
     TeamOutlined, TransactionOutlined, UserAddOutlined, ShopOutlined,
-    CommentOutlined, MenuUnfoldOutlined, MenuFoldOutlined, ScheduleOutlined
+    CommentOutlined, 
 } from '@ant-design/icons'
 import { Route, NavLink, Redirect } from 'react-router-dom'
 import HomeIndex from '../homeIndex/HomeIndex'

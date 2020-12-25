@@ -313,17 +313,19 @@ class Custom extends Component {
     }
     // 删除客户
     delCustom = id => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'DELETE',
-            url: `/client?clientId=${id}`,
-            // data: {
-            //     clientId: id
-            // }
+            url: `/client?merId=${merId}`,
+            data: {
+                clientId: id
+            }
         })
             .then(res => {
                 console.log('删除客户成功', res)
                 if (res.data.status === 200) {
-                    this.getAllCustom()
+                    // this.getAllCustom()
+                    message.success(res.data.message)
                 } else {
                     message.error(res.data.message)
                 }

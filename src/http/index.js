@@ -2,9 +2,10 @@ import axios from "axios";
 import { message, Modal } from 'antd'
 
 let config = {
-    // baseURL: "http://47.108.174.202:9010",
+    baseURL: "http://47.108.174.202:9010",
     // baseURL: "http://192.168.3.192:9010",
-    baseURL: "http://192.168.3.135:9010",
+    // baseURL: "http://192.168.188.24:9010",
+    // baseURL: "http://172.20.10.4:9010",
     timeout: 60 * 1000, // Timeout
 };
 

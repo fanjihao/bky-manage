@@ -3,10 +3,9 @@ import '../goods/Goods.css'
 import './Order.css'
 import {
     Input, Select, Button, Space, Table, Tag,
-    Modal, message, Image, Popover, Popconfirm
+    Modal, message, Popover
 } from 'antd'
 import axios from '../../http/index'
-import { SearchOutlined } from '@ant-design/icons'
 
 const { Option } = Select
 const { TextArea } = Input
@@ -193,8 +192,12 @@ class Order extends Component {
         })
             .then(res => {
                 console.log('获取员工信息成功', res)
+                let data = res.data.data.data.list
+                data.map((item,index) => {
+                    item.key = index + 1
+                })
                 this.setState({
-                    data: res.data.data.list
+                    data: data
                 })
             })
             .catch(err => {
@@ -305,8 +308,8 @@ class Order extends Component {
         const columns = [
             {
                 title: '项目编号',
-                dataIndex: 'id',
-                key: 'id',
+                dataIndex: 'key',
+                key: 'key',
                 render: text => <a>{text}</a>,
             },
             {
@@ -407,8 +410,8 @@ class Order extends Component {
         const employColumns = [
             {
                 title: '编号',
-                dataIndex: 'id',
-                key: 'id'
+                dataIndex: 'key',
+                key: 'key'
             },
             {
                 title: '姓名',
@@ -425,8 +428,8 @@ class Order extends Component {
         const colOnline = [
             {
                 title: '订单编号',
-                dataIndex: 'id',
-                key: 'id'
+                dataIndex: 'key',
+                key: 'key'
             },
             {
                 title: '用户姓名',

@@ -2,19 +2,17 @@ import React, { Component } from 'react'
 import axios from '../../http'
 import './Cashier.css'
 import {
-    Input, Select, Space, Table, Modal, message,
-    Image, DatePicker, Popover, Button, Popconfirm, InputNumber
+    Input, Space, Table, Modal, message,
+    Image, DatePicker, Popover, Button, Popconfirm
 } from 'antd'
 import moment from 'moment'
 import locale from 'antd/lib/date-picker/locale/zh_CN'
 import {
-    CloseCircleOutlined, EyeOutlined, EyeInvisibleOutlined,
-    SearchOutlined, DownloadOutlined, PlusOutlined
+     EyeOutlined, EyeInvisibleOutlined, DownloadOutlined, PlusOutlined
 } from '@ant-design/icons'
 import XLSX from 'xlsx'
 
 const { RangePicker } = DatePicker
-const { Option } = Select
 const { TextArea } = Input
 const dateFormat = 'YYYY/MM/DD'
 
@@ -583,9 +581,10 @@ class Cashier extends Component {
     }
     // 删除订单
     delOrder = record => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'DELETE',
-            url: `/cash`,
+            url: `/cash?merId=${merId}`,
             data: {
                 classify: record.classify,
                 orderId: record.orderId
@@ -593,7 +592,12 @@ class Cashier extends Component {
         })
             .then(res => {
                 console.log('订单删除成功', res)
-                this.getOrderData(this.state.tabCheck)
+                if(res.data.status === 200){
+                    message.success(res.data.message)
+                }else{
+                    message.error(res.data.message)
+                }
+                // this.getOrderData(this.state.tabCheck)
             })
             .catch(err => {
                 console.log('订单删除失败', err)

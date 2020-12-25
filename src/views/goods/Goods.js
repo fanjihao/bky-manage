@@ -591,14 +591,19 @@ export default class Goods extends Component {
     }
     // 删除服务商品
     delService = id => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'DELETE',
-            url: `/statistics/service?id=${id}`
+            url: `/statistics/service?merId=${merId}`,
+            data: {
+                id: id
+            }
         })
             .then(res => {
                 if (res.data.status === 200) {
+                    message.success(res.data.message)
                     console.log('删除服务商品成功', res)
-                    this.getService()
+                    // this.getService()
                 } else {
                     message.error(res.data.message)
                 }
@@ -672,17 +677,19 @@ export default class Goods extends Component {
     }
     // 删除普通商品
     delOnline = id => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
-            url: '/statistics/delOnlineProducts',
-            method: 'GET',
-            params: {
+            url: `/statistics/delOnlineProducts?merId=${merId}`,
+            method: 'DELETE',
+            data: {
                 id: id
             }
         })
             .then(res => {
                 console.log('普通商品删除成功', res)
                 if (res.data.status === 200) {
-                    this.getOnlineList()
+                    // this.getOnlineList()
+                    message.success(res.data.message)
                 } else {
                     message.error(res.data.message)
                 }
@@ -940,8 +947,8 @@ export default class Goods extends Component {
             },
             {
                 title: '商品价格',
-                dataIndex: 'price',
-                key: 'price',
+                dataIndex: 'otPrice',
+                key: 'otPrice',
                 render: text => (
                     <span>￥{text.toFixed(2)}</span>
                 ),
@@ -1727,10 +1734,10 @@ export default class Goods extends Component {
                             className={goodsTable === 0 ? 'goods-check-class' : 'goods-not-check-calss'}
                             onClick={() => this.setState({ goodsTable: 0 }, () => this.getGoods())}
                         >待上架</span>
-                        <span
+                        {/* <span
                             className={goodsTable === 3 ? 'goods-check-class' : 'goods-not-check-calss'}
                             onClick={() => this.setState({ goodsTable: 3 }, () => this.getGoods())}
-                        >回收站</span>
+                        >回收站</span> */}
                     </div>
 
                     <div className="goods-search">

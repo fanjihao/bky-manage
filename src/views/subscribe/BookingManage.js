@@ -80,8 +80,12 @@ export default class BookingManage extends Component {
             .then(res => {
                 console.log('获取预约数据成功', res)
                 if (res.data.status === 200) {
+                    let data = res.data.data
+                    data.map((item,index) => {
+                        item.key = index + 1
+                    })
                     this.setState({
-                        subData: res.data.data,
+                        subData: data,
                         loading: false,
                         promptModal: false,
                         promptInfo: '',
@@ -232,8 +236,8 @@ export default class BookingManage extends Component {
         const subColumns = [
             {
                 title: '预约编号',
-                dataIndex: 'id',
-                key: 'id',
+                dataIndex: 'key',
+                key: 'key',
                 align: 'center'
             },
             {

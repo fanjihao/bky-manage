@@ -76,8 +76,12 @@ export default class Spell extends Component {
         })
             .then(res => {
                 console.log('查询拼团列表成功', res)
+                let data = res.data.content
+                data.map((item,index) => {
+                    item.key = index + 1
+                })
                 this.setState({
-                    spellList: res.data.content,
+                    spellList: data,
                     loading: false
                 })
             })
@@ -243,13 +247,22 @@ export default class Spell extends Component {
     }
     // 删除拼团商品
     delSpellGroup = id => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
             method: 'DELETE',
-            url: `/api/yxStoreCombination/${id}`
+            url: `/api/yxStoreCombination?merId=${merId}`,
+            data: {
+                id
+            }
         })
             .then(res => {
                 console.log('删除拼团商品成功', res)
-                this.getSpellList()
+                if(res.data.status === 200){
+                    message.success(res.data.message)
+                }else{
+                    message.success(res.data.message)
+                }
+                // this.getSpellList()
             })
             .catch(err => {
                 console.log('删除拼团商品失败', err)
@@ -291,9 +304,9 @@ export default class Spell extends Component {
             spellDiscount, originalPrice } = this.state
         const columns = [
             {
-                title: 'id',
-                key: 'id',
-                dataIndex: 'id',
+                title: '拼团编号',
+                key: 'key',
+                dataIndex: 'key',
                 align: 'center'
             },
             {
@@ -508,7 +521,7 @@ export default class Spell extends Component {
                                 />
                             </div>
                             <div className="timeItem">
-                                <span className="smallSpan">拼团价</span>
+                                <span className="smallSpan">拼成价格</span>
                                 <Input
                                     className="smallInput"
                                     value={spellPrice}

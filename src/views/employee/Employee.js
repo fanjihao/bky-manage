@@ -41,7 +41,7 @@ export default class Employee extends Component {
         // 员工底薪
         employSalary: 0
     }
-    // 或i去员工列表
+    // 获取员工列表
     getEmploy = () => {
         let user = JSON.parse(localStorage.getItem('user'))
         const { name, phone } = this.state
@@ -61,8 +61,8 @@ export default class Employee extends Component {
                 console.log('获取员工信息成功', res)
                 if (res.data.data.list) {
                     let list = res.data.data.list
-                    list.map((item) => {
-                        item.key = item.id
+                    list.map((item, index) => {
+                        item.key = index + 1
                     })
                     this.setState({
                         data: list,
@@ -355,18 +355,23 @@ export default class Employee extends Component {
         }
     }
     // 删除员工
-    restore = (i) => {
+    restore = id => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
-            url: '/merchantOrder/removeStaff',
-            method: 'GET',
-            params: {
-                id: i
+            url: `/merchantOrder/removeStaff?merId=${merId}`,
+            method: 'DELETE',
+            data: {
+                id: id
             }
         })
             .then(res => {
                 console.log('删除员工成功', res)
-                message.success('删除成功')
-                this.getEmploy()
+                if (res.data.status === 200) {
+                    message.success(res.data.message)
+                } else {
+                    message.error(res.data.message)
+                }
+                // this.getEmploy()
             })
             .catch(err => {
                 console.log('删除员工失败')
@@ -456,10 +461,9 @@ export default class Employee extends Component {
         })
         const columns = [
             {
-                title: '员工工号',
-                dataIndex: 'id',
-                key: 'id',
-                render: (text, record) => <span>{text}</span>,
+                title: '员工编号',
+                dataIndex: 'key',
+                key: 'key',
                 align: 'center'
             },
             {
@@ -590,18 +594,15 @@ export default class Employee extends Component {
                             placeholder='请输入姓名搜索'
                             value={name}
                             onChange={e => this.setName(e)}></Input>
-                        {/* <Input style={{ width: 150, margin: '0 20px' }}
-                            placeholder='请输入手机号码'
-                            value={phone}
-                            onChange={e => this.setPhone(e)}></Input> */}
-                        <div className='search-btn' onClick={() => this.setState({ loading: true }, () => { 
-                            if(name === ''){
+
+                        <div className='search-btn' onClick={() => this.setState({ loading: true }, () => {
+                            if (name === '') {
                                 message.warning('请先输入搜索内容!')
-                                this.setState({loading: false})
-                            }else{
+                                this.setState({ loading: false })
+                            } else {
                                 this.getEmploy()
                             }
-                         })}>
+                        })}>
                             <SearchOutlined />搜索
                         </div>
                         <div className='add-btn' onClick={() => this.employDetail('add', 0)}>
