@@ -448,7 +448,7 @@ class Setting extends Component {
                                     </div>
                                 </div>
 
-                                <div className='sbodyFormItem'>
+                                {/* <div className='sbodyFormItem'>
                                     <div className='formItemLabel'>
                                         <span>负责人身份证号</span>
                                     </div>
@@ -462,7 +462,7 @@ class Setting extends Component {
                                                 }
                                             })} />
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
 
 

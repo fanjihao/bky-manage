@@ -908,6 +908,13 @@ export default class Goods extends Component {
                 })
         }
     }
+    // // 对拼团结束时间的判断
+    // timeJudge = () => {
+    //     const { startDate,startTime, endDate, endTime } = this.state
+    //     if(startTime !== '' && startDate !== '' && endTime !== '' && endDate !== ''){
+    //         console.log(startDate,startTime,endDate,endTime)
+    //     }
+    // }
     render() {
         const { goodsTable, onlineList, loading, emptyText, searchVal, classify,
             classList, goodsImage, goodsClass, goodsName, goodsPrice, goodsSales,
@@ -1575,6 +1582,7 @@ export default class Goods extends Component {
                                 style={{ marginRight: 10 }}
                                 allowClear={false}
                                 onChange={this.getStartDate}
+                                // onBlur={this.timeJudge}
                             />
                             <TimePicker
                                 locale={locale}

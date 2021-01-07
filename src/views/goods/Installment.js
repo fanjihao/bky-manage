@@ -368,17 +368,19 @@ export default class Installment extends Component {
     }
     // 删除分期项目
     delInstallment = id => {
+        const merId = JSON.parse(localStorage.getItem('user')).id
         axios({
-            url: '/statistics/deletePhasedProject',
-            method: 'GET',
-            params: {
+            url: `/statistics/deletePhasedProject?merId=${merId}`,
+            method: 'DELETE',
+            data: {
                 id: id
             }
         })
             .then(res => {
                 console.log('删除分期项目成功', res)
                 if (res.data.status === 200) {
-                    this.getInstallmentList()
+                    message.success(res.data.message)
+                    // this.getInstallmentList()
                 } else {
                     message.error(res.data.message)
                 }
@@ -677,6 +679,12 @@ export default class Installment extends Component {
                                         placeholder="请输入有效次数"
                                         value={astrict}
                                         onChange={e => this.setState({ astrict: e.target.value })}
+                                        onBlur={() => {
+                                            if(!/^[0-9]*$/.test(this.state.astrict)){
+                                                message.warning('请输入数字!')
+                                                this.setState({astrict: ''})
+                                            }
+                                        }}
                                     />
                                 </div>
                                 : <div className="goods-modal-header">
@@ -686,6 +694,12 @@ export default class Installment extends Component {
                                         placeholder="请输入有效天数"
                                         value={astrict}
                                         onChange={e => this.setState({ astrict: e.target.value })}
+                                        onBlur={() => {
+                                            if(!/^[0-9]*$/.test(this.state.astrict)){
+                                                message.warning('请输入数字!')
+                                                this.setState({astrict: ''})
+                                            }
+                                        }}
                                     />
                                 </div>
                         }
@@ -949,10 +963,10 @@ export default class Installment extends Component {
                             className={goodsTable === 2 ? 'goods-check-class' : 'goods-not-check-calss'}
                             onClick={() => this.setState({ goodsTable: 2 }, () => this.getInstallmentList())}
                         >待上架</span>
-                        <span
+                        {/* <span
                             className={goodsTable === 3 ? 'goods-check-class' : 'goods-not-check-calss'}
                             onClick={() => this.setState({ goodsTable: 3 }, () => this.getInstallmentList())}
-                        >回收站</span>
+                        >回收站</span> */}
                     </div>
 
                     <div className="goods-search">

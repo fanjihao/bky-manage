@@ -16,7 +16,7 @@ export default class Employee extends Component {
         whatDo: '',
         isLook: false,
         employNo: '', // 员工工号
-        employId: '', // 员工身份证
+        employId: '513021199805052211', // 员工身份证
         idWrong: false,
         telWrong: false,
         employSex: '', // 员工性别
@@ -24,7 +24,7 @@ export default class Employee extends Component {
         employhomeAdd: '', // 员工户籍地址
         employName: '', // 员工名字
         employPhone: '', // 员工电话
-        employBirth: '', // 员工生日
+        employBirth: '1998-03-01', // 员工生日
         employNation: '', // 员工民族
         employNowAdd: '', // 员工现居地址
         employSchool: '', // 员工毕业院校
@@ -491,14 +491,14 @@ export default class Employee extends Component {
                 render: (text, record) => <span>{text.substr(0, 3) + '****' + text.substr(7)}</span>,
                 align: 'center'
             },
-            {
-                title: '身份证号码',
-                dataIndex: 'idCard',
-                key: 'idCard',
-                render: (text, record) =>
-                    <span>{text.substr(0, 6) + '********'}</span>,
-                align: 'center'
-            },
+            // {
+            //     title: '身份证号码',
+            //     dataIndex: 'idCard',
+            //     key: 'idCard',
+            //     render: (text, record) =>
+            //         <span>{text.substr(0, 6) + '********'}</span>,
+            //     align: 'center'
+            // },
             {
                 title: '性别',
                 dataIndex: 'sex',
@@ -674,21 +674,21 @@ export default class Employee extends Component {
                         </div>
 
                         <div className='modalBodyChild'>
-                            <div className='embLabel'>
+                            {/* <div className='embLabel'>
                                 <span><span style={{ color: 'red' }}>*</span>身份证号</span>
                                 <Input placeholder='请输入身份证号' disabled={isLook}
                                     value={employId}
                                     onChange={e => this.setNo(e, 'id')}
                                     style={{ borderColor: idWrong ? 'red' : null }}></Input>
-                            </div>
+                            </div> */}
 
-                            <div className='embLabel'>
+                            {/* <div className='embLabel'>
                                 <span>出生日期</span>
                                 <Input
                                     value={employBirth}
                                     disabled={true}
                                     style={{ width: '60%' }} />
-                            </div>
+                            </div> */}
 
                             <div className='embLabel'>
                                 <span><span style={{ color: 'red' }}>*</span>性别</span>
